@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Wildcats Performance System</title>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- ✅ HEADER -->
+    <div id="header-placeholder"></div>
+
+    <main>
+
+        <!-- 🏠 HERO -->
+        <div class="home-header">
+            <h1 class="hero-title">Track. Compete. Improve.</h1>
+        </div>
+
+        <!-- ➕ QUICK ACTION -->
+        <div style="text-align:center; margin: 15px;">
+    <button class="cta-button" onclick="goToEnterTest()">
+        Enter Test
+    </button>
+</div>
+
+        <div class="quick-stats">
+    <div>👥 Athletes: <span id="totalAthletes">0</span></div>
+    <div>📊 Tests: <span id="totalTests">0</span></div>
+</div>
+
+        <!-- 🧭 DASHBOARD -->
+        <div id="dashboard">
+            <div class="dashboard-grid">
+
+                <a class="dashboard-card" href="timer.html">
+                    <h2>⏱ Training Timer</h2>
+                    <p>4 Quadrant Weight Room Timer</p>
+                </a>
+
+                <a class="dashboard-card" href="testing.html">
+                    <h2>📋 Combine Testing</h2>
+                    <p>Record and Analyze Results</p>
+                </a>
+
+                <a class="dashboard-card" href="athletes.html">
+                    <h2>🧑 Athlete Profiles</h2>
+                    <p>View Performance Ratings</p>
+                </a>
+
+                <a class="dashboard-card" href="leaderboard.html">
+                    <h2>🏆 Leaderboard</h2>
+                    <p>Athlete Rankings</p>
+                </a>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ✅ SCRIPTS -->
+    <script src="js/header.js"></script>
+    
+
+</body>
+</html>

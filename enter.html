@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enter Athlete Data</title>
+<link rel="stylesheet" href="styles.css">
+
+<script>
+if (sessionStorage.getItem("coachAccess") !== "true") {
+    window.location.href = "index.html";
+}
+</script>
+
+</head>
+
+ 
+
+<body>
+
+   
+
+<h1>🏋️ Enter Athlete Test</h1>
+
+<div class="form-card">
+
+LAST NAME, FIRST NAME
+<input id="name" placeholder="Enter Here">
+<div>
+
+         
+<input id="date" type="Date">
+<div>
+    
+
+<select id="hour">
+    <option value="">Hour</option>
+    <option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+</select>
+<div>
+
+
+<select id="grade">
+    <option value="">Grade</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+    <option value="10">10</option>
+    <option value="11">11</option>
+    <option value="12">12</option>
+    </select>
+    <div>
+
+WEIGHT
+<input id="weight" type="number" placeholder="Enter Here">
+<div>
+
+<h3>STRENGTH</h3>
+BENCH PRESS
+<input id="bench" type="number" placeholder="Enter Here">
+<div>
+
+SQUAT    
+<input id="squat" type="number" placeholder="Enter Here">
+<div>
+
+HANG CLEAN
+<input id="clean" type="number" placeholder="Enter Here">
+<div>
+
+<h3>EXPLOSIVENESS</h3>
+<select id="vertical">
+    <option value="">Vertical Jump</option>
+    <option value="10">10"</option>
+    <option value="11">11"</option>
+    <option value="12">12"</option>
+    <option value="13">13"</option>
+    <option value="14">14"</option>
+    <option value="15">15"</option>
+    <option value="16">16"</option>
+    <option value="17">17"</option>
+    <option value="18">18"</option>
+    <option value="19">19"</option>
+    <option value="20">20"</option>
+    <option value="21">21"</option>
+    <option value="22">22"</option>
+    <option value="23">23"</option>
+    <option value="24">24"</option>
+    <option value="25">25"</option>
+    <option value="26">26"</option>
+    <option value="27">27"</option>
+    <option value="28">28"</option>
+    <option value="29">29"</option>
+    <option value="30">30"</option>
+    <option value="31">31"</option>
+    <option value="32">32"</option>
+    <option value="33">33"</option>
+    <option value="34">34"</option>
+    <option value="35">35"</option>
+    <option value="36">36"</option>
+</select>
+<div>
+
+<select id="broad">
+    <option value="">Broad Jump</option>
+<option value="3.06">3.06</option>
+<option value="3.09">3.09</option>
+<option value="4.00">4.00</option>
+<option value="4.03">4.03</option>
+<option value="4.06">4.06</option>
+<option value="4.09">4.09</option>
+<option value="5.00">5.00</option>
+<option value="5.03">5.03</option>
+<option value="5.06">5.06</option>
+<option value="5.09">5.09</option>
+<option value="6.00">6.00</option>
+<option value="6.03">6.03</option>
+<option value="6.06">6.06</option>
+<option value="6.09">6.09</option>
+<option value="7.00">7.00</option>
+<option value="7.03">7.03</option>
+<option value="7.06">7.06</option>
+<option value="7.09">7.09</option>
+<option value="8.00">8.00</option>
+<option value="8.03">8.03</option>
+<option value="8.06">8.06</option>
+<option value="8.09">8.09</option>
+<option value="9.00">9.00</option>
+<option value="9.03">9.03</option>
+<option value="9.06">9.06</option>
+<option value="9.09">9.09</option>
+<option value="10.00">10.00</option>
+<option value="10.03">10.03</option>
+<option value="10.06">10.06</option>
+<option value="10.09">10.09</option>
+</select>
+<div>
+
+
+<select id="medball">
+    <option value="">Med Ball Toss (11 lb)</option>
+<option value="6.00">6.00</option>
+<option value="6.03">6.03</option>
+<option value="6.06">6.06</option>
+<option value="6.09">6.09</option>
+<option value="7.00">7.00</option>
+<option value="7.03">7.03</option>
+<option value="7.06">7.06</option>
+<option value="7.09">7.09</option>
+<option value="8.00">8.00</option>
+<option value="8.03">8.03</option>
+<option value="8.06">8.06</option>
+<option value="8.09">8.09</option>
+<option value="9.00">9.00</option>
+<option value="9.03">9.03</option>
+<option value="9.06">9.06</option>
+<option value="9.09">9.09</option>
+<option value="10.00">10.00</option>
+<option value="10.03">10.03</option>
+<option value="10.06">10.06</option>
+<option value="10.09">10.09</option>
+<option value="11.00">11.00</option>
+<option value="11.03">11.03</option>
+<option value="11.06">11.06</option>
+<option value="11.09">11.09</option>
+<option value="12.00">12.00</option>
+<option value="12.03">12.03</option>
+<option value="12.06">12.06</option>
+<option value="12.09">12.09</option>
+<option value="13.00">13.00</option>
+<option value="13.03">13.03</option>
+<option value="13.06">13.06</option>
+<option value="13.09">13.09</option>
+<option value="14.00">14.00</option>
+<option value="14.03">14.03</option>
+<option value="14.06">14.06</option>
+<option value="14.09">14.09</option>
+<option value="15.00">15.00</option>
+<option value="15.03">15.03</option>
+<option value="15.06">15.06</option>
+<option value="15.09">15.09</option>
+<option value="16.00">16.00</option>
+<option value="16.03">16.03</option>
+<option value="16.06">16.06</option>
+<option value="16.09">16.09</option>
+<option value="17.00">17.00</option>
+<option value="17.03">17.03</option>
+<option value="17.06">17.06</option>
+<option value="17.09">17.09</option>
+<option value="18.00">18.00</option>
+<option value="18.03">18.03</option>
+<option value="18.06">18.06</option>
+<option value="18.09">18.09</option>
+<option value="19.00">19.00</option>
+<option value="19.03">19.03</option>
+<option value="19.06">19.06</option>
+<option value="19.09">19.09</option>
+<option value="20.00">20.00</option>
+<option value="20.03">20.03</option>
+<option value="20.06">20.06</option>
+<option value="20.09">20.09</option>
+<option value="21.00">21.00</option>
+<option value="21.03">21.03</option>
+<option value="21.06">21.06</option>
+<option value="21.09">21.09</option>
+<option value="22.00">22.00</option>
+<option value="22.03">22.03</option>
+<option value="22.06">22.06</option>
+<option value="22.09">22.09</option>
+<option value="23.00">23.00</option>
+<option value="23.03">23.03</option>
+<option value="23.06">23.06</option>
+<option value="23.09">23.09</option>
+<option value="24.00">24.00</option>
+<option value="24.03">24.03</option>
+<option value="24.06">24.06</option>
+<option value="24.09">24.09</option>
+</select>
+<div>
+
+
+<h3>SPEED & AGILITY</h3>
+
+<select id="agility">
+    <option value="">Pro Agility</option>
+<option value="4.20">4.20</option>
+<option value="4.25">4.25</option>
+<option value="4.30">4.30</option>
+<option value="4.35">4.35</option>
+<option value="4.40">4.40</option>
+<option value="4.45">4.45</option>
+<option value="4.50">4.50</option>
+<option value="4.55">4.55</option>
+<option value="4.60">4.60</option>
+<option value="4.65">4.65</option>
+<option value="4.70">4.70</option>
+<option value="4.75">4.75</option>
+<option value="4.80">4.80</option>
+<option value="4.85">4.85</option>
+<option value="4.90">4.90</option>
+<option value="4.95">4.95</option>
+<option value="5.00">5.00</option>
+<option value="5.05">5.05</option>
+<option value="5.10">5.10</option>
+<option value="5.15">5.15</option>
+<option value="5.20">5.20</option>
+<option value="5.25">5.25</option>
+<option value="5.30">5.30</option>
+<option value="5.35">5.35</option>
+<option value="5.40">5.40</option>
+<option value="5.45">5.45</option>
+<option value="5.50">5.50</option>
+<option value="5.55">5.55</option>
+<option value="5.60">5.60</option>
+<option value="5.65">5.65</option>
+<option value="5.70">5.70</option>
+<option value="5.75">5.75</option>
+<option value="5.80">5.80</option>
+<option value="5.85">5.85</option>
+<option value="5.90">5.90</option>
+<option value="5.95">5.95</option>
+<option value="6.00">6.00</option>
+<option value="6.05">6.05</option>
+<option value="6.10">6.10</option>
+</select>
+<div>
+
+
+<select id="ten">
+    <option value="">10 Yard</option>
+<option value="4.20">1.20</option>
+<option value="4.25">1.25</option>
+<option value="4.30">1.30</option>
+<option value="4.35">1.35</option>
+<option value="4.40">1.40</option>
+<option value="4.45">1.45</option>
+<option value="4.50">1.50</option>
+<option value="4.55">1.55</option>
+<option value="4.60">1.60</option>
+<option value="4.65">1.65</option>
+<option value="4.70">1.70</option>
+<option value="4.75">1.75</option>
+<option value="4.80">1.80</option>
+<option value="4.85">1.85</option>
+<option value="4.90">1.90</option>
+<option value="4.95">1.95</option>
+<option value="5.00">2.00</option>
+<option value="5.05">2.05</option>
+<option value="5.10">2.10</option>
+<option value="5.15">2.15</option>
+<option value="5.20">2.20</option>
+<option value="5.25">2.25</option>
+<option value="5.30">2.30</option>
+<option value="5.35">2.35</option>
+<option value="5.40">2.40</option>
+<option value="5.45">2.45</option>
+<option value="5.50">2.50</option>
+<option value="5.55">2.55</option>
+<option value="5.60">2.60</option>
+<option value="5.65">2.65</option>
+<option value="5.70">2.70</option>
+<option value="5.75">2.75</option>
+<option value="5.80">2.80</option>
+<option value="5.85">2.85</option>
+<option value="5.90">2.90</option>
+<option value="5.95">2.95</option>
+
+
+
+</select>
+<select id="forty">
+    <option value="">40 Yard</option>
+<option value="4.35">4.35</option>
+<option value="4.40">4.40</option>
+<option value="4.45">4.45</option>
+<option value="4.50">4.50</option>
+<option value="4.55">4.55</option>
+<option value="4.60">4.60</option>
+<option value="4.65">4.65</option>
+<option value="4.70">4.70</option>
+<option value="4.75">4.75</option>
+<option value="4.80">4.80</option>
+<option value="4.85">4.85</option>
+<option value="4.90">4.90</option>
+<option value="4.95">4.95</option>
+<option value="5.00">5.00</option>
+<option value="5.05">5.05</option>
+<option value="5.10">5.10</option>
+<option value="5.15">5.15</option>
+<option value="5.20">5.20</option>
+<option value="5.25">5.25</option>
+<option value="5.30">5.30</option>
+<option value="5.35">5.35</option>
+<option value="5.40">5.40</option>
+<option value="5.45">5.45</option>
+<option value="5.50">5.50</option>
+<option value="5.55">5.55</option>
+<option value="5.60">5.60</option>
+<option value="5.65">5.65</option>
+<option value="5.70">5.70</option>
+<option value="5.75">5.75</option>
+<option value="5.80">5.80</option>
+<option value="5.85">5.85</option>
+<option value="5.90">5.90</option>
+<option value="5.95">5.95</option>
+<option value="6.00">6.00</option>
+<option value="6.05">6.05</option>
+<option value="6.10">6.10</option>
+<option value="6.10">6.15</option>
+<option value="6.10">6.20</option>
+<option value="6.10">6.25</option>
+<option value="6.10">6.30</option>
+<option value="6.10">6.35</option>
+
+</select>
+<div>
+
+
+<h3>ENDURANCE</h3>
+
+<select id="situps">
+    <option value="">Sit Ups</option>
+    <option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+ <option value="30">30</option>
+<option value="31">31</option>
+<option value="32">32</option>
+<option value="33">33</option>
+<option value="34">34</option>
+<option value="35">35</option>
+<option value="36">36</option>
+<option value="37">37</option>
+<option value="38">38</option>
+<option value="39">39</option>
+ <option value="40">40</option>
+<option value="41">41</option>
+<option value="42">42</option>
+<option value="43">43</option>
+<option value="44">44</option>
+<option value="45">45</option>
+<option value="46">46</option>
+<option value="47">47</option>
+<option value="48">48</option>
+<option value="49">49</option>
+ <option value="50">50</option>
+<option value="51">51</option>
+<option value="52">52</option>
+<option value="53">53</option>
+<option value="54">54</option>
+<option value="55">55</option>
+<option value="56">56</option>
+<option value="57">57</option>
+<option value="58">58</option>
+<option value="59">59</option>
+ <option value="60">60</option>
+<option value="61">61</option>
+<option value="62">62</option>
+<option value="63">63</option>
+<option value="64">64</option>
+<option value="65">65</option>
+<option value="66">66</option>
+<option value="67">67</option>
+<option value="68">68</option>
+<option value="69">69</option>
+<option value="70">70</option>
+<option value="71">71</option>
+<option value="72">72</option>
+<option value="73">73</option>
+<option value="74">74</option>
+<option value="75">75</option>
+
+
+
+
+
+</select>
+<br><br>
+
+<button onclick="saveAthlete()">💾 Save Test</button>
+
+</div>
+
+<script src="js/enter.js"></script>
+
+</body>
+</html>

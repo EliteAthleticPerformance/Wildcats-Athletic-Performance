@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Combine Testing</title>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div id="header-placeholder"></div>
+<script src="js/header.js"></script>
+
+<div id="testing">
+
+<h1>📋 Combine Testing Results</h1>
+
+<!-- 🔍 SEARCH -->
+<input 
+type="text" 
+id="searchInput" 
+placeholder="Search athlete name..."
+>
+
+<div class="table-container">
+
+<table id="testingTable">
+
+<thead>
+<tr>
+<th onclick="sortTable(0)">Athlete</th>
+<th onclick="sortTable(1)">Date</th>
+<th onclick="sortTable(2)">Hr</th>
+<th onclick="sortTable(3)">Gr</th>
+<th onclick="sortTable(4)">Wt</th>
+<th onclick="sortTable(5)">Group</th>
+
+<th onclick="sortTable(6)">Bench</th>
+<th onclick="sortTable(7)">Squat</th>
+<th onclick="sortTable(8)">Clean</th>
+
+<th onclick="sortTable(9)">Vert</th>
+<th onclick="sortTable(10)">Broad</th>
+<th onclick="sortTable(11)">Med</th>
+
+<th onclick="sortTable(12)">Agility</th>
+<th onclick="sortTable(13)">Sit</th>
+<th onclick="sortTable(14)">10yd</th>
+<th onclick="sortTable(15)">40yd</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script src="js/testing.js"></script>
+
+</body>
+</html>
