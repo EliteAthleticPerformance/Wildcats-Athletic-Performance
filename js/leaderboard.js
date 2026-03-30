@@ -136,8 +136,9 @@ const formatScore = (val) => {
                             ${athlete.name}
                         </a>
                     </td>
-                    <td>${athlete.date}</td>
+                    
                     <td>${athlete.total > 0 ? Math.round(athlete.total) : "-"}</td>
+                    <td>${athlete.date}</td>
                 </tr>
             `;
         });
@@ -152,7 +153,9 @@ const formatScore = (val) => {
                             ${athlete.name}
                         </a>
                     </td>
+                    
                     <td>${formatScore(athlete.score)}</td>
+                    <td>${athlete.date}</td>
                 </tr>
             `;
         });

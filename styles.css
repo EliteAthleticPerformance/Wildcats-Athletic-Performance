@@ -572,6 +572,15 @@ border:1px solid #777;
 background:#111;
 }
 
+th, td {
+    text-align: center;
+    padding: 10px;
+}
+
+td:last-child {
+    color: #ccc; /* subtle gray for date */
+}
+
 /* 🎯 COLUMN WIDTH CONTROL */
 
 /* RANK (smaller) */
@@ -591,10 +600,10 @@ background:#111;
 }
 
 /* OTHER COLUMNS */
-#totalTable th:nth-child(3),
-#totalTable td:nth-child(3),
-#leaderboardTable th:nth-child(3),
-#leaderboardTable td:nth-child(3),
+#totalTable th:nth-child(4),
+#totalTable td:nth-child(4),
+#leaderboardTable th:nth-child(4),
+#leaderboardTable td:nth-child(4),
 #totalTable th:nth-child(4),
 #totalTable td:nth-child(4),
 #leaderboardTable th:nth-child(4),
