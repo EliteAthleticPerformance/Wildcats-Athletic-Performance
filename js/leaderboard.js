@@ -108,7 +108,7 @@ const formatScore = (val) => {
         }
     }
 
-
+console.log(topTotals[0]);
     
     // =====================
     // RENDER TABLES
@@ -127,21 +127,17 @@ const formatScore = (val) => {
     let totalHTML = "";
 
     topTotals.forEach((athlete, index) => {
-        totalHTML += `
-            <tr>
-                <td>${index + 1}</td>
-                <td>
-                    <a href="athlete.html?name=${encodeURIComponent(athlete.name)}">
-                        ${athlete.name}
-                    </a>
-                </td>
-                <td>${athlete.total > 0 ? Math.round(athlete.total) : "-"}</td>
-                <td>${athlete.date}</td>
-            </tr>
-        `;
-    });
+    totalHTML += `
+        <tr>
+            <td>${index + 1}</td>
+            <td><a href="athlete.html?name=${encodeURIComponent(athlete.name)}">${athlete.name}</a></td>
+            <td>${athlete.total > 0 ? Math.round(athlete.total) : "-"}</td>
+            <td>${athlete.date || "-"}</td>
+        </tr>
+    `;
+});
 
-    totalTable.innerHTML = totalHTML;
+totalTable.innerHTML = totalHTML;
 
     // ===== SCORE TABLE =====
     let scoreHTML = "";

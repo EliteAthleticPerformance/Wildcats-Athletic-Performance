@@ -930,10 +930,11 @@ h3 {
     text-shadow: 0 0 8px rgba(65, 105, 225, 0.6);
 }
 
-.leaderboard-grid {
-  display: grid;
+#leaderboard .leaderboard-grid {
+  display: grid !important;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 40px;
+  align-items: start;
 }
 
 .leaderboard-table {
@@ -1008,7 +1009,14 @@ h3 {
   overflow-x: auto;
 }
 
+#totalTable tr {
+  display: table-row;
+}
 
+#totalTable td,
+#totalTable th {
+  display: table-cell;
+}
 
 
 /* ANIMATIONS */
