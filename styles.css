@@ -986,18 +986,32 @@ h3 {
   white-space: nowrap;
 }
 
-/* COLUMN WIDTHS */
+/* RANK */
 #totalTable th:nth-child(1),
-#leaderboardTable th:nth-child(1) { width: 10%; }
+#leaderboardTable th:nth-child(1) { width: 8%; }
 
+/* ATHLETE (bigger) */
 #totalTable th:nth-child(2),
-#leaderboardTable th:nth-child(2) { width: 40%; }
+#leaderboardTable th:nth-child(2) { width: 42%; }
 
+/* SCORE / TOTAL */
 #totalTable th:nth-child(3),
 #leaderboardTable th:nth-child(3) { width: 20%; }
 
+/* DATE */
 #totalTable th:nth-child(4),
 #leaderboardTable th:nth-child(4) { width: 30%; }
+
+#totalTable td,
+#leaderboardTable td {
+  padding: 14px 18px;
+}
+
+#totalTable th,
+#leaderboardTable th {
+  text-align: center;
+  font-size: 1.05rem;
+}
 
 .leaderboard-left,
 .leaderboard-right {
@@ -1016,6 +1030,34 @@ h3 {
 #totalTable td,
 #totalTable th {
   display: table-cell;
+}
+
+/* 🔥 FORCE LEADERBOARD LAYOUT */
+#leaderboard .leaderboard-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 40px;
+}
+
+#leaderboard .leaderboard-left,
+#leaderboard .leaderboard-right {
+  flex: 1;
+}
+
+#leaderboard h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#leaderboardSearch {
+  display: block;
+  margin: 0 auto 40px auto;
+  width: 30%;
+  max-width: 700px;
+  text-align: center;
+  font-size: 18px;
+  padding: 14px;
+  border-radius: 12px;
 }
 
 
