@@ -930,12 +930,6 @@ h3 {
     text-shadow: 0 0 8px rgba(65, 105, 225, 0.6);
 }
 
-#leaderboard .leaderboard-grid {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  align-items: start;
-}
 
 .leaderboard-table {
   width: 100%;
@@ -1023,14 +1017,7 @@ h3 {
   overflow-x: auto;
 }
 
-#totalTable tr {
-  display: table-row;
-}
 
-#totalTable td,
-#totalTable th {
-  display: table-cell;
-}
 
 /* 🔥 FORCE LEADERBOARD LAYOUT */
 #leaderboard .leaderboard-grid {
@@ -1052,12 +1039,32 @@ h3 {
 #leaderboardSearch {
   display: block;
   margin: 0 auto 40px auto;
-  width: 30%;
-  max-width: 700px;
+  width: 50%;
+  max-width: 600px;
   text-align: center;
   font-size: 18px;
   padding: 14px;
   border-radius: 12px;
+}
+
+.leaderboard-left h2,
+.leaderboard-right h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+  font-size: 1.4rem;
+}
+
+#leaderboard .leaderboard-grid {
+  display: flex !important;
+  justify-content: center;   /* 🔥 KEY FIX */
+  gap: 60px;
+}
+
+.leaderboard-left,
+.leaderboard-right {
+  flex: 1;
+  max-width: 700px;          /* keep width control */
 }
 
 
