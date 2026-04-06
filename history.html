@@ -7,26 +7,157 @@
   <title>Athlete Profile</title>
 
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- PapaParse (CSV parser) -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 
 <body>
 
-  <main style="padding: 40px; text-align: center;">
+<main class="section" style="text-align:center;">
 
-    <h1 id="name"></h1>
+  <h1 id="name"></h1>
+  <p id="score" style="color: var(--muted); margin-bottom: 20px;"></p>
 
-    <p id="subtitle" style="color: var(--muted); margin-top: 10px;">
-      Athlete Performance Profile
-    </p>
+  <div style="max-width: 500px; margin: auto;">
+    <canvas id="radarChart"></canvas>
+  </div>
 
-  </main>
+</main>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const name = params.get("name");
+<script>
 
-    document.getElementById("name").textContent = name || "Athlete";
-  </script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THCtlSa9Wvaa77owi-_BAR/pub?output=csv";
+
+// ✅ GET NAME FROM URL
+const params = new URLSearchParams(window.location.search);
+const selectedName = (params.get("name") || "").trim();
+
+document.getElementById("name").textContent = selectedName;
+
+/* ---------- LOAD DATA ---------- */
+
+Papa.parse(CSV_URL + "&t=" + Date.now(), {
+  download: true,
+  skipEmptyLines: true,
+
+  complete: function(results) {
+
+    const rows = results.data;
+
+    let athlete = null;
+
+    // ✅ FIND ATHLETE
+    rows.forEach(row => {
+      const name = (row[0] || "").trim().toLowerCase();
+      const target = selectedName.trim().toLowerCase();
+
+      if (name === target) {
+        athlete = row;
+      }
+    });
+
+    console.log("FOUND ATHLETE:", athlete);
+
+    if (!athlete) {
+      document.getElementById("score").textContent = "No data found";
+      return;
+    }
+
+    /* ---------- HARD COLUMN MAPPING ---------- */
+
+    const bench = Number(athlete[6]) || 0;
+    const squat = Number(athlete[8]) || 0;
+    const clean = Number(athlete[10]) || 0;
+    const vertical = Number(athlete[12]) || 0;
+    const broad = Number(athlete[14]) || 0;
+    const medBall = Number(athlete[16]) || 0;
+    const agilityRaw = Number(athlete[18]) || 0;
+    const situps = Number(athlete[20]) || 0;
+    const dash10 = Number(athlete[22]) || 0;
+    const dash40 = Number(athlete[24]) || 0;
+    const score = Number(athlete[30]) || 0;
+
+    /* ---------- BUILD METRICS ---------- */
+
+    const strength = bench + squat;
+    const power = clean + vertical;
+    const explosiveness = broad + medBall;
+    const agility = agilityRaw + situps;
+    const speed = dash10 + dash40;
+
+    document.getElementById("score").textContent = `Score: ${score}`;
+
+    /* ---------- NORMALIZE ---------- */
+
+    function norm(val) {
+      return Math.min(val / 5, 100);
+    }
+
+    renderRadarChart(
+      norm(speed),
+      norm(strength),
+      norm(power),
+      norm(agility),
+      norm(explosiveness)
+    );
+  }
+});
+
+/* ---------- RADAR CHART ---------- */
+
+function renderRadarChart(speed, strength, power, agility, explosiveness) {
+
+  const ctx = document.getElementById("radarChart");
+
+  new Chart(ctx, {
+    type: "radar",
+    data: {
+      labels: ["Speed", "Strength", "Power", "Agility", "Explosive"],
+      datasets: [{
+        label: "Performance",
+        data: [speed, strength, power, agility, explosiveness],
+        backgroundColor: "rgba(59,130,246,0.2)",
+        borderColor: "#3b82f6",
+        borderWidth: 2,
+        pointBackgroundColor: "#3b82f6"
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        r: {
+          beginAtZero: true,
+          ticks: {
+            display: false
+          },
+          grid: {
+            color: "rgba(255,255,255,0.1)"
+          },
+          angleLines: {
+            color: "rgba(255,255,255,0.1)"
+          },
+          pointLabels: {
+            color: "#fff",
+            font: {
+              size: 12
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+</script>
 
 </body>
 </html>
