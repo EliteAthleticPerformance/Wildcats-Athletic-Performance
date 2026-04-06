@@ -1,73 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Team Leaderboard</title>
+<title>Leaderboard</title>
 
-<link rel="stylesheet" href="styles.css?v=4">
+<link rel="icon" href="data:,">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  background:#000;
+  color:#fff;
+  font-family:Arial;
+  margin:0;
+}
+
+.header {
+  text-align:center;
+  padding:20px;
+  background:linear-gradient(to right,#000,#222,#000);
+}
+
+.title {
+  text-align:center;
+  margin:20px 0;
+  font-size:24px;
+}
+
+#search {
+  display:block;
+  margin:0 auto 20px;
+  padding:12px;
+  width:90%;
+  max-width:400px;
+  border-radius:10px;
+  border:none;
+}
+
+.container {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  padding:20px;
+}
+
+.box {
+  background:#111;
+  padding:15px;
+  border-radius:12px;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+}
+
+th, td {
+  padding:8px;
+  border-bottom:1px solid #333;
+}
+
+th { color:#aaa; }
+
+tr:hover { background:#1a1a1a; cursor:pointer; }
+
+.rank { font-weight:bold; }
+
+.gold { color:gold; }
+.silver { color:#c0c0c0; }
+.bronze { color:#cd7f32; }
+
+/* mobile */
+@media(max-width:700px){
+  table { display:none; }
+
+  .mobile-cards {
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .card {
+    background:#111;
+    padding:15px;
+    border-radius:12px;
+  }
+}
+</style>
 </head>
 
 <body>
 
-<div id="header-placeholder"></div>
+<div class="header">
+  <h2>Wildcats Athletic Performance</h2>
+</div>
 
-<main>
+<div class="title">🏆 Team Leaderboard</div>
 
-<div id="leaderboard">
+<input id="search" placeholder="Search athlete...">
 
-<h1>🏆 Team Leaderboard</h1>
+<div class="container">
 
-<!-- 🔍 SEARCH -->
-<input 
-type="text" 
-id="leaderboardSearch" 
-placeholder="Search athlete..."
->
-
-<div class="leaderboard-grid">
-
-  <!-- LEFT -->
-  <div class="leaderboard-left">
-    <h2>3 Lift Max Totals</h2>
-    <table id="totalTable">
+  <div class="box">
+    <h3>🏋️ 3 Lift Max Totals</h3>
+    <table id="liftTable">
       <thead>
-  <tr>
-    <th>Rank</th>
-    <th>Athlete</th>
-    <th>Total</th>
-    <th>Test Date</th>
-  </tr>
-</thead>
+        <tr>
+          <th>#</th><th>Athlete</th><th>Total</th><th>Date</th>
+        </tr>
+      </thead>
       <tbody></tbody>
     </table>
+    <div id="mobileLift" class="mobile-cards"></div>
   </div>
 
-  <!-- RIGHT -->
-  <div class="leaderboard-right">
-    <h2>Athletic Performance Score</h2>
-    <table id="leaderboardTable">
+  <div class="box">
+    <h3>🏆 Athletic Performance</h3>
+    <table id="scoreTable">
       <thead>
-  <tr>
-    <th>Rank</th>
-    <th>Athlete</th>
-    <th>Points</th>
-    <th>Test Date</th>
-  </tr>
-</thead>
+        <tr>
+          <th>#</th><th>Athlete</th><th>Score</th><th>Date</th>
+        </tr>
+      </thead>
       <tbody></tbody>
     </table>
+    <div id="mobileScore" class="mobile-cards"></div>
   </div>
 
 </div>
 
-</div>
+<script>
+const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
 
-</main>
+let grouped = {};
+let athletes = [];
 
-<script src="js/header.js"></script>
-<script src="js/leaderboard.js"></script>
+fetch(url + "&t=" + Date.now())
+.then(res => res.text())
+.then(text => {
+
+  const rows = text.trim().split("\n");
+
+  const headers = rows[0].split(",").map(h=>h.trim());
+
+  const data = rows.slice(1).map(row=>{
+    const cols = (row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)||[])
+      .map(c=>c.replace(/"/g,"").trim());
+
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=cols[i]);
+
+    return {
+      name: obj["Student-Athlete"],
+      date: obj["Test Date"],
+
+      bench: +obj["Bench Press"]||0,
+      squat: +obj["Squat"]||0,
+      clean: +obj["Hang Clean"]||0,
+
+      vertical: +obj["Vertical Jump"]||0,
+      broad: +obj["Broad Jump"]||0,
+      med: +obj["Med Ball Toss"]||0,
+
+      pro: +obj["Pro Agility"]||0,
+      ten: +obj["10 yd Dash"]||0,
+      forty: +obj["40 yd Dash"]||0,
+
+      sit: +obj["Sit-Ups"]||0,
+
+      lift: +obj["3 Lift Projected Max Total"]||0,
+      score: +obj["Total Athletic Performance Points"]||0
+    };
+  });
+
+  data.forEach(a=>{
+    if(!grouped[a.name]) grouped[a.name]=[];
+    grouped[a.name].push(a);
+  });
+
+  Object.values(grouped).forEach(arr=>{
+    arr.sort((a,b)=> new Date(b.date)-new Date(a.date));
+  });
+
+  athletes = Object.keys(grouped).map(n=>grouped[n][0]);
+
+  render();
+});
+
+function render(){
+  const val = document.getElementById("search").value.toLowerCase();
+
+  const filtered = athletes.filter(a =>
+    a.name.toLowerCase().includes(val)
+  );
+
+  renderLift(filtered);
+  renderScore(filtered);
+}
+
+function renderLift(data){
+  const tbody = document.querySelector("#liftTable tbody");
+  const mobile = document.getElementById("mobileLift");
+
+  tbody.innerHTML="";
+  mobile.innerHTML="";
+
+  data.sort((a,b)=>b.lift-a.lift);
+
+  data.forEach((a,i)=>{
+    const medal = i===0?"gold":i===1?"silver":i===2?"bronze":"";
+
+    tbody.appendChild(createRow(a,i,"lift",medal));
+
+    mobile.innerHTML+=`
+      <div class="card ${medal}">
+        <strong>${i+1}. ${a.name}</strong><br>
+        Total: ${a.lift || "-"}<br>
+        ${a.date}
+      </div>
+    `;
+  });
+}
+
+function renderScore(data){
+  const tbody = document.querySelector("#scoreTable tbody");
+  const mobile = document.getElementById("mobileScore");
+
+  tbody.innerHTML="";
+  mobile.innerHTML="";
+
+  data.sort((a,b)=>b.score-a.score);
+
+  data.forEach((a,i)=>{
+    const medal = i===0?"gold":i===1?"silver":i===2?"bronze":"";
+
+    tbody.appendChild(createRow(a,i,"score",medal));
+
+    mobile.innerHTML+=`
+      <div class="card ${medal}">
+        <strong>${i+1}. ${a.name}</strong><br>
+        Score: ${a.score || "-"}<br>
+        ${a.date}
+      </div>
+    `;
+  });
+}
+
+function createRow(a,i,type,medal){
+  const tr=document.createElement("tr");
+
+  tr.innerHTML=`
+    <td class="${medal}">${i+1}</td>
+    <td>${a.name}</td>
+    <td>${type==="lift"?a.lift:a.score}</td>
+    <td>${a.date}</td>
+  `;
+
+  const detail=document.createElement("tr");
+  detail.style.display="none";
+
+  const td=document.createElement("td");
+  td.colSpan=4;
+  detail.appendChild(td);
+
+  tr.onclick=()=>{
+    if(detail.style.display==="table-row"){
+      detail.style.display="none";
+      return;
+    }
+
+    detail.style.display="table-row";
+
+    const latest=grouped[a.name][0];
+
+    td.innerHTML=`<canvas id="chart-${i}" height="200"></canvas>`;
+
+    setTimeout(()=>{
+      new Chart(document.getElementById(`chart-${i}`),{
+        type:'radar',
+        data:{
+          labels:["Bench","Squat","Clean","Vertical","Broad","Med","Sit"],
+          datasets:[{
+            data:[
+              latest.bench,
+              latest.squat,
+              latest.clean,
+              latest.vertical,
+              latest.broad,
+              latest.med,
+              latest.sit
+            ]
+          }]
+        },
+        options:{
+          plugins:{legend:{display:false}},
+          scales:{r:{ticks:{display:false}}}
+        }
+      });
+    },100);
+  };
+
+  const frag=document.createDocumentFragment();
+  frag.appendChild(tr);
+  frag.appendChild(detail);
+
+  return frag;
+}
+
+document.getElementById("search").addEventListener("input",render);
+</script>
 
 </body>
 </html>

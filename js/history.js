@@ -1,121 +1,150 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const input = document.getElementById("searchAthlete");
-    const container = document.getElementById("historyContainer");
+/* =====================
+   CONFIG
+===================== */
 
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
+const STORAGE_KEY = "wildcatsData";
 
-    const STORAGE_KEY = "wildcatsData";
+const input = document.getElementById("searchAthlete");
+const container = document.getElementById("historyContainer");
 
-    // =====================
-    // CSV PARSER
-    // =====================
-    function parseCSV(text) {
-        return text.trim().split(/\r?\n/).map(row => {
-            const cols = [];
-            let current = '';
-            let insideQuotes = false;
+/* =====================
+   HELPERS
+===================== */
 
-            for (let i = 0; i < row.length; i++) {
-                const char = row[i];
+function clean(val) {
+    if (val === undefined || val === null || val === "" || val === "NaN") {
+        return "-";
+    }
+    return String(val).trim();
+}
 
-                if (char === '"' && row[i + 1] === '"') {
-                    current += '"';
-                    i++;
-                } else if (char === '"') {
-                    insideQuotes = !insideQuotes;
-                } else if (char === ',' && !insideQuotes) {
-                    cols.push(current);
-                    current = '';
-                } else {
-                    current += char;
-                }
+function toNumber(val) {
+    const num = parseFloat(String(val).replace(/[^0-9.\-]/g, ""));
+    return isNaN(num) ? 0 : num;
+}
+
+function formatDate(val) {
+    if (!val || val === "-") return "—";
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleDateString();
+}
+
+function normalize(str) {
+    return (str || "")
+        .toLowerCase()
+        .replace(/[^a-z]/g, "");
+}
+
+/* =====================
+   CSV PARSER (ROBUST)
+===================== */
+
+function parseCSV(text) {
+    return text.trim().split(/\r?\n/).map(row => {
+        const cols = [];
+        let current = '';
+        let insideQuotes = false;
+
+        for (let i = 0; i < row.length; i++) {
+            const char = row[i];
+
+            if (char === '"' && row[i + 1] === '"') {
+                current += '"';
+                i++;
+            } else if (char === '"') {
+                insideQuotes = !insideQuotes;
+            } else if (char === ',' && !insideQuotes) {
+                cols.push(current);
+                current = '';
+            } else {
+                current += char;
             }
+        }
 
-            cols.push(current);
-            return cols;
-        });
-    }
+        cols.push(current);
+        return cols;
+    });
+}
 
-    // =====================
-    // PROCESS DATA
-    // =====================
-    function processData(rows) {
+/* =====================
+   LOAD DATA (WITH CACHE)
+===================== */
 
-        const headers = rows[0];
-        const dataRows = rows.slice(1);
-
-        const data = dataRows.map(cols => {
-            const obj = {};
-            headers.forEach((h, i) => obj[h.trim().toLowerCase()] = cols[i]);
-
-            return {
-                name: (obj["student-athlete"] || "").trim(),
-                date: obj["test date"] || "",
-                grade: obj["grade"] || "",
-                weight: obj["actual weight"] || "",
-                group: obj["weight group"] || "",
-                total: parseFloat(obj["3 lift projected max total"]) || 0,
-                score: parseFloat(obj["total athletic performance points"]) || 0
-            };
-        }).filter(a => a.name);
-
-        setupSearch(data);
-    }
-
-    // =====================
-    // FETCH + CACHE
-    // =====================
-    function loadData() {
-        fetch(SHEET_URL)
+function loadData() {
+    fetch(SHEET_URL + "?t=" + Date.now())
         .then(res => res.text())
         .then(csv => {
-
             const rows = parseCSV(csv);
-
-            // save to localStorage
             localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-
             processData(rows);
-
         })
         .catch(() => {
-
-            console.warn("Offline mode");
-
             const cached = localStorage.getItem(STORAGE_KEY);
 
             if (cached) {
                 processData(JSON.parse(cached));
             } else {
-                container.innerHTML = "<p>No data available offline</p>";
+                container.innerHTML = "<p>No data available</p>";
             }
         });
-    }
+}
 
-    loadData();
+/* =====================
+   PROCESS DATA
+===================== */
 
-    // 🔄 AUTO REFRESH (every 60 sec)
-    setInterval(loadData, 60000);
+function processData(rows) {
 
-    // =====================
-    // SEARCH + RENDER
-    // =====================
-    function setupSearch(data) {
+    const headers = rows[0];
+    const dataRows = rows.slice(1);
 
-        const clean = str => (str || "")
-            .toLowerCase()
-            .replace(/[^a-z]/g, "");
+    const data = dataRows.map(cols => {
 
-        input.addEventListener("input", () => {
+        const obj = {};
+        headers.forEach((h, i) => {
+            obj[h.trim().toLowerCase()] = cols[i];
+        });
 
-            const term = input.value;
+        return {
+            name: clean(obj["student-athlete"]),
+            date: clean(obj["test date"]),
+            grade: clean(obj["grade"]),
+            weight: clean(obj["actual weight"]),
+            group: clean(obj["weight group"]),
+            total: toNumber(obj["3 lift projected max total"]),
+            score: toNumber(obj["total athletic performance points"])
+        };
+
+    }).filter(a => a.name !== "-" && a.name !== "");
+
+    setupSearch(data);
+}
+
+/* =====================
+   SEARCH (DEBOUNCED)
+===================== */
+
+function setupSearch(data) {
+
+    let timeout;
+
+    input.addEventListener("input", () => {
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+
+            const term = normalize(input.value);
             container.innerHTML = "";
 
             if (!term) return;
 
             const matches = data.filter(a =>
-                clean(a.name).includes(clean(term))
+                normalize(a.name).includes(term)
             );
 
             if (!matches.length) {
@@ -123,132 +152,138 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const grouped = {};
+            render(matches);
 
-            matches.forEach(a => {
-                if (!grouped[a.name]) grouped[a.name] = [];
-                grouped[a.name].push(a);
-            });
+        }, 200);
+    });
+}
 
-            Object.keys(grouped).forEach(name => {
+/* =====================
+   RENDER
+===================== */
 
-                const athleteHistory = grouped[name]
-                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+function render(matches) {
 
-                const bestTotal = Math.max(...athleteHistory.map(a => a.total));
-                const bestScore = Math.max(...athleteHistory.map(a => a.score));
+    const grouped = {};
 
-                const rowsHTML = athleteHistory.map(h => {
+    matches.forEach(a => {
+        if (!grouped[a.name]) grouped[a.name] = [];
+        grouped[a.name].push(a);
+    });
 
-                    const isTotalPR = h.total === bestTotal;
-                    const isScorePR = h.score === bestScore;
+    Object.keys(grouped).forEach(name => {
 
-                    return `
-                        <tr class="${isTotalPR ? "pr-row" : ""}">
-                            <td>${h.name}</td>
-                            <td>${h.date ? new Date(h.date).toLocaleDateString() : "—"}</td>
-                            <td>${h.grade || "-"}</td>
-                            <td>${h.weight || "-"}</td>
-                            <td>${h.group || "-"}</td>
-                            <td>${h.total} ${isTotalPR ? "🏆" : ""}</td>
-                            <td>${h.score > 0 ? Math.round(h.score) : "—"} ${isScorePR ? "🔥" : ""}</td>
+        const history = grouped[name]
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const bestTotal = Math.max(...history.map(a => a.total));
+        const bestScore = Math.max(...history.map(a => a.score));
+
+        const chartId = `chart-${name.replace(/[^a-z0-9]/gi, '')}`;
+
+        const rowsHTML = history.map(h => {
+
+            const isTotalPR = h.total === bestTotal;
+            const isScorePR = h.score === bestScore;
+
+            return `
+                <tr class="${isTotalPR ? "pr-row" : ""}">
+                    <td>${h.name}</td>
+                    <td>${formatDate(h.date)}</td>
+                    <td>${h.grade}</td>
+                    <td>${h.weight}</td>
+                    <td>${h.group}</td>
+                    <td>${h.total || "—"} ${isTotalPR ? "🏆" : ""}</td>
+                    <td>${h.score ? Math.round(h.score) : "—"} ${isScorePR ? "🔥" : ""}</td>
+                </tr>
+            `;
+        }).join("");
+
+        const card = document.createElement("div");
+        card.className = "history-card";
+
+        card.innerHTML = `
+            <h2>${name}</h2>
+
+            <canvas id="${chartId}" height="100"></canvas>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Athlete</th>
+                            <th>Date</th>
+                            <th>Grade</th>
+                            <th>Weight</th>
+                            <th>Group</th>
+                            <th>Total</th>
+                            <th>Score</th>
                         </tr>
-                    `;
-                }).join("");
+                    </thead>
+                    <tbody>
+                        ${rowsHTML}
+                    </tbody>
+                </table>
+            </div>
+        `;
 
-                const chartId = `chart-${name.replace(/[^a-z]/gi, '')}`;
+        container.appendChild(card);
 
-                const div = document.createElement("div");
-                div.className = "history-card";
+        /* =====================
+           CHART (CLEAN LINE)
+        ===================== */
 
-                div.innerHTML = `
-                    <h2>${name}</h2>
+        if (typeof Chart !== "undefined") {
 
-                    <canvas id="${chartId}" height="100"></canvas>
+            const ctx = document.getElementById(chartId).getContext("2d");
 
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Athlete</th>
-                                    <th>Date</th>
-                                    <th>Grade</th>
-                                    <th>Weight</th>
-                                    <th>Group</th>
-                                    <th>3 Lift Total</th>
-                                    <th>Overall Athletic Performance Score</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${rowsHTML}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-
-                container.appendChild(div);
-
-                // =====================
-                // 📊 BAR GRAPH
-                // =====================
-                if (typeof Chart !== "undefined") {
-
-                    const ctx = document.getElementById(chartId).getContext("2d");
-
-                    const labels = athleteHistory.map(a =>
-                        a.date ? new Date(a.date).toLocaleDateString() : ""
-                    ).reverse();
-
-                    const totals = athleteHistory.map(a => a.total).reverse();
-                    const scores = athleteHistory.map(a => a.score).reverse();
-
-                    new Chart(ctx, {
-                        type: "bar",
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: "3 Lift Total",
-                                    data: totals,
-                                    backgroundColor: "#0066FF",
-                                    borderColor: "#C0C0C0",
-                                    borderWidth: 1,
-                                    borderRadius: 6
-                                },
-                                {
-                                    label: "Performance Score",
-                                    data: scores,
-                                    backgroundColor: "rgba(192, 192, 192, 0.85)", // 🥈 silver
-                                    borderColor: "#C0C0C0",
-                                    borderWidth: 1,
-                                    borderRadius: 6
-                                }
-                            ]
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: history.map(a => formatDate(a.date)).reverse(),
+                    datasets: [
+                        {
+                            label: "Total",
+                            data: history.map(a => a.total).reverse(),
+                            tension: 0.3
                         },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    labels: { color: "#fff" }
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    ticks: { color: "#fff" }
-                                },
-                                y: {
-                                    ticks: { color: "#fff" },
-                                    beginAtZero: true
-                                }
-                            }
+                        {
+                            label: "Score",
+                            data: history.map(a => a.score).reverse(),
+                            tension: 0.3
                         }
-                    });
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: "#fff" }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#aaa" }
+                        },
+                        y: {
+                            ticks: { color: "#aaa" },
+                            beginAtZero: true
+                        }
+                    }
                 }
-
             });
+        }
 
-        });
+    });
+}
 
-    }
+/* =====================
+   INIT
+===================== */
+
+loadData();
+
+// Auto refresh every 60s (keeps data fresh)
+setInterval(loadData, 60000);
 
 });

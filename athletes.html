@@ -1,34 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Athletes | Wildcats Performance</title>
 
-<title>Athlete History</title>
+  <link rel="stylesheet" href="styles.css">
 
-<link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: white;
+    }
+
+    .container {
+      padding: 15px;
+      padding-bottom: 90px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #222;
+      background: #111;
+      color: white;
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
+
+    /* GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: #111;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #222;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .meta {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-top: 5px;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    .elite { background: gold; color: black; }
+    .strong { background: #00c853; }
+    .developing { background: #00b0ff; }
+    .needs { background: #ff5252; }
+
+    /* NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #111;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      border-top: 1px solid #222;
+    }
+
+    .bottom-nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.2rem;
+    }
+  </style>
 </head>
 
 <body>
 
-<div id="header-placeholder"></div>
+<div class="container">
 
-<h1>📊 Athlete History</h1>
+  <h1>👥 Athletes</h1>
 
-<!-- 🔍 SEARCH -->
-<div class="search-container">
-    <input id="searchAthlete" placeholder="Search athlete...">
+  <input type="text" id="search" placeholder="Search athletes..." onkeyup="filterAthletes()">
+
+  <div id="athleteGrid" class="grid"></div>
+
 </div>
 
+<!-- NAV -->
+<div class="bottom-nav">
+  <a href="index.html">🏠</a>
+  <a href="leaderboard.html">🏆</a>
+  <a href="history.html">📊</a>
+</div>
 
-<!-- 📋 HISTORY RESULTS -->
-<div id="historyContainer"></div>
+<script>
+const csvUrl = "YOUR_CSV_URL_HERE"; // 🔥 replace
 
-<!-- 🔧 SCRIPTS (ORDER IS CRITICAL) -->
-<script src="js/header.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="js/history.js"></script>
+let athletes = [];
+
+/* ---------- HELPERS ---------- */
+
+function clean(val) {
+  if (!val || val === "NaN") return "-";
+  return val;
+}
+
+function getTag(score) {
+  score = Number(score);
+  if (score >= 900) return ["elite", "🔥 Elite"];
+  if (score >= 800) return ["strong", "💪 Strong"];
+  if (score >= 700) return ["developing", "⚡ Developing"];
+  return ["needs", "📈 Needs Work"];
+}
+
+/* ---------- LOAD DATA ---------- */
+
+fetch(csvUrl + "?t=" + Date.now())
+  .then(res => res.text())
+  .then(text => {
+    const rows = text.split("\n").slice(1);
+
+    const map = {};
+
+    rows.forEach(r => {
+      const cols = r.split(",");
+      const name = cols[0];
+      const score = Number(cols[1]);
+
+      if (!name) return;
+
+      // Keep BEST score per athlete
+      if (!map[name] || score > map[name]) {
+        map[name] = score;
+      }
+    });
+
+    athletes = Object.keys(map).map(name => ({
+      name,
+      score: map[name]
+    }));
+
+    athletes.sort((a, b) => b.score - a.score);
+
+    render(athletes);
+  });
+
+/* ---------- RENDER ---------- */
+
+function render(list) {
+  const grid = document.getElementById("athleteGrid");
+  grid.innerHTML = "";
+
+  list.forEach(a => {
+    const [tagClass, tagText] = getTag(a.score);
+
+    grid.innerHTML += `
+      <div class="card" onclick="goToAthlete('${a.name}')">
+        <div class="name">${clean(a.name)}</div>
+        <div class="meta">Score: ${clean(a.score)}</div>
+        <div class="tag ${tagClass}">${tagText}</div>
+      </div>
+    `;
+  });
+}
+
+/* ---------- SEARCH ---------- */
+
+function filterAthletes() {
+  const term = document.getElementById("search").value.toLowerCase();
+
+  const filtered = athletes.filter(a =>
+    a.name.toLowerCase().includes(term)
+  );
+
+  render(filtered);
+}
+
+/* ---------- NAV ---------- */
+
+function goToAthlete(name) {
+  const encoded = encodeURIComponent(name);
+  window.location.href = `history.html?name=${encoded}`;
+}
+</script>
 
 </body>
 </html>

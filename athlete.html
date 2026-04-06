@@ -1,173 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Athlete Profile | Wildcats Performance</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
 
-<title>Athlete Profile</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: white;
+    }
 
-<link rel="stylesheet" href="styles.css">
+    .container {
+      padding: 15px;
+      padding-bottom: 90px;
+      max-width: 800px;
+      margin: auto;
+    }
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
+    .name {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .score {
+      font-size: 2rem;
+      margin-top: 5px;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .elite { background: gold; color: black; }
+    .strong { background: #00c853; }
+    .developing { background: #00b0ff; }
+    .needs { background: #ff5252; }
+
+    .card {
+      background: #111;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #222;
+      margin-bottom: 15px;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #222;
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: #aaa;
+    }
+
+    /* NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #111;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      border-top: 1px solid #222;
+    }
+
+    .bottom-nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.2rem;
+    }
+  </style>
 </head>
 
 <body>
 
-    <!-- ✅ HEADER -->
-    <div id="header-placeholder"></div>
+<div class="container">
 
-    <main>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="name" id="athleteName">Athlete</div>
+    <div class="score" id="athleteScore">--</div>
+    <div id="athleteTag"></div>
+  </div>
 
-    <!-- ATHLETE NAME + LEGEND -->
-<section class="athlete-header">
-    <h1 id="athleteName">Loading...</h1>
+  <!-- PRs -->
+  <div class="card">
+    <h3>🏆 Personal Records</h3>
+    <div id="prList"></div>
+  </div>
 
-    <!-- ✅ LEGEND ON ITS OWN LINE -->
-    <div class="legend">
-        <span class="legend-item elite">● Elite</span>
-        <span class="legend-item average">● Average</span>
-        <span class="legend-item low">● Needs Work</span>
-    </div>
-</section>
+  <!-- HISTORY -->
+  <div class="card">
+    <h3>📊 Test History</h3>
+    <div id="historyList"></div>
+  </div>
 
-<!-- OPTIONAL INSIGHTS -->
-<div id="insights"></div>
+</div>
 
-<!-- ✅ FIRST ROW OF CARDS -->
-<section class="athlete-stats">
+<!-- NAV -->
+<div class="bottom-nav">
+  <a href="index.html">🏠</a>
+  <a href="leaderboard.html">🏆</a>
+  <a href="history.html">📊</a>
+</div>
 
-    <div class="stat-box">
-        <h3>Bench</h3>
-        <p id="bench">-</p>
-    </div>
+<script>
+const csvUrl = "YOUR_CSV_URL_HERE"; // 🔥 replace
 
-    <div class="stat-box">
-        <h3>Squat</h3>
-        <p id="squat">-</p>
-    </div>
+let athleteName = new URLSearchParams(window.location.search).get("name");
 
-    <div class="stat-box">
-        <h3>Clean</h3>
-        <p id="clean">-</p>
-    </div>
+/* ---------- HELPERS ---------- */
 
-</section>
+function clean(val) {
+  if (!val || val === "NaN") return "-";
+  return val;
+}
 
-    <!-- EXPLOSIVE -->
-    <section class="athlete-stats">
+function formatDate(val) {
+  const d = new Date(val);
+  if (!val || isNaN(d)) return "-";
+  return d.toLocaleDateString();
+}
 
-        <div class="stat-box">
-            <h3>Vertical</h3>
-            <p id="verticalScore">-</p>
+function getTag(score) {
+  score = Number(score);
+  if (score >= 900) return ["elite", "🔥 Elite"];
+  if (score >= 800) return ["strong", "💪 Strong"];
+  if (score >= 700) return ["developing", "⚡ Developing"];
+  return ["needs", "📈 Needs Work"];
+}
+
+/* ---------- LOAD DATA ---------- */
+
+fetch(csvUrl + "?t=" + Date.now())
+  .then(res => res.text())
+  .then(text => {
+    const rows = text.split("\n").slice(1);
+
+    const data = rows.map(r => {
+      const cols = r.split(",");
+      return {
+        name: cols[0],
+        score: Number(cols[1]),
+        lift: cols[2],
+        reps: cols[3],
+        weight: cols[4],
+        date: cols[5]
+      };
+    }).filter(r => r.name === athleteName);
+
+    if (!data.length) return;
+
+    // SORT newest first
+    data.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // BEST SCORE
+    const best = Math.max(...data.map(d => d.score));
+
+    document.getElementById("athleteName").innerText = athleteName;
+    document.getElementById("athleteScore").innerText = best;
+
+    const [tagClass, tagText] = getTag(best);
+    document.getElementById("athleteTag").innerHTML =
+      `<span class="tag ${tagClass}">${tagText}</span>`;
+
+    renderHistory(data);
+    renderPRs(data);
+  });
+
+/* ---------- HISTORY ---------- */
+
+function renderHistory(data) {
+  const container = document.getElementById("historyList");
+  container.innerHTML = "";
+
+  data.forEach(d => {
+    container.innerHTML += `
+      <div class="row">
+        <div>
+          <strong>${clean(d.lift)}</strong><br>
+          <span style="font-size:0.8rem;color:#aaa;">
+            ${clean(d.reps)} reps @ ${clean(d.weight)}
+          </span>
         </div>
-
-        <div class="stat-box">
-            <h3>Broad Jump</h3>
-            <p id="broadScore">-</p>
+        <div style="text-align:right;">
+          ${formatDate(d.date)}
         </div>
+      </div>
+    `;
+  });
+}
 
-        <div class="stat-box">
-            <h3>Med Ball</h3>
-            <p id="medballScore">-</p>
-        </div>
+/* ---------- PRs ---------- */
 
-    </section>
+function renderPRs(data) {
+  const prs = {};
 
-    <!-- SPEED -->
-    <section class="athlete-stats">
+  data.forEach(d => {
+    if (!prs[d.lift] || d.weight > prs[d.lift]) {
+      prs[d.lift] = d.weight;
+    }
+  });
 
-        <div class="stat-box">
-            <h3>Pro Agility</h3>
-            <p id="proagility">-</p>
-        </div>
+  const container = document.getElementById("prList");
+  container.innerHTML = "";
 
-        <div class="stat-box">
-            <h3>Sit Ups</h3>
-            <p id="situps">-</p>
-        </div>
-
-        <div class="stat-box">
-            <h3>10 Yard</h3>
-            <p id="tenyard">-</p>
-        </div>
-
-        <div class="stat-box">
-            <h3>40 Yard</h3>
-            <p id="forty">-</p>
-        </div>
-
-        </section>
-
-<!-- ✅ SUMMARY ROW (ADD HERE) -->
-<section class="summary-row">
-
-    <div class="stat-box highlight summary-card">
-        <h3>3 Lift Total</h3>
-        <p id="total">-</p>
-    </div>
-
-    <div class="ranking-card summary-card">
-        <p class="rank-title">Program Ranking</p>
-        <p id="rank"></p>
-        <p id="percentile"></p>
-    </div>
-
-    <div class="card summary-card" id="performanceCard">
-        <h3>Athletic Performance</h3>
-        <p id="performance">-</p>
-    </div>
-
-</section>
-
-
-
-</section>
-
-    <!-- CHART -->
-    <section class="chart-section">
-        <h2>Performance Over Time</h2>
-        <canvas id="progressChart"></canvas>
-    </section>
-
-    <section class="history-section">
-    <h2>Full Testing History</h2>
-
-    <table id="historyTable">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Bench</th>
-                <th>Squat</th>
-                <th>Clean</th>
-                <th>Strength</th>
-                <th>Vertical</th>
-                <th>Broad</th>
-                <th>Med Ball</th>
-                <th>Agility</th>
-                <th>Sit Ups</th>
-                <th>10 yd</th>
-                <th>40 yd</th>
-                <th>Athletic Performance</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</section>
-
-    <!-- RADAR -->
-    <section class="chart-section">
-        <h2>Performance Breakdown</h2>
-        <canvas id="radarChart"></canvas>
-    </section>
-
-    </main>
-
-    <!-- SCRIPTS -->
-    <script src="js/header.js"></script>
-    <script src="js/athlete.js"></script>
+  Object.keys(prs).forEach(lift => {
+    container.innerHTML += `
+      <div class="row">
+        <div class="label">${lift}</div>
+        <div><strong>${prs[lift]}</strong></div>
+      </div>
+    `;
+  });
+}
+</script>
 
 </body>
 </html>

@@ -1,152 +1,183 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const rawData = JSON.parse(localStorage.getItem("athleteScores")) || [];
+/* =========================
+   ⚙️ CONFIG
+========================= */
 
-    // ✅ ONLY REQUIRE NAME (Column A)
-    const validTests = rawData.filter(a =>
-        a.name && a.name.trim() !== ""
-    );
+const STORAGE_KEY = "athleteScores";
+const SESSION_KEY = "coachAccess";
+const COACH_PASSWORD = "coach123";
 
-    const totalTests = validTests.length;
+/* =========================
+   📊 DASHBOARD STATS
+========================= */
 
-    const uniqueAthletes = [
-        ...new Set(validTests.map(a => a.name))
-    ].length;
+function updateStats() {
+    try {
+        const rawData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-    const testsEl = document.getElementById("totalTests");
-    const athletesEl = document.getElementById("totalAthletes");
+        const valid = rawData.filter(a =>
+            a && a.name && a.name.trim() !== ""
+        );
 
-    if (testsEl) testsEl.innerText = totalTests;
-    if (athletesEl) athletesEl.innerText = uniqueAthletes;
+        const totalTests = valid.length;
 
-});
+        const uniqueAthletes = new Set(
+            valid.map(a => a.name.trim())
+        ).size;
 
+        const testsEl = document.getElementById("totalTests");
+        const athletesEl = document.getElementById("totalAthletes");
 
- 
- 
- // =========================
-// 🔒 ENTER TEST ACCESS (GLOBAL)
-// =========================
-function goToEnterTest() {
-    const unlocked = sessionStorage.getItem("coachAccess");
+        if (testsEl) testsEl.textContent = totalTests;
+        if (athletesEl) athletesEl.textContent = uniqueAthletes;
 
-    if (unlocked === "true") {
+    } catch (err) {
+        console.warn("Stats error:", err);
+    }
+}
+
+/* =========================
+   🔒 AUTH (COACH ACCESS)
+========================= */
+
+function isCoach() {
+    return sessionStorage.getItem(SESSION_KEY) === "true";
+}
+
+window.goToEnterTest = function () {
+    if (isCoach()) {
         window.location.href = "enter.html";
         return;
     }
 
     const password = prompt("Enter coach password:");
 
-    if (password === "coach123") {
-        sessionStorage.setItem("coachAccess", "true");
+    if (password === null) return; // user cancelled
+
+    if (password === COACH_PASSWORD) {
+        sessionStorage.setItem(SESSION_KEY, "true");
         window.location.href = "enter.html";
     } else {
         alert("Incorrect password");
     }
-}
+};
 
-function logout() {
-    sessionStorage.removeItem("coachAccess");
+window.logout = function () {
+    sessionStorage.removeItem(SESSION_KEY);
     location.reload();
-}
+};
 
+/* =========================
+   🧱 LOAD HEADER
+========================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-
- 
-
+function loadHeader() {
     const container = document.getElementById("header-placeholder");
 
-    // ✅ SAFETY CHECK
     if (!container) {
-        console.warn("No header-placeholder found on this page");
+        console.warn("No #header-placeholder found");
         return;
     }
 
-    fetch("components/header.html") // safer path
+    fetch("components/header.html")
         .then(res => {
             if (!res.ok) throw new Error("Header failed to load");
             return res.text();
         })
-        .then(data => {
+        .then(html => {
+            container.innerHTML = html;
 
-            container.innerHTML = data;
-
-            
-
-            // =========================
-            // 📏 SCALE HEADER TEXT
-            // =========================
-
-            
-            function scaleHeaderText() {
-
-                const header = document.getElementById("schoolHeader");
-                const left = document.querySelector(".header-left");
-                const right = document.querySelector(".header-right");
-                const title = document.getElementById("headerMotto");
-
-                if (!header || !left || !right || !title) return;
-
-                title.style.transform = "scale(1)";
-
-                const available =
-                    header.clientWidth -
-                    left.offsetWidth -
-                    right.offsetWidth - 40;
-
-                const textWidth = title.scrollWidth;
-
-                if (!textWidth) return;
-
-                let scale = available / textWidth;
-
-                scale = Math.min(Math.max(scale, 0.6), 1.3);
-
-                title.style.transform = `scale(${scale})`;
-            }
-
-            
-
-            // =========================
-            // ☰ DROPDOWN MENU
-            // =========================
-            const toggle = document.getElementById("menuToggle");
-            const nav = document.getElementById("mainNav");
-
-            if (toggle && nav) {
-
-                toggle.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    nav.classList.toggle("show");
-                });
-
-                // close when clicking outside
-                document.addEventListener("click", (e) => {
-                    if (!nav.contains(e.target) && !toggle.contains(e.target)) {
-                        nav.classList.remove("show");
-                    }
-                });
-            }
-
-            // =========================
-            // 🚀 INITIAL RENDER
-            // =========================
-            requestAnimationFrame(scaleHeaderText);
-
-            // =========================
-            // 📱 RESIZE HANDLING
-            // =========================
-            let resizeTimeout;
-
-            window.addEventListener("resize", () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(scaleHeaderText, 100);
-            });
-
+            initHeaderUI();
         })
         .catch(err => {
             console.error("Header load error:", err);
         });
+}
+
+/* =========================
+   🎯 INIT HEADER UI
+========================= */
+
+function initHeaderUI() {
+    scaleHeaderText();
+    setupMenuToggle();
+    setupResizeHandler();
+}
+
+/* =========================
+   📏 SCALE HEADER TEXT
+========================= */
+
+function scaleHeaderText() {
+    const header = document.getElementById("schoolHeader");
+    const left = document.querySelector(".header-left");
+    const right = document.querySelector(".header-right");
+    const title = document.getElementById("headerMotto");
+
+    if (!header || !left || !right || !title) return;
+
+    // Reset before recalculating
+    title.style.transform = "scale(1)";
+
+    const availableWidth =
+        header.clientWidth -
+        left.offsetWidth -
+        right.offsetWidth -
+        40;
+
+    const textWidth = title.scrollWidth;
+
+    if (!textWidth) return;
+
+    let scale = availableWidth / textWidth;
+
+    // Clamp for readability
+    scale = Math.min(Math.max(scale, 0.65), 1.2);
+
+    title.style.transform = `scale(${scale})`;
+}
+
+/* =========================
+   ☰ MOBILE MENU
+========================= */
+
+function setupMenuToggle() {
+    const toggle = document.getElementById("menuToggle");
+    const nav = document.getElementById("mainNav");
+
+    if (!toggle || !nav) return;
+
+    toggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        nav.classList.toggle("show");
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!nav.contains(e.target) && !toggle.contains(e.target)) {
+            nav.classList.remove("show");
+        }
+    });
+}
+
+/* =========================
+   📱 RESIZE HANDLING
+========================= */
+
+function setupResizeHandler() {
+    let resizeTimeout;
+
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(scaleHeaderText, 100);
+    });
+}
+
+/* =========================
+   🚀 INIT
+========================= */
+
+updateStats();
+loadHeader();
 
 });
