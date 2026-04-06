@@ -7,12 +7,7 @@
   <title>Athlete Profile</title>
 
   <link rel="stylesheet" href="styles.css">
-
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- PapaParse (CSV parser) -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 
 <body>
@@ -30,82 +25,101 @@
 
 <script>
 
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THCtlSa9Wvaa77owi-_BAR/pub?output=csv";
 
-// ✅ GET NAME FROM URL
 const params = new URLSearchParams(window.location.search);
-const selectedName = (params.get("name") || "").trim();
+const selectedName = decodeURIComponent(params.get("name") || "");
 
 document.getElementById("name").textContent = selectedName;
 
 /* ---------- LOAD DATA ---------- */
 
-Papa.parse(CSV_URL + "&t=" + Date.now(), {
-  download: true,
-  skipEmptyLines: true,
+fetch(CSV_URL + "&t=" + Date.now())
+  .then(res => res.text())
+  .then(text => {
 
-  complete: function(results) {
+    const rows = text.trim().split("\n");
 
-    const rows = results.data;
+    // ✅ Parse headers
+    const headers = rows[0].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+      .map(h => h.replace(/"/g, "").trim());
+
+    const dataRows = rows.slice(1);
 
     let athlete = null;
 
-    // ✅ FIND ATHLETE
-    rows.forEach(row => {
-      const name = (row[0] || "").trim().toLowerCase();
-      const target = selectedName.trim().toLowerCase();
+    dataRows.forEach(r => {
+      const cols = r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+      if (!cols) return;
 
-      if (name === target) {
-        athlete = row;
-      }
+      const name = cols[0].replace(/"/g, "").trim();
+
+const cleanSheetName = name.replace(/\s+/g, " ").trim().toLowerCase();
+const cleanSelectedName = selectedName.replace(/\s+/g, " ").trim().toLowerCase();
+
+console.log("Comparing:", cleanSheetName, "|", cleanSelectedName);
+
+if (cleanSheetName === cleanSelectedName) {
+  athlete = cols;
+  console.log("✅ MATCH FOUND:", athlete);
+}
     });
-
-    console.log("FOUND ATHLETE:", athlete);
 
     if (!athlete) {
       document.getElementById("score").textContent = "No data found";
       return;
     }
 
-    /* ---------- HARD COLUMN MAPPING ---------- */
+    /* ---------- FIND INDEXES ---------- */
 
-    const bench = Number(athlete[6]) || 0;
-    const squat = Number(athlete[8]) || 0;
-    const clean = Number(athlete[10]) || 0;
-    const vertical = Number(athlete[12]) || 0;
-    const broad = Number(athlete[14]) || 0;
-    const medBall = Number(athlete[16]) || 0;
-    const agilityRaw = Number(athlete[18]) || 0;
-    const situps = Number(athlete[20]) || 0;
-    const dash10 = Number(athlete[22]) || 0;
-    const dash40 = Number(athlete[24]) || 0;
-    const score = Number(athlete[30]) || 0;
-
-    /* ---------- BUILD METRICS ---------- */
-
-    const strength = bench + squat;
-    const power = clean + vertical;
-    const explosiveness = broad + medBall;
-    const agility = agilityRaw + situps;
-    const speed = dash10 + dash40;
-
-    document.getElementById("score").textContent = `Score: ${score}`;
-
-    /* ---------- NORMALIZE ---------- */
-
-    function norm(val) {
-      return Math.min(val / 5, 100);
+    function getIndex(label) {
+      return headers.findIndex(h => h.toLowerCase().includes(label));
     }
 
-    renderRadarChart(
-      norm(speed),
-      norm(strength),
-      norm(power),
-      norm(agility),
-      norm(explosiveness)
-    );
-  }
-});
+    /* ---------- HARD INDEX MAPPING (BASED ON YOUR SHEET) ---------- */
+
+// Column positions (0-based index)
+const bench = Number(athlete[6]) || 0;
+const squat = Number(athlete[8]) || 0;
+const clean = Number(athlete[10]) || 0;
+const vertical = Number(athlete[12]) || 0;
+const broad = Number(athlete[14]) || 0;
+const medBall = Number(athlete[16]) || 0;
+const agilityRaw = Number(athlete[18]) || 0;
+const situps = Number(athlete[20]) || 0;
+const dash10 = Number(athlete[22]) || 0;
+const dash40 = Number(athlete[24]) || 0;
+const score = Number(athlete[30]) || 0;
+
+/* ---------- BUILD METRICS ---------- */
+
+const strength = bench + squat;
+const power = clean + vertical;
+const explosiveness = broad + medBall;
+const agility = agilityRaw + situps;
+const speed = dash10 + dash40;
+
+document.getElementById("score").textContent = `Score: ${score}`;
+
+/* ---------- NORMALIZE ---------- */
+
+function norm(val) {
+  return Math.min(val / 5, 100);
+}
+
+renderRadarChart(
+  norm(speed),
+  norm(strength),
+  norm(power),
+  norm(agility),
+  norm(explosiveness)
+);
+
+  })
+  .catch(err => {
+    console.error("FETCH ERROR:", err);
+    document.getElementById("score").textContent = "Error loading data";
+  });
 
 /* ---------- RADAR CHART ---------- */
 
@@ -120,10 +134,7 @@ function renderRadarChart(speed, strength, power, agility, explosiveness) {
       datasets: [{
         label: "Performance",
         data: [speed, strength, power, agility, explosiveness],
-        backgroundColor: "rgba(59,130,246,0.2)",
-        borderColor: "#3b82f6",
-        borderWidth: 2,
-        pointBackgroundColor: "#3b82f6"
+        fill: true
       }]
     },
     options: {
@@ -138,18 +149,6 @@ function renderRadarChart(speed, strength, power, agility, explosiveness) {
           beginAtZero: true,
           ticks: {
             display: false
-          },
-          grid: {
-            color: "rgba(255,255,255,0.1)"
-          },
-          angleLines: {
-            color: "rgba(255,255,255,0.1)"
-          },
-          pointLabels: {
-            color: "#fff",
-            font: {
-              size: 12
-            }
           }
         }
       }
