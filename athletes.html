@@ -99,15 +99,7 @@ fetch(url + "&t=" + Date.now())
   })
   .catch(err => console.error("FETCH ERROR:", err));
 
-    athletes = Object.keys(map).map(name => ({
-      name,
-      score: map[name]
-    }));
-
-    athletes.sort((a, b) => b.score - a.score);
-
-    render(athletes);
-  });
+    
 
 /* ---------- RENDER ---------- */
 
