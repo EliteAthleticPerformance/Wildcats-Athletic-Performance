@@ -257,14 +257,15 @@ const avg = {
   explosive: totals.explosive / count
 };
 
+  console.log("PLAYER METRICS:", player);
   renderRadarChart(player, avg);
   renderRankings(player);
 }
 
 function getTier(p) {
-  if (p >= 90) return "elite";
-  if (p >= 75) return "strong";
-  if (p >= 50) return "average";
+  if (p >= 95) return "elite";
+  if (p >= 85) return "strong";
+  if (p >= 70) return "average";
   return "developing";
 }
 
