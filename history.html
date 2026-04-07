@@ -77,15 +77,15 @@ function cleanNum(val) {
 function extractMetrics(row) {
 
   const bench = cleanNum(row[6]);
-  const squat = cleanNum(row[8]);
-  const clean = cleanNum(row[10]);
-  const vertical = cleanNum(row[12]);
-  const broad = cleanNum(row[14]);
-  const medBall = cleanNum(row[16]);
-  const proAgility = cleanNum(row[18]);
-  const situps = cleanNum(row[20]);
-  const dash10 = cleanNum(row[22]);
-  const dash40 = cleanNum(row[24]);
+  const squat = cleanNum(row[9]);
+  const clean = cleanNum(row[12]);
+  const vertical = cleanNum(row[15]);
+  const broad = cleanNum(row[17]);
+  const medBall = cleanNum(row[19]);
+  const proAgility = cleanNum(row[21]);
+  const situps = cleanNum(row[23]);
+  const dash10 = cleanNum(row[25]);
+  const dash40 = cleanNum(row[27]);
 
   return {
     speed: dash10 + dash40 + proAgility,          // ✅ UPDATED
