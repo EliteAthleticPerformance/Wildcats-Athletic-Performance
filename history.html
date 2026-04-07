@@ -43,9 +43,13 @@
 
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
 
+/* ================= GLOBAL ================= */
+
 let compareMode = "team";
 let ALL_ROWS = [];
 let CURRENT_ATHLETE = null;
+
+/* ================= BUTTON ================= */
 
 function setCompareMode(mode) {
   compareMode = mode;
@@ -58,18 +62,36 @@ function setCompareMode(mode) {
   updateComparison();
 }
 
-// ---------- GET NAME ----------
+/* ================= NAME ================= */
+
 const params = new URLSearchParams(window.location.search);
 const selectedName = (params.get("name") || "").trim().toLowerCase();
 
-document.getElementById("name").textContent = decodeURIComponent(params.get("name") || "");
+document.getElementById("name").textContent =
+  decodeURIComponent(params.get("name") || "");
 
-// ---------- CLEAN ----------
+/* ================= HELPERS ================= */
+
 function cleanNum(val) {
   return Number((val || "").replace(/\r/g, "").trim()) || 0;
 }
 
-// ---------- LOAD ----------
+function extractMetrics(row) {
+  return {
+    strength: cleanNum(row[6]) + cleanNum(row[8]),
+    power: cleanNum(row[10]) + cleanNum(row[12]),
+    explosive: cleanNum(row[14]) + cleanNum(row[16]),
+    agility: cleanNum(row[18]) + cleanNum(row[20]),
+    speed: cleanNum(row[22]) + cleanNum(row[24])
+  };
+}
+
+function norm(val) {
+  return Math.min(val / 5, 100);
+}
+
+/* ================= LOAD DATA ================= */
+
 Papa.parse(CSV_URL + "&t=" + Date.now(), {
   download: true,
   skipEmptyLines: true,
@@ -79,18 +101,10 @@ Papa.parse(CSV_URL + "&t=" + Date.now(), {
     const rows = results.data;
 
     let athlete = null;
-    const others = [];
 
     rows.forEach(row => {
       const name = (row[0] || "").trim().toLowerCase();
-
-      if (!name) return;
-
-      if (name === selectedName) {
-        athlete = row;
-      } else {
-        others.push(row);
-      }
+      if (name === selectedName) athlete = row;
     });
 
     if (!athlete) {
@@ -99,20 +113,20 @@ Papa.parse(CSV_URL + "&t=" + Date.now(), {
     }
 
     ALL_ROWS = rows;
-CURRENT_ATHLETE = athlete;
-updateComparison();
+    CURRENT_ATHLETE = athlete;
+
+    const score = cleanNum(athlete[30]);
+
+    document.getElementById("score").innerHTML =
+      `<span style="font-size:18px;">Score: ${score}</span>`;
+
+    updateComparison(); // 🔥 initial render
+  }
+});
+
+/* ================= COMPARISON ENGINE ================= */
 
 function updateComparison() {
-
-  function extractMetrics(row) {
-    return {
-      strength: cleanNum(row[6]) + cleanNum(row[8]),
-      power: cleanNum(row[10]) + cleanNum(row[12]),
-      explosive: cleanNum(row[14]) + cleanNum(row[16]),
-      agility: cleanNum(row[18]) + cleanNum(row[20]),
-      speed: cleanNum(row[22]) + cleanNum(row[24])
-    };
-  }
 
   const player = extractMetrics(CURRENT_ATHLETE);
 
@@ -137,7 +151,13 @@ function updateComparison() {
     });
   }
 
-  let totals = { speed:0, strength:0, power:0, agility:0, explosive:0 };
+  let totals = {
+    speed: 0,
+    strength: 0,
+    power: 0,
+    agility: 0,
+    explosive: 0
+  };
 
   group.forEach(r => {
     const m = extractMetrics(r);
@@ -161,62 +181,15 @@ function updateComparison() {
   renderRadarChart(player, avg);
 }
 
+/* ================= CHART ================= */
 
-    // ---------- EXTRACT FUNCTION ----------
-    function extractMetrics(row) {
-      const bench = cleanNum(row[6]);
-      const squat = cleanNum(row[8]);
-      const clean = cleanNum(row[10]);
-      const vertical = cleanNum(row[12]);
-      const broad = cleanNum(row[14]);
-      const medBall = cleanNum(row[16]);
-      const agilityRaw = cleanNum(row[18]);
-      const situps = cleanNum(row[20]);
-      const dash10 = cleanNum(row[22]);
-      const dash40 = cleanNum(row[24]);
-
-      return {
-        strength: bench + squat,
-        power: clean + vertical,
-        explosive: broad + medBall,
-        agility: agilityRaw + situps,
-        speed: dash10 + dash40
-      };
-    }
-
-    // ---------- ATHLETE ----------
-    const athleteMetrics = extractMetrics(athlete);
-
-    const score = cleanNum(athlete[30]);
-
-    // ---------- TEAM AVERAGE ----------
-    
-ALL_ROWS = rows;
-CURRENT_ATHLETE = athlete;
-
-updateComparison();
-   
-
-    
-
-    // ---------- UI ----------
-    document.getElementById("score").innerHTML = `
-      <span style="font-size:18px;">Score: ${score}</span>
-    `;
-
-    
-
-  }
-});
-
-// ---------- CHART ----------
 function renderRadarChart(player, avg) {
 
   const ctx = document.getElementById("radarChart");
 
   if (window.radarChart && typeof window.radarChart.destroy === "function") {
-  window.radarChart.destroy();
-}
+    window.radarChart.destroy();
+  }
 
   window.radarChart = new Chart(ctx, {
     type: "radar",
@@ -233,11 +206,10 @@ function renderRadarChart(player, avg) {
             norm(player.explosive)
           ],
           backgroundColor: "rgba(59,130,246,0.4)",
-          borderColor: "#3b82f6",
-          borderWidth: 2
+          borderColor: "#3b82f6"
         },
         {
-          label: "Team Avg",
+          label: "Comparison",
           data: [
             norm(avg.speed),
             norm(avg.strength),
@@ -246,8 +218,7 @@ function renderRadarChart(player, avg) {
             norm(avg.explosive)
           ],
           backgroundColor: "rgba(255,255,255,0.15)",
-          borderColor: "#aaa",
-          borderWidth: 2
+          borderColor: "#aaa"
         }
       ]
     },
@@ -255,31 +226,18 @@ function renderRadarChart(player, avg) {
       responsive: true,
       plugins: {
         legend: {
-          labels: {
-            color: "#ccc"
-          }
+          labels: { color: "#ccc" }
         }
       },
       scales: {
         r: {
           beginAtZero: true,
           suggestedMax: 100,
-          ticks: { display: false },
-          grid: { color: "rgba(255,255,255,0.08)" },
-          angleLines: { color: "rgba(255,255,255,0.1)" },
-          pointLabels: {
-            color: "#aaa",
-            font: { size: 13, weight: "600" }
-          }
+          ticks: { display: false }
         }
       }
     }
   });
-}
-
-// ---------- NORMALIZE ----------
-function norm(val) {
-  return Math.min(val / 5, 100);
 }
 
 </script>
