@@ -102,10 +102,10 @@ function scale(val, min, max) {
 
 function normalizeMetrics(m) {
   return {
-    speed: scale(m.speed, 0, 100),
-    power: scale(m.power, 100, 400),
-    strength: scale(m.strength, 200, 800),
-    explosive: scale(m.explosive, 50, 300)
+    speed: scale(m.speed, 10, 100),        // better spread
+    power: scale(m.power, 100, 300),       // FIXED
+    strength: scale(m.strength, 200, 700), // slightly tighter
+    explosive: scale(m.explosive, 100, 300)
   };
 }
 
@@ -276,14 +276,12 @@ function renderRankings(playerMetrics) {
 
   function card(label, data) {
     return `
-      <div class="card">
+      <div class="card tier-${getTier(data.percentile)}">
         <h3>${label}</h3>
         <p>#${data.rank} / ${data.total}</p>
-        <p style="color:#3b82f6; font-weight:600;">
-          <span class="tier-${getTier(data.percentile)}">
+        <p class="tier-${getTier(data.percentile)}">
   Top ${data.percentile}%
-</span>
-        </p>
+</p>
       </div>
     `;
   }
@@ -362,11 +360,11 @@ pointBorderColor: "#fff",
             a.power,
             a.explosive
     ],
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderColor: "#888",
-    borderWidth: 2,
-    pointRadius: 0
-  }
+    borderColor: "#22c55e", // green
+  backgroundColor: "rgba(34,197,94,0.15)",
+  borderWidth: 2,
+  pointRadius: 3
+}
 ]
 
     },
