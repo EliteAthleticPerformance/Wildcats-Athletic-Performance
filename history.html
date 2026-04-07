@@ -87,11 +87,22 @@ function extractMetrics(row) {
   const dash10 = cleanNum(row[26]);
   const dash40 = cleanNum(row[28]);
 
+  /* ---------- CATEGORY AVERAGES ---------- */
+
+  const speedTests = [dash10, dash40, agility].filter(v => v > 0);
+  const strengthTests = [bench, squat, situps].filter(v => v > 0);
+  const powerTests = [clean].filter(v => v > 0);
+  const explosiveTests = [vertical, broad, medBall].filter(v => v > 0);
+
+  function avg(arr) {
+    return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+  }
+
   return {
-    speed: dash10 + dash40 + proAgility,          // ✅ UPDATED
-    power: clean,                                 // ✅ UPDATED (no longer combined)
-    strength: squat + bench + situps,             // ✅ UPDATED
-    explosive: broad + vertical + medBall         // ✅ UPDATED
+    speed: avg(speedTests),
+    strength: avg(strengthTests),
+    power: avg(powerTests),
+    explosive: avg(explosiveTests)
   };
 }
 
