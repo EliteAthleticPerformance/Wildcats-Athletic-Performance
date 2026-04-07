@@ -173,6 +173,8 @@ function updateComparison() {
   const player = extractMetrics(CURRENT_ATHLETE);
   const dominant = getDominantTrait(player);
 
+  const scoreVal = cleanNum(CURRENT_ATHLETE[30]); // ✅ ADD THIS
+
   document.getElementById("score").innerHTML = `
   <span style="font-size:18px;">Score: ${scoreVal}</span>
   <div style="margin-top:8px; color:#3b82f6; font-weight:600;">
@@ -222,7 +224,7 @@ function updateComparison() {
     totals.explosive += m.explosive;
   });
 
-  const count = group.length || 1;
+  if (group.length === 0) group = [CURRENT_ATHLETE];
 
   const avg = {
   speed: totals.speed / count,
@@ -317,6 +319,8 @@ gradient.addColorStop(1, "rgba(59,130,246,0.05)");
     backgroundColor: gradient,
     borderColor: getColor(cleanNum(CURRENT_ATHLETE[30])),
     borderWidth: 3,
+borderColor: getColor(cleanNum(CURRENT_ATHLETE[30])),
+pointBorderColor: "#fff",
     pointBackgroundColor: getColor(cleanNum(CURRENT_ATHLETE[30])),
     pointRadius: 5,
     pointHoverRadius: 7
