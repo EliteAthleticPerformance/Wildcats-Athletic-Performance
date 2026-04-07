@@ -100,14 +100,7 @@ function scale(val, min, max) {
   return Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
 }
 
-function normalizeMetrics(m) {
-  return {
-    speed: scale(m.speed, 10, 100),        // better spread
-    power: scale(m.power, 100, 300),       // FIXED
-    strength: scale(m.strength, 200, 700), // slightly tighter
-    explosive: scale(m.explosive, 100, 300)
-  };
-}
+
 
 function calculateRankings(playerMetrics) {
 
@@ -358,8 +351,8 @@ return "#3b82f6";
 
 function renderRadarChart(player, avg) {
 
-  const p = normalizeMetrics(player);
-const a = normalizeMetrics(avg);
+  const p = player;
+const a = avg;
 
   const canvas = document.getElementById("radarChart");
 const ctx = canvas.getContext("2d");
