@@ -90,7 +90,7 @@ async function loadHeader() {
   if (container.innerHTML.trim() !== "") return;
 
   try {
-    const res = await fetch("components/header.html");
+    const res = await fetch("/Wildcats-Athletic-Performance/components/header.html");
 
     if (!res.ok) throw new Error("Header fetch failed");
 
@@ -115,8 +115,7 @@ function initHeaderUI() {
   setupResize();
 }
 
-// Ensure it runs at the right time
-document.addEventListener("DOMContentLoaded", loadHeader);
+
 
 /* ========================================
    📏 RESPONSIVE TITLE SCALING
