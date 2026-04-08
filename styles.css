@@ -72,6 +72,23 @@ letter-spacing: 3px;
 text-shadow: 0 0 12px rgba(0,102,255,0.7);
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 16px;
+}
+
+.header-right a:hover {
+  color: #ffffff;
+}
+
+
+
 /* ===== 5. CARD SYSTEM ===== */
 .card {
 background: linear-gradient(145deg, #111, #1a1a1a);
