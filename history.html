@@ -79,6 +79,7 @@ function extractMetrics(row) {
   const bench = cleanNum(row[8]);
   const squat = cleanNum(row[11]);
   const clean = cleanNum(row[14]);
+  console.log("POWER VALUE:", clean);
   const vertical = cleanNum(row[16]);
   const broad = cleanNum(row[18]);
   const medBall = cleanNum(row[20]);
@@ -154,20 +155,14 @@ const allMetrics = validRows.map(r => extractMetrics(r));
 
 /* ================= LOAD DATA ================= */
 
-Papa.parse(CSV_URL + "&t=" + Date.now(), {
+Papa.parse(CSV_URL, {
   download: true,
-  skipEmptyLines: true,
-
+  header: false,
   complete: function(results) {
-
     const rows = results.data;
-
-    let athlete = null;
-
-    rows.forEach(row => {
-      const name = (row[0] || "").trim().toLowerCase();
-      if (name === selectedName) athlete = row;
-    });
+    // use rows instead of manual split
+  }
+});
 
     if (!athlete) {
       document.getElementById("score").textContent = "No data found";
