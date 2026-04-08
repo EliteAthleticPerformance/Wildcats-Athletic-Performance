@@ -177,14 +177,25 @@ CURRENT_ATHLETE = bestRow;
     
 
     function getBestRow(rows, athleteName) {
+
+  const normalize = str =>
+    (str || "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const target = normalize(athleteName);
+
   const athleteRows = rows.filter(r =>
-    (r[0] || "").toLowerCase().trim() === athleteName
+    normalize(r[0]) === target
   );
+
+  console.log("MATCHED ROWS:", athleteRows); // 👈 DEBUG
 
   if (!athleteRows.length) return null;
 
   return athleteRows.reduce((best, current) => {
-    const bestScore = cleanNum(best[31]);     // total score column
+    const bestScore = cleanNum(best[31]);
     const currentScore = cleanNum(current[31]);
 
     return currentScore > bestScore ? current : best;
