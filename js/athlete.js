@@ -1,4 +1,4 @@
-<script>
+
 
 let athletes = [];
 let currentLetter = "ALL";
@@ -169,4 +169,3 @@ function goToAthlete(name) {
   window.location.href = `history.html?name=${encoded}`;
 }
 
-</script>
