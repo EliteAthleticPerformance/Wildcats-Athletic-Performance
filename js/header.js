@@ -20,25 +20,38 @@ document.addEventListener("DOMContentLoaded", () => {
    ======================================== */
 
 function updateStats() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-    const valid = raw.filter(a =>
-      a && a.name && a.name.trim() !== ""
-    );
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
 
-    const totalTests = valid.length;
+  Papa.parse(CSV_URL, {
+    download: true,
+    header: false,
+    complete: function(results) {
 
-    const uniqueAthletes = new Set(
-      valid.map(a => a.name.trim())
-    ).size;
+      const rows = results.data || [];
 
-    updateElement("totalTests", totalTests);
-    updateElement("totalAthletes", uniqueAthletes);
+      // Remove empty rows
+      const cleanRows = rows.filter(r => (r[0] || "").trim() !== "");
 
-  } catch (err) {
-    console.warn("Stats error:", err);
-  }
+      // TOTAL TESTS
+      const totalTests = cleanRows.length;
+
+      // UNIQUE ATHLETES
+      const uniqueAthletes = new Set(
+        cleanRows.map(r => (r[0] || "").trim())
+      ).size;
+
+      console.log("LIVE STATS:", { totalTests, uniqueAthletes });
+
+      // 🔥 Animate numbers
+      animateValue("totalTests", totalTests, 800);
+      animateValue("totalAthletes", uniqueAthletes, 800);
+
+    },
+    error: function(err) {
+      console.error("CSV LOAD ERROR:", err);
+    }
+  });
 }
 
 /* ========================================
@@ -199,4 +212,37 @@ function navigate(url) {
 
 function clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
+}
+
+
+function animateValue(id, end, duration = 800) {
+
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  let start = 0;
+  const range = end - start;
+
+  if (range === 0) {
+    el.textContent = end;
+    return;
+  }
+
+  const startTime = performance.now();
+
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    const value = Math.floor(progress * range + start);
+    el.textContent = value;
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = end; // ensure exact final value
+    }
+  }
+
+  requestAnimationFrame(update);
 }
