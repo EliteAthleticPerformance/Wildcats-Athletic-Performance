@@ -32,7 +32,6 @@ Papa.parse(CSV_URL + "&t=" + Date.now(), {
     const map = {};
 
     data.slice(1).forEach(row => {
-
       const name = (row[0] || "").replace(/"/g, "").trim();
       const score = Number(row[row.length - 1]);
 
@@ -50,9 +49,8 @@ Papa.parse(CSV_URL + "&t=" + Date.now(), {
 
     athletes.sort((a, b) => b.score - a.score);
 
-    // ✅ CORRECT ORDER
-    renderAlphabet();
-    render(athletes);
+    renderAlphabet();   // ✅ FIRST
+    render(athletes);   // ✅ SECOND
   }
 });
 
@@ -92,18 +90,6 @@ function render(list) {
   grid.appendChild(fragment);
 }
 
-/* ---------- SEARCH ---------- */
-
-function filterAthletes() {
-  const term = document.getElementById("search").value.toLowerCase();
-
-  const filtered = athletes.filter(a =>
-    a.name.toLowerCase().includes(term)
-  );
-
-  render(filtered);
-}
-
 /* ---------- A-Z FILTER ---------- */
 
 function renderAlphabet() {
@@ -135,7 +121,6 @@ function renderAlphabet() {
   });
 }
 
-/* ✅ THIS WAS MISSING */
 function filterByLetter(letter) {
   currentLetter = letter;
   setActiveLetter(letter);
@@ -163,6 +148,18 @@ function setActiveLetter(letter) {
       el.classList.add("active");
     }
   });
+}
+
+/* ---------- SEARCH ---------- */
+
+function filterAthletes() {
+  const term = document.getElementById("search").value.toLowerCase();
+
+  const filtered = athletes.filter(a =>
+    a.name.toLowerCase().includes(term)
+  );
+
+  render(filtered);
 }
 
 /* ---------- NAV ---------- */
