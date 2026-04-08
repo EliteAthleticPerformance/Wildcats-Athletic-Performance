@@ -1,22 +1,5 @@
-
-
 let athletes = [];
 let currentLetter = "ALL";
-
-/* ---------- HELPERS ---------- */
-
-function clean(val) {
-  if (!val || val === "NaN") return "-";
-  return val;
-}
-
-function getTag(score) {
-  score = Number(score);
-  if (score >= 800) return ["elite", "🔥 Elite"];
-  if (score >= 650) return ["strong", "💪 Strong"];
-  if (score >= 500) return ["developing", "⚡ Developing"];
-  return ["needs", "📈 Needs Work"];
-}
 
 /* ---------- LOAD DATA ---------- */
 
@@ -49,12 +32,22 @@ Papa.parse(CSV_URL + "&t=" + Date.now(), {
 
     athletes.sort((a, b) => b.score - a.score);
 
-    renderAlphabet();   // ✅ FIRST
-    render(athletes);   // ✅ SECOND
+    renderAlphabet();
+    render(athletes);
   }
 });
 
-/* ---------- RENDER ---------- */
+/* ---------- HELPERS ---------- */
+
+function getTag(score) {
+  score = Number(score);
+  if (score >= 850) return ["elite", "🔥 Elite"];
+  if (score >= 700) return ["strong", "💪 Strong"];
+  if (score >= 550) return ["developing", "⚡ Developing"];
+  return ["needs", "📈 Needs Work"];
+}
+
+/* ---------- RENDER GRID ---------- */
 
 function render(list) {
   const grid = document.getElementById("athleteGrid");
@@ -66,22 +59,14 @@ function render(list) {
     const [tagClass, tagText] = getTag(a.score);
 
     const card = document.createElement("div");
-    card.className = `card ${tagClass}`;
+    card.className = `card athlete-card ${tagClass}`;
+
     card.onclick = () => goToAthlete(a.name);
 
     card.innerHTML = `
-      <div class="card-header">
-        <div>
-          <h3>${clean(a.name)}</h3>
-          <p class="score">Score: ${clean(a.score)}</p>
-        </div>
-      </div>
-
-      <div class="card-footer">
-        <div class="tag ${tagClass}">
-          ${tagText}
-        </div>
-      </div>
+      <h3>${a.name}</h3>
+      <p class="score">Score: ${a.score}</p>
+      <div class="tag ${tagClass}">${tagText}</div>
     `;
 
     fragment.appendChild(card);
@@ -90,20 +75,18 @@ function render(list) {
   grid.appendChild(fragment);
 }
 
-/* ---------- A-Z FILTER ---------- */
+/* ---------- A-Z BAR ---------- */
 
 function renderAlphabet() {
   const bar = document.getElementById("alphabetBar");
   if (!bar) return;
 
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
   const counts = {};
 
   athletes.forEach(a => {
-    const last = (a.name.split(",")[0] || "").trim().toUpperCase()[0];
-    if (!counts[last]) counts[last] = 0;
-    counts[last]++;
+    const last = a.name.split(",")[0].trim().toUpperCase()[0];
+    counts[last] = (counts[last] || 0) + 1;
   });
 
   bar.innerHTML = `
@@ -120,6 +103,8 @@ function renderAlphabet() {
     `;
   });
 }
+
+/* ---------- FILTER ---------- */
 
 function filterByLetter(letter) {
   currentLetter = letter;
@@ -139,7 +124,7 @@ function showAll() {
   render(athletes);
 }
 
-/* ---------- ACTIVE LETTER UI ---------- */
+/* ---------- ACTIVE UI ---------- */
 
 function setActiveLetter(letter) {
   document.querySelectorAll(".letter").forEach(el => {
@@ -165,7 +150,5 @@ function filterAthletes() {
 /* ---------- NAV ---------- */
 
 function goToAthlete(name) {
-  const encoded = encodeURIComponent(name);
-  window.location.href = `history.html?name=${encoded}`;
+  window.location.href = `history.html?name=${encodeURIComponent(name)}`;
 }
-

@@ -461,6 +461,70 @@ border-color: var(--accent);
   }
 }
 
+/* TITLE */
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+/* CENTER */
+.center {
+  text-align: center;
+}
+
+/* ALPHABET BAR */
+.alphabet-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  position: sticky;
+  top: 70px;
+  z-index: 10;
+  padding: 10px 0;
+  background: black;
+}
+
+.letter {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.letter:hover {
+  background: #222;
+}
+
+.letter.active {
+  background: #2563eb;
+  color: white;
+}
+
+/* ATHLETE CARDS */
+.athlete-card {
+  text-align: center;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.athlete-card:hover {
+  transform: translateY(-4px);
+}
+
+.score {
+  margin: 8px 0;
+  font-weight: bold;
+}
+
+.tag {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
 /* ===== 14. MOBILE ===== */
 @media (max-width: 768px) {
 

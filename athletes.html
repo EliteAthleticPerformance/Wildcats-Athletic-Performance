@@ -6,49 +6,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Athletes | Wildcats Performance</title>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
 <link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 
 <body>
 
-<!-- ===== HEADER ===== -->
+<!-- HEADER -->
 <div id="header-placeholder"></div>
 <script src="js/header.js"></script>
-<script src="js/athlete.js"></script>
 
-<!-- ===== MAIN ===== -->
 <main>
 
- <!-- TITLE -->
-<section class="section" style="text-align:center;">
-  <h1>👥 Athletes</h1>
-</section>
+  <!-- TITLE -->
+  <section class="section center">
+    <h1 class="page-title">👥 Athletes</h1>
+  </section>
 
-<!-- A-Z FILTER -->
-<section class="section" style="text-align:center;">
-  <div id="alphabetBar" class="alphabet-bar"></div>
-</section>
+  <!-- A-Z BAR -->
+  <section class="section">
+    <div id="alphabetBar" class="alphabet-bar"></div>
+  </section>
 
-<!-- SEARCH -->
-<section class="section">
-  <input 
-    type="text" 
-    id="search" 
-    class="search"
-    placeholder="Search athletes..."
-    onkeyup="filterAthletes()"
-  >
-</section>
+  <!-- SEARCH -->
+  <section class="section">
+    <input 
+      type="text" 
+      id="search" 
+      class="search"
+      placeholder="Search athletes..."
+      onkeyup="filterAthletes()"
+    >
+  </section>
 
-<!-- GRID -->
-<section class="section">
-  <div id="athleteGrid" class="grid grid-auto"></div>
-</section>
+  <!-- GRID -->
+  <section class="section">
+    <div id="athleteGrid" class="grid grid-auto"></div>
+  </section>
 
 </main>
 
-
+<!-- SCRIPTS -->
+<script src="js/athlete.js"></script>
 
 </body>
 </html>
