@@ -327,6 +327,21 @@ outline: none;
 border-color: var(--accent);
 }
 
+.header {
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: linear-gradient(to right, #000, #444, #000);
+  border-bottom: 2px solid #fff;
+}
+
+.logo {
+  height: 60px;
+  width: auto;
+}
+
 /* ===== 14. MOBILE ===== */
 @media (max-width: 768px) {
 

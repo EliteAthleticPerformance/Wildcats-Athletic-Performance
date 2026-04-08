@@ -126,7 +126,7 @@ function scaleHeaderText() {
   const header = document.getElementById("schoolHeader");
   const left = document.querySelector(".header-left");
   const right = document.querySelector(".header-right");
-  const title = document.getElementById("headerMotto");
+  const title = document.querySelector(".title");
 
   if (!header || !left || !right || !title) return;
 
