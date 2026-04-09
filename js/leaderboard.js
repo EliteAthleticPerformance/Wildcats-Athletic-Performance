@@ -121,7 +121,7 @@ function processData(rows) {
 
     sit: idx("Sit-Ups"),
 
-    score: idx("Total Athletic"),
+    score: idx("Total Athletic Performance"),
     lift: idx("3 Lift Projected")
   };
 
@@ -156,7 +156,11 @@ function processData(rows) {
     lift: bench + squat + clean
   };
 
-}).filter(a => a.name && !a.name.includes("{"));
+}).filter(a =>
+  a.name &&
+  typeof a.name === "string" &&
+  a.name.includes(",") // ensures "Last, First" format
+);
 
   // GROUP
   grouped = {};
