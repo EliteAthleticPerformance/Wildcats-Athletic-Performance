@@ -260,10 +260,10 @@ function formatDate(date) {
 
   const d = new Date(date);
 
-  return d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short"
-  });
+  const month = d.toLocaleString("en-US", { month: "short" });
+  const year = d.getFullYear();
+
+  return `${year} ${month}`;
 }
 
 
