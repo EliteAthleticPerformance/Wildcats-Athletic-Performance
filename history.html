@@ -215,7 +215,16 @@ function renderRadarChart(player, avg) {
 
   const ctx = document.getElementById("radarChart");
 
-  if (window.radarChart) {
+  if (window.radarChart && typeof window.radarChart.destroy === "function") {
+  window.radarChart.destroy();
+}
+
+  function renderRadarChart(player, avg) {
+
+  const ctx = document.getElementById("radarChart");
+
+  // ✅ SAFE DESTROY (FIXES YOUR ERROR)
+  if (window.radarChart && typeof window.radarChart.destroy === "function") {
     window.radarChart.destroy();
   }
 
@@ -226,16 +235,27 @@ function renderRadarChart(player, avg) {
       datasets: [
         {
           label: "Athlete",
-          data: [player.speed, player.strength, player.power, player.explosive],
+          data: [
+            player.speed,
+            player.strength,
+            player.power,
+            player.explosive
+          ],
           borderWidth: 3
         },
         {
           label: "Comparison",
-          data: [avg.speed, avg.strength, avg.power, avg.explosive]
+          data: [
+            avg.speed,
+            avg.strength,
+            avg.power,
+            avg.explosive
+          ]
         }
       ]
     },
     options: {
+      responsive: true,
       scales: {
         r: {
           beginAtZero: true,
