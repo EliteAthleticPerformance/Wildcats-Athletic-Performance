@@ -874,6 +874,35 @@ th.sort-desc::after {
   letter-spacing: 0.5px;
 }
 
+.tier {
+  font-size: 11px;
+  margin-top: 4px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.tier-elite {
+  color: #22c55e;
+}
+
+.tier-strong {
+  color: #3b82f6;
+}
+
+.tier-average {
+  color: #f59e0b;
+}
+
+.tier-needs {
+  color: #ef4444;
+}
+
+.podium-card .tier {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 /* MOBILE STACK */
 @media (max-width: 768px) {
   .leaderboard-grid {

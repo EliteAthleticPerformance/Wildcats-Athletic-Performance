@@ -255,6 +255,7 @@ function renderTable(data, tableId, type) {
 }
 
 function renderPodium(data) {
+    
   const container = document.getElementById("podium");
   if (!container) return;
 
@@ -271,10 +272,12 @@ function renderPodium(data) {
   const medals = ["🥇", "🥈", "🥉"];
 
   container.innerHTML = top3.map((a, i) => `
+  const tier = getPerformanceTier(a.score, a.lift);
     <div class="podium-card podium-${i + 1}">
       <div class="podium-rank">${medals[i]}</div>
       <div class="podium-name">${a.name}</div>
       <div class="podium-score">${Math.round(a.score)}</div>
+      <div class="tier ${tier.class}">${tier.label}</div>
       <div style="font-size:12px; opacity:0.6;">Performance</div>
     </div>
   `).join("");
@@ -294,17 +297,33 @@ function formatDate(date) {
   return `${year} ${month}`;
 }
 
+function getPerformanceTier(score, lift) {
+  if (!score || !lift) return "";
+
+  const pct = score / lift;
+
+  if (pct >= 0.89) return { label: "Elite", class: "tier-elite" };
+  if (pct >= 0.79) return { label: "Strong", class: "tier-strong" };
+  if (pct >= 0.69) return { label: "Average", class: "tier-average" };
+
+  return { label: "Needs Work", class: "tier-needs" };
+}
 
 function createRow(a, index, type) {
+
+  const tier = getPerformanceTier(a.score, a.lift);
 
   const tr = document.createElement("tr");
 
   tr.innerHTML = `
-    <td class="${medal(index)}">${index + 1}</td>
-    <td>${a.name}</td>
-    <td>${safe(a[type])}</td>
-    <td>${formatDate(type === "lift" ? a.liftDate : a.scoreDate)}</td>
-  `;
+  <td class="${medal(index)}">${index + 1}</td>
+  <td>
+    ${a.name}
+    <div class="tier ${tier.class}">${tier.label}</div>
+  </td>
+  <td>${safe(a[type])}</td>
+  <td>${formatDate(type === "lift" ? a.liftDate : a.scoreDate)}</td>
+`;
 
   const detail = document.createElement("tr");
   detail.style.display = "none";
