@@ -173,8 +173,8 @@ function getBestRow(rows, athleteName) {
   if (!athleteRows.length) return null;
 
   return athleteRows.reduce((best, current) => {
-    const bestScore = cleanNum(best[30]);
-    const currentScore = cleanNum(current[30]);
+    const bestScore = cleanNum(best[34]);
+    const currentScore = cleanNum(current[34]);
 
     return currentScore > bestScore ? current : best;
   });
