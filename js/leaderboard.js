@@ -122,8 +122,7 @@ function processData(rows) {
     sit: idx("Sit-Ups"),
 
     score: idx("Total Athletic Performance"),
-    lift: toNumber(row[i.lift]) || (bench + squat + clean)
-  };
+    lift: idx("3 Lift Projected Max Total")
 
   const parsed = rows.slice(1).map(row => {
 
@@ -153,7 +152,7 @@ function processData(rows) {
     score: toNumber(row[i.score]),
 
     // 🔥 CORRECT
-    lift: bench + squat + clean
+    lift: toNumber(row[i.lift]) || (bench + squat + clean)
   };
 
 }).filter(a =>
