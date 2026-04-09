@@ -798,6 +798,7 @@ th.sort-desc::after {
 /* ===== PODIUM ===== */
 .podium-container {
   display: flex;
+  flex-direction: row;          /* 🔥 force horizontal */
   justify-content: center;
   align-items: flex-end;
   gap: 20px;
@@ -851,9 +852,10 @@ th.sort-desc::after {
 /* MOBILE */
 @media (max-width: 768px) {
   .podium-container {
-    flex-direction: column;
+    flex-direction: column;   /* mobile only */
     align-items: center;
   }
+}
 
   .podium-card {
     width: 90%;
