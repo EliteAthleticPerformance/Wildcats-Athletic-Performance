@@ -722,15 +722,18 @@ th.sort-desc::after {
 
 .leaderboard-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(420px, 1fr));
+  grid-template-columns: 1fr 1fr;   /* 👈 equal columns */
   gap: 30px;
-  justify-content: center;
-}
+  max-width: 1200px;                /* 👈 keeps layout centered */
+  margin: 0 auto;
 
 .leaderboard-card {
-  background: #111;
-  border-radius: 16px;
-  padding: 24px;   /* ⬅ bigger padding */
+  width: 100%;
+  min-width: 0;        /* 👈 prevents overflow issues */
+}
+
+.leaderboard-table {
+  width: 100%;
 }
 
 .leaderboard-card {
