@@ -660,6 +660,59 @@ th.sort-desc::after {
   font-weight: 800;
   text-shadow: 0 0 10px rgba(0,255,200,0.8);
 }
+/* MOBILE CARDS */
+.mobile-cards {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  #testingTable {
+    display: none;
+  }
+
+  .mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .athlete-card {
+    background: #111;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .name {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .meta {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .pr {
+    color: gold;
+    font-weight: bold;
+  }
+}
+
 
 /* ===== 14. MOBILE ===== */
 @media (max-width: 768px) {

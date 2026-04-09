@@ -204,23 +204,31 @@ function computeAthletePRs(data) {
    RENDER TABLE
    ======================================== */
 
+   
+
+
+
 function renderTable(data) {
+  const isMobile = window.innerWidth <= 768;
+
+   if (isMobile) {
+  document.getElementById("testingTable").style.display = "none";
+  renderMobileCards(data);
+  return;
+} else {
+  document.getElementById("testingTable").style.display = "table";
+  document.getElementById("mobileCards").innerHTML = "";
+}
+
+window.addEventListener("resize", () => {
+  renderTable(tableData);
+});
+
   const tbody = document.querySelector("#testingTable tbody");
   tbody.innerHTML = "";
   const prMap = computeAthletePRs(data);
 
-  const max = {
-    bench: getColumnMax(data, "bench"),
-    squat: getColumnMax(data, "squat"),
-    clean: getColumnMax(data, "clean"),
-    vertical: getColumnMax(data, "vertical"),
-    broad: getColumnMax(data, "broad"),
-    med: getColumnMax(data, "med"),
-    agility: getColumnMax(data, "agility"),
-    situps: getColumnMax(data, "situps"),
-    ten: getColumnMax(data, "ten"),
-    forty: getColumnMax(data, "forty")
-  };
+  
 
   data.forEach(a => {
   const tr = document.createElement("tr");
@@ -251,8 +259,72 @@ function renderTable(data) {
 
     tbody.appendChild(tr);
   });
+
+  
 }
 
+function renderMobileCards(data) {
+  const container = document.getElementById("mobileCards");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const prMap = computeAthletePRs(data);
+
+  data.forEach(a => {
+    const prs = prMap[a.name];
+
+    const card = document.createElement("div");
+    card.className = "athlete-card";
+
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="name">${a.name}</div>
+        <div class="meta">${a.grade} | ${a.group}</div>
+      </div>
+
+      <div class="card-grid">
+        <div class="${a.bench === prs.bench ? 'pr' : ''}">
+          Bench: ${format(a.bench)}
+        </div>
+        <div class="${a.squat === prs.squat ? 'pr' : ''}">
+          Squat: ${format(a.squat)}
+        </div>
+        <div class="${a.clean === prs.clean ? 'pr' : ''}">
+          Clean: ${format(a.clean)}
+        </div>
+
+        <div class="${a.vertical === prs.vertical ? 'pr' : ''}">
+          Vert: ${format(a.vertical)}
+        </div>
+
+        <div class="${a.broad === prs.broad ? 'pr' : ''}">
+          Broad: ${formatDecimal(a.broad)}
+        </div>
+
+        <div class="${a.med === prs.med ? 'pr' : ''}">
+          Med: ${formatDecimal(a.med)}
+        </div>
+
+        <div class="${a.agility === prs.agility ? 'pr' : ''}">
+          Agility: ${formatDecimal(a.agility)}
+        </div>
+
+        <div class="${a.ten === prs.ten ? 'pr' : ''}">
+          10 yd: ${formatDecimal(a.ten)}
+        </div>
+
+        <div class="${a.forty === prs.forty ? 'pr' : ''}">
+          40 yd: ${formatDecimal(a.forty)}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+ 
 /* ========================================
    SORTING (UPGRADED)
    ======================================== */
