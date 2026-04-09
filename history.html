@@ -272,15 +272,15 @@ function renderRankings(player) {
     return "weak";
   }
 
-  function card(label, value) {
+  function card(label, value, index) {
     const level = getColor(value);
 
     return `
-      <div class="metric-card ${level}">
+      <div class="metric-card ${level}" style="animation-delay:${index * 0.08}s">
         <div class="metric-label">${label}</div>
-        <div class="metric-value">${value}</div>
+        <div class="metric-value" data-value="${value}">0</div>
         <div class="metric-bar">
-          <div class="metric-fill" style="width:${value}%"></div>
+          <div class="metric-fill" data-width="${value}%"></div>
         </div>
       </div>
     `;
@@ -288,12 +288,45 @@ function renderRankings(player) {
 
   container.innerHTML = `
     <div class="metrics-grid">
-      ${card("Speed", player.speed)}
-      ${card("Strength", player.strength)}
-      ${card("Power", player.power)}
-      ${card("Explosive", player.explosive)}
+      ${card("Speed", player.speed, 0)}
+      ${card("Strength", player.strength, 1)}
+      ${card("Power", player.power, 2)}
+      ${card("Explosive", player.explosive, 3)}
     </div>
   `;
+
+  animateMetrics(); // 🔥 trigger animation
+}
+
+function animateMetrics() {
+
+  // 🔢 COUNT-UP NUMBERS
+  document.querySelectorAll(".metric-value").forEach(el => {
+    const target = Number(el.dataset.value);
+    let current = 0;
+
+    const step = Math.ceil(target / 30);
+
+    const interval = setInterval(() => {
+      current += step;
+
+      if (current >= target) {
+        current = target;
+        clearInterval(interval);
+      }
+
+      el.textContent = current;
+    }, 20);
+  });
+
+  // 📊 BAR FILL ANIMATION
+  document.querySelectorAll(".metric-fill").forEach(el => {
+    const width = el.dataset.width;
+
+    setTimeout(() => {
+      el.style.width = width;
+    }, 200);
+  });
 }
 
 </script>

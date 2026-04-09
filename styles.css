@@ -592,6 +592,53 @@ border-color: var(--accent);
   grid-template-columns: repeat(4, 1fr);
 }
 
+/* ===== ENTRY ANIMATION ===== */
+.metric-card {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.4s ease forwards;
+}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== BAR START STATE ===== */
+.metric-fill {
+  width: 0%;
+}
+
+/* ===== GLOW EFFECTS ===== */
+
+.metric-card.elite {
+  box-shadow:
+    0 0 10px rgba(76, 175, 80, 0.6),
+    0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.metric-card.strong {
+  box-shadow:
+    0 0 8px rgba(33, 150, 243, 0.5);
+}
+
+.metric-card.developing {
+  box-shadow:
+    0 0 8px rgba(255, 152, 0, 0.5);
+}
+
+.metric-card.weak {
+  box-shadow:
+    0 0 8px rgba(244, 67, 54, 0.5);
+}
+
+/* ===== HOVER BOOST ===== */
+.metric-card:hover {
+  transform: translateY(-4px) scale(1.03);
+}
+
 /* ===== 14. MOBILE ===== */
 @media (max-width: 768px) {
 
