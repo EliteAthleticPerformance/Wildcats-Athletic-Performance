@@ -169,11 +169,51 @@ function processData(rows) {
 // ===============================
 // RENDER
 // ===============================
+
+function buildLeaderboardData(data) {
+  const map = {};
+
+  data.forEach(a => {
+    if (!map[a.name]) {
+      map[a.name] = {
+        name: a.name,
+        lift: 0,
+        score: 0,
+        liftDate: "",
+        scoreDate: ""
+      };
+    }
+
+    const athlete = map[a.name];
+
+    // 🏋️ BEST 3 LIFT
+    if (a.lift > athlete.lift) {
+      athlete.lift = a.lift;
+      athlete.liftDate = a.date;
+    }
+
+    // ⚡ BEST SCORE
+    if (a.score > athlete.score) {
+      athlete.score = a.score;
+      athlete.scoreDate = a.date;
+    }
+  });
+
+  return Object.values(map);
+}
+
 function render() {
 
   const search = document.getElementById("leaderboardSearch")?.value.toLowerCase() || "";
 
-  const filtered = athletes.filter(a =>
+  // 🔥 FLATTEN ALL TESTS (NOT JUST LATEST)
+  const allTests = Object.values(grouped).flat();
+
+  // 🔥 BUILD TRUE LEADERBOARD (BEST PER ATHLETE)
+  const leaderboardData = buildLeaderboardData(allTests);
+
+  // 🔍 APPLY SEARCH
+  const filtered = leaderboardData.filter(a =>
     a.name.toLowerCase().includes(search)
   );
 
