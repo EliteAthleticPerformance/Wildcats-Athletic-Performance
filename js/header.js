@@ -6,6 +6,15 @@ const STORAGE_KEY = "athleteScores";
 const SESSION_KEY = "coachAccess";
 const COACH_PASSWORD = "coach123";
 
+const links = document.querySelectorAll("#dropdownMenu a");
+
+links.forEach(link => {
+  if (window.location.href.includes(link.getAttribute("href"))) {
+    link.style.color = "gold";
+    link.style.fontWeight = "700";
+  }
+});
+
 /* ========================================
    INIT
    ======================================== */
@@ -128,7 +137,11 @@ function initHeaderUI() {
   setupResize();
 }
 
+const pageTitleEl = document.getElementById("pageTitle");
 
+if (pageTitleEl && window.pageTitle) {
+  pageTitleEl.textContent = window.pageTitle;
+}
 
 /* ========================================
    📏 RESPONSIVE TITLE SCALING
