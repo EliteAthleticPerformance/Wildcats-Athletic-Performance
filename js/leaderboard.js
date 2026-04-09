@@ -271,8 +271,11 @@ function renderPodium(data) {
 
   const medals = ["🥇", "🥈", "🥉"];
 
-  container.innerHTML = top3.map((a, i) => `
-  const tier = getPerformanceTier(a.score, a.lift);
+  container.innerHTML = top3.map((a, i) => {
+
+  const tier = getPerformanceTier(a.score, a.lift); // ✅ DEFINE IT HERE
+
+  return `
     <div class="podium-card podium-${i + 1}">
       <div class="podium-rank">${medals[i]}</div>
       <div class="podium-name">${a.name}</div>
@@ -280,7 +283,9 @@ function renderPodium(data) {
       <div class="tier ${tier.class}">${tier.label}</div>
       <div style="font-size:12px; opacity:0.6;">Performance</div>
     </div>
-  `).join("");
+  `;
+
+}).join("");
 }
 
 // ===============================
