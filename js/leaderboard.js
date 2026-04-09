@@ -255,6 +255,18 @@ function renderTable(data, tableId, type) {
 // ===============================
 // CREATE ROW
 // ===============================
+function formatDate(date) {
+  if (!date) return "-";
+
+  const d = new Date(date);
+
+  return d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short"
+  });
+}
+
+
 function createRow(a, index, type) {
 
   const tr = document.createElement("tr");
@@ -263,7 +275,7 @@ function createRow(a, index, type) {
     <td class="${medal(index)}">${index + 1}</td>
     <td>${a.name}</td>
     <td>${safe(a[type])}</td>
-    <td>${type === "lift" ? a.liftDate : a.scoreDate}</td>
+    <td>${formatDate(type === "lift" ? a.liftDate : a.scoreDate)}</td>
   `;
 
   const detail = document.createElement("tr");
