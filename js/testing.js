@@ -32,6 +32,7 @@ const formatDate = (raw) => {
 
 let tableData = [];
 let currentSort = { col: null, dir: "asc" };
+let currentLetter = "ALL";
 
 /* ========================================
    CSV PARSER (SAFE)
@@ -83,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadData() {
   try {
-    const res = await fetch(sheetURL + "?t=" + Date.now());
+    const res = await fetch(CSV_URL + "?t=" + Date.now());
     const text = await res.text();
 
     const parsed = parseCSV(text);
@@ -96,6 +97,7 @@ async function loadData() {
       .map(cols => buildAthlete(cols, getIndex))
       .filter(Boolean);
 
+    renderAlphabet();     
     renderTable(tableData);
 
     // Save for other pages
@@ -238,5 +240,63 @@ function setupSearch() {
     );
 
     renderTable(filtered);
+  });
+}
+
+/* ========================================
+   A-Z FILTER (NEW)
+   ======================================== */
+
+function renderAlphabet() {
+  const bar = document.getElementById("alphabetBar");
+  if (!bar) return;
+
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const counts = {};
+
+  tableData.forEach(a => {
+    const last = (a.name.split(",")[0] || "").trim().toUpperCase()[0];
+    counts[last] = (counts[last] || 0) + 1;
+  });
+
+  bar.innerHTML = `
+    <span class="letter active" onclick="showAll()">ALL (${tableData.length})</span>
+  `;
+
+  letters.forEach(letter => {
+    const count = counts[letter] || 0;
+
+    bar.innerHTML += `
+      <span class="letter" onclick="filterByLetter('${letter}')">
+        ${letter}${count ? ` (${count})` : ""}
+      </span>
+    `;
+  });
+}
+
+function filterByLetter(letter) {
+  currentLetter = letter;
+  setActiveLetter(letter);
+
+  const filtered = tableData.filter(a => {
+    const last = a.name.split(",")[0].trim().toUpperCase();
+    return last.startsWith(letter);
+  });
+
+  renderTable(filtered);
+}
+
+function showAll() {
+  currentLetter = "ALL";
+  setActiveLetter("ALL");
+  renderTable(tableData);
+}
+
+function setActiveLetter(letter) {
+  document.querySelectorAll(".letter").forEach(el => {
+    el.classList.remove("active");
+    if (el.textContent.startsWith(letter)) {
+      el.classList.add("active");
+    }
   });
 }
