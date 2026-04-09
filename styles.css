@@ -864,7 +864,7 @@ th.sort-desc::after {
 
 .podium-wrapper {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 60px;   /* 🔥 increase this */
 }
 
 .podium-title {
