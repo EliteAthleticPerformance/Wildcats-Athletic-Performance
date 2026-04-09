@@ -826,9 +826,41 @@ th.sort-desc::after {
 }
 
   .podium-card {
-    width: 90%;
-  }
+  width: 220px;          /* 🔥 forces side-by-side */
+  text-align: center;
+  padding: 20px;
+  border-radius: 14px;
 }
+
+.podium-1 {
+  order: 2;
+  transform: scale(1.15);
+  margin-bottom: 20px;   /* 👈 raises 1st place */
+}
+
+.podium-2 {
+  order: 1;
+  margin-bottom: 0px;
+}
+
+.podium-3 {
+  order: 3;
+  margin-bottom: 0px;
+}
+
+.podium-1 {
+  border: 2px solid gold;
+  box-shadow: 0 0 20px rgba(255,215,0,0.4);
+}
+
+.podium-2 {
+  border: 2px solid silver;
+}
+
+.podium-3 {
+  border: 2px solid #cd7f32;
+}
+
 
 .podium-wrapper {
   text-align: center;
