@@ -722,19 +722,33 @@ th.sort-desc::after {
 
 .leaderboard-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(420px, 1fr));
   gap: 30px;
-
-  max-width: 1200px;   /* 🔥 controls overall width */
-  margin: 40px auto;   /* 🔥 centers it */
-
-  padding: 0 20px;
+  justify-content: center;
 }
 
 .leaderboard-card {
   background: #111;
   border-radius: 16px;
   padding: 24px;   /* ⬅ bigger padding */
+}
+
+.leaderboard-card {
+  width: 100%;
+  max-width: 650px;   /* 👈 controls width */
+  margin: 0 auto;
+}
+
+.leaderboard-table td,
+.leaderboard-table th {
+  white-space: nowrap;
+}
+
+.podium-title {
+  font-size: 22px;
+  background: linear-gradient(90deg, gold, white);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .leaderboard-card h2 {
@@ -841,6 +855,18 @@ th.sort-desc::after {
   .podium-card {
     width: 90%;
   }
+}
+
+.podium-wrapper {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.podium-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  letter-spacing: 0.5px;
 }
 
 /* MOBILE STACK */
