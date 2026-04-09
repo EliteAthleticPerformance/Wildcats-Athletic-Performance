@@ -149,7 +149,13 @@ function buildAthlete(cols, getIndex) {
   return athlete;
 }
 
-
+function getColumnMax(data, key) {
+  return Math.max(
+    ...data
+      .map(a => Number(a[key]))
+      .filter(v => !isNaN(v) && v > 0)
+  );
+}
 
 /* ========================================
    RENDER TABLE
