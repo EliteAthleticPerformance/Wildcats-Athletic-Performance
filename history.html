@@ -74,44 +74,15 @@ function cleanNum(val) {
   return Number((val || "").replace(/\r/g, "").trim()) || 0;
 }
 
-function extractMetrics(row) {
+function extractMetrics(row, headers) {
 
-  const bench = cleanNum(row[8]);
-  const squat = cleanNum(row[11]);
-  const clean = cleanNum(row[14]);
-  console.log("FULL ROW:", row);
-  console.log("POWER VALUE:", clean);
-  const vertical = cleanNum(row[16]);
-  const broad = cleanNum(row[18]);
-  const medBall = cleanNum(row[20]);
-  const proAgility = cleanNum(row[22]);
-  const situps = cleanNum(row[24]);
-  const dash10 = cleanNum(row[26]);
-  const dash40 = cleanNum(row[28]);
-
-  /* ---------- CATEGORY AVERAGES ---------- */
-
-  const speedTests = [dash10, dash40].filter(v => v > 0);
-  const strengthTests = [bench, squat, situps].filter(v => v > 0);
-  const powerTests = [clean].filter(v => v > 0);
-  const explosiveTests = [
-  vertical,
-  broad,
-  medBall,
-  proAgility // ✅ MOVED HERE
-].filter(v => v > 0);
-
-  function avg(arr) {
-    return arr.length
-  ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)
-  : 0;
-  }
+  const getIndex = (name) => headers.indexOf(name);
 
   return {
-    speed: avg(speedTests),
-    strength: avg(strengthTests),
-    power: avg(powerTests),
-    explosive: avg(explosiveTests)
+    speed: cleanNum(row[getIndex("Speed Total")]),
+    strength: cleanNum(row[getIndex("Strength Total")]),
+    power: cleanNum(row[getIndex("Power Total")]),
+    explosive: cleanNum(row[getIndex("Explosive Total")])
   };
 }
 
