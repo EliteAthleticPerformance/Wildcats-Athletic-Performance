@@ -150,11 +150,49 @@ function buildAthlete(cols, getIndex) {
 }
 
 function getColumnMax(data, key) {
-  return Math.max(
-    ...data
-      .map(a => Number(a[key]))
-      .filter(v => !isNaN(v) && v > 0)
-  );
+  const values = data
+    .map(a => Number(a[key]))
+    .filter(v => !isNaN(v) && v > 0);
+
+  return values.length ? Math.max(...values) : 0;
+}
+
+function computeAthletePRs(data) {
+  const map = {};
+
+  data.forEach(a => {
+    if (!map[a.name]) {
+      map[a.name] = {
+        bench: 0,
+        squat: 0,
+        clean: 0,
+        vertical: 0,
+        broad: 0,
+        med: 0,
+        agility: Infinity, // lower is better
+        situps: 0,
+        ten: Infinity,     // lower is better
+        forty: Infinity    // lower is better
+      };
+    }
+
+    const p = map[a.name];
+
+    p.bench = Math.max(p.bench, a.bench);
+    p.squat = Math.max(p.squat, a.squat);
+    p.clean = Math.max(p.clean, a.clean);
+    p.vertical = Math.max(p.vertical, a.vertical);
+    p.broad = Math.max(p.broad, a.broad);
+    p.med = Math.max(p.med, a.med);
+    p.situps = Math.max(p.situps, a.situps);
+
+    // LOWER = BETTER
+    if (a.agility > 0) p.agility = Math.min(p.agility, a.agility);
+    if (a.ten > 0) p.ten = Math.min(p.ten, a.ten);
+    if (a.forty > 0) p.forty = Math.min(p.forty, a.forty);
+  });
+
+  return map;
 }
 
 /* ========================================
@@ -164,6 +202,7 @@ function getColumnMax(data, key) {
 function renderTable(data) {
   const tbody = document.querySelector("#testingTable tbody");
   tbody.innerHTML = "";
+  const prMap = computeAthletePRs(data);
 
   const max = {
     bench: getColumnMax(data, "bench"),
@@ -179,28 +218,31 @@ function renderTable(data) {
   };
 
   data.forEach(a => {
-    const tr = document.createElement("tr");
+  const tr = document.createElement("tr");
+
+  const prs = prMap[a.name];
 
     tr.innerHTML = `
-      <td>${a.name}</td>
-      <td>${a.date}</td>
-      <td>${a.hour}</td>
-      <td>${a.grade}</td>
-      <td>${format(a.weight)}</td>
-      <td>${a.group}</td>
+  <td>${a.name}</td>
+  <td>${a.date}</td>
+  <td>${a.hour}</td>
+  <td>${a.grade}</td>
+  <td>${format(a.weight)}</td>
+  <td>${a.group}</td>
 
-      <td class="${a.bench === max.bench ? 'pr' : ''}">${format(a.bench)}</td>
-      <td class="${a.squat === max.squat ? 'pr' : ''}">${format(a.squat)}</td>
-      <td class="${a.clean === max.clean ? 'pr' : ''}">${format(a.clean)}</td>
+  <td class="${a.bench === prs.bench ? 'pr' : ''}">${format(a.bench)}</td>
+  <td class="${a.squat === prs.squat ? 'pr' : ''}">${format(a.squat)}</td>
+  <td class="${a.clean === prs.clean ? 'pr' : ''}">${format(a.clean)}</td>
 
-      <td class="${Number(a.vertical) === max.vertical ? 'pr' : ''}">
-<td class="${Number(a.broad) === max.broad ? 'pr' : ''}">
-<td class="${Number(a.med) === max.med ? 'pr' : ''}">
-<td class="${Number(a.agility) === max.agility ? 'pr' : ''}">
-<td class="${Number(a.situps) === max.situps ? 'pr'  :  ''}">
-<td class="${Number(a.ten) === max.ten ? 'pr' : ''}">
-<td class="${Number(a.forty) === max.forty ? 'pr' : ''}">
-    `;
+  <td class="${a.vertical === prs.vertical ? 'pr' : ''}">${format(a.vertical)}</td>
+  <td class="${a.broad === prs.broad ? 'pr' : ''}">${format(a.broad)}</td>
+  <td class="${a.med === prs.med ? 'pr' : ''}">${format(a.med)}</td>
+
+  <td class="${a.agility === prs.agility ? 'pr' : ''}">${format(a.agility)}</td>
+  <td class="${a.situps === prs.situps ? 'pr' : ''}">${format(a.situps)}</td>
+  <td class="${a.ten === prs.ten ? 'pr' : ''}">${format(a.ten)}</td>
+  <td class="${a.forty === prs.forty ? 'pr' : ''}">${format(a.forty)}</td>
+`;
 
     tbody.appendChild(tr);
   });
