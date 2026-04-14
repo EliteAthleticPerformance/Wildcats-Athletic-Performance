@@ -96,7 +96,7 @@ async function loadHeader() {
   if (!container) return;
 
   try {
-    const res = await fetch("./components/header.html");
+    const res = await fetch("/Elite-Athletic-Performance/components/header.html");
 
     if (!res.ok) throw new Error("Header fetch failed");
 
