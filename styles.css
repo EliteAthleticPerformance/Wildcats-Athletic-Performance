@@ -47,114 +47,132 @@ text-align: center;
 }
 
 /* ========================================
-HEADER (BULLETPROOF)
+   🔥 ELITE HEADER
 ======================================== */
 
 .header {
-display: grid;
-grid-template-columns: auto 1fr auto;
-align-items: center;
-padding: 12px 24px;
-background: linear-gradient(90deg, #000, #444, #000);
-border-bottom: 2px solid #fff;
-position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 20px;
+
+  background: linear-gradient(
+    to right,
+    #0a0a0a,
+    #1a1a1a,
+    #0a0a0a
+  );
+
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+
+  backdrop-filter: blur(8px);
+
+  animation: fadeSlideDown 0.4s ease;
 }
 
-/* LEFT */
-.header-left {
-display: flex;
-align-items: center;
-}
-
-.logo {
-height: 60px;
-object-fit: contain;
-}
-
-/* CENTER */
-.header-center {
-text-align: center;
-}
-
-.title {
-font-size: 24px;
-font-weight: 700;
-letter-spacing: 2px;
-}
-
-.subtitle {
-font-size: 14px;
-opacity: 0.8;
-letter-spacing: 3px;
-}
-
-.page-title {
-font-size: 14px;
-opacity: 0.7;
-margin-top: 2px;
-}
-
-/* RIGHT */
+/* Layout Sections */
+.header-left,
 .header-right {
-display: flex;
-align-items: center;
-gap: 10px;
-position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* BUTTONS */
+.header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+/* Logo */
+.logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Title */
+.title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: transform 0.2s ease;
+}
+
+/* Buttons */
 .enter-btn,
 .logout-btn {
-background: #111;
-color: white;
-border: 1px solid #444;
-padding: 6px 10px;
-border-radius: 6px;
-cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .enter-btn:hover {
-background: #2563eb;
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 .logout-btn:hover {
-background: #ef4444;
+  background: #444;
 }
 
-/* MENU */
+/* Menu */
 .menu-toggle {
-font-size: 20px;
-cursor: pointer;
-padding: 6px 10px;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px;
 }
 
-/* DROPDOWN */
+/* Dropdown */
 .dropdown {
-position: absolute;
-top: 50px;
-right: 0;
-background: #111;
-border: 1px solid #333;
-border-radius: 8px;
-display: none;
-flex-direction: column;
-min-width: 180px;
-z-index: 1000;
+  position: absolute;
+  top: 60px;
+  right: 20px;
+
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+
+  display: none;
+  flex-direction: column;
+
+  min-width: 180px;
 }
 
 .dropdown a {
-padding: 10px;
-color: white;
-text-decoration: none;
-border-bottom: 1px solid #222;
+  padding: 10px;
+  color: white;
+  text-decoration: none;
 }
 
 .dropdown a:hover {
-background: #2563eb;
+  background: #222;
 }
 
 .dropdown.show {
-display: flex;
+  display: flex;
+}
+
+/* Animation */
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ===== 4. BUTTON ===== */
