@@ -188,6 +188,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 /* ===================== ELITE HEADERS ===================== */
 
 #schoolHeader {
+    position:relative; /* 🔥 REQUIRED for absolute centering */
     display:flex;
     align-items:center;
     justify-content:space-between; /* 🔥 THIS is key */
@@ -201,10 +202,9 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 }
 
 .header-center {
-    flex:1;
-    display:flex;
-    justify-content:center;
-    min-width:0; /* 🔥 prevents pushing */
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
 }
 
 .header-right {
