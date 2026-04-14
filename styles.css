@@ -84,7 +84,7 @@ text-align: center;
 }
 
 .logo {
-  height: 56px; /* 🔥 was 48px → slightly bigger */
+  height: 75px; /* 🔥 was 48px → slightly bigger */
   width: auto;
   object-fit: contain;
 }
@@ -211,7 +211,9 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
     flex:0 0 auto;
     display:flex;
     align-items:center;
-    gap:10px; /* spacing between buttons */
+    gap:10px;
+
+    margin-left:auto; /* 🔥 THIS pushes it all the way right */
 }
 
 .elite-lg {
