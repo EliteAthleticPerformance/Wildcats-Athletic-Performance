@@ -90,9 +90,8 @@ text-align: center;
   text-align: center;
 }
 
-/* Logo */
 .logo {
-  height: 40px;
+  height: 56px; /* 🔥 was 48px → slightly bigger */
   width: auto;
   object-fit: contain;
 }
