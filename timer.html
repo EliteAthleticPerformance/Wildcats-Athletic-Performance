@@ -84,33 +84,38 @@ body {
     flex:0;
     font-size:5.5vh;
     font-weight:900;
-    margin-right:10px;
-    z-index:2;
+    margin-right:8px; /* 🔥 tighter */
 }
 
 #teamLogo {
     flex:0;
     height:70px;
-    width:auto;
-    object-fit:contain;
-
-    margin-right:20px; /* 🔥 spacing between logo & title */
-    margin-left:10px;  /* 🔥 small gap from time */
-
-    z-index:2;
+    margin-left:6px;   /* 🔥 small gap from time */
+    margin-right:18px; /* 🔥 space before title */
 }
 
 #headerMotto {
     flex:1;
-    text-align:left; /* 🔥 THIS is key */
+    text-align:left;
     font-size:5.5vh;
-    z-index:2;
+
+    padding-left:10px; /* 🔥 subtle breathing room */
+}
+
+      #schoolHeader {
+    padding:18px 40px; /* 🔥 horizontal balance */
+}
+
+      #schoolHeader span,
+#schoolHeader img {
+    display:flex;
+    align-items:center;
 }
       
 /* Watermark */
 
 #schoolHeader::before {
-    content:"ELITE ATHLETIC PERFORMANCE";
+    content:"STRENGTH - SPEED - AGILITY               STRENGTH - SPEED - AGILITY";
     position:absolute;
     white-space:nowrap;
     font-size:140px;
@@ -368,7 +373,7 @@ body {
   onerror="this.src='/Elite-Athletic-Performance/images/wildcat-logo.png'" 
 />
 
-    <span id="headerMotto">Speed - Strength - Agility</span>
+    <span id="headerMotto">Elite Athletic Performance</span>
 </div>
 
 <div id="toolbar" style="display:none;">
