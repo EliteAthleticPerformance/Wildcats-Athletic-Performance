@@ -64,20 +64,11 @@ body {
 /* ===================== HEADER ===================== */
 
 #schoolHeader {
-    position:relative;
-
     display:flex;
     align-items:center;
     justify-content:space-between;
 
-    padding:18px 30px; /* 🔥 reduced */
-
-    background:linear-gradient(90deg,#000,#111,#aaa,#111,#000);
-    border-top:4px solid #fff;
-    border-bottom:6px solid #fff;
-
-    box-shadow:0 8px 25px rgba(0,0,0,0.8);
-    overflow:hidden;
+    flex-wrap:nowrap; /* 🔥 THIS FIXES IT */
 }
 
 #totalTime {
@@ -87,17 +78,13 @@ body {
     margin-right:8px; /* 🔥 tighter */
 }
 
-#totalTime {
-    flex:0;
-    font-size:5.5vh;
-    font-weight:900;
-    margin-right:15px;
-}
-
 #headerMotto {
     flex:1;
-    text-align:right; /* 🔥 pushes title toward logo */
+    text-align:right;
     font-size:5.5vh;
+
+    white-space:nowrap; /* 🔥 prevents wrapping */
+    overflow:hidden;
 }
 
 #teamLogo {
