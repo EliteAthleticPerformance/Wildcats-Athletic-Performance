@@ -73,29 +73,29 @@ body {
 
 #totalTime {
     flex:0;
-    font-size:1.5vh;
-    font-weight:500;
-    margin-right:14px;
+    font-size:3.2vh;   /* 🔥 was 1.5 (too tiny) */
+    font-weight:700;
+    margin-right:12px;
 }
 
 #headerMotto {
     flex:1;
     text-align:right;
-    font-size:3.5vh;
+    font-size:4.5vh;   /* 🔥 slightly smaller */
 
     white-space:nowrap;
-    overflow:hidden;  
+    overflow:hidden;
+    min-width:0;       /* 🔥 CRITICAL (prevents logo push) */
 }
 
 #teamLogo {
     flex:0;
-
-    height:95px; /* 🔥 IMPORTANT: keeps it from dropping */
+    height:55px;       /* 🔥 smaller = fits clean */
     width:auto;
 
     object-fit:contain;
 
-    margin-left:12px; /* space after title */
+    margin-left:10px;
 }
 
 #schoolHeader span,
