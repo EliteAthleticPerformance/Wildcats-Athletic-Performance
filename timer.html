@@ -89,10 +89,16 @@ body {
 }
 
 #teamLogo {
-    flex:0;
-    height:75px;
+    flex:0 0 auto;   /* 🔥 prevents ANY stretching */
+
+    height:50px;
+    width:auto;      /* 🔥 keeps natural ratio */
+
+    max-width:60px;  /* 🔥 safety cap */
+
+    display:block;   /* 🔥 removes flex weirdness */
+
     margin-left:10px;
-      padding-right:70px;
 }
 
 #schoolHeader span,
