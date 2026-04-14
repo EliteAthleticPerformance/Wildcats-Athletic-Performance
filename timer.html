@@ -5,13 +5,7 @@
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-
-
-
-<title>Harrisonville Wildcats | 4 Quadrant Training Timer</title>
-
-
-
+      <title>Harrisonville Wildcats | 4 Quadrant Training Timer</title>
 
 <style>
 :root {
@@ -19,17 +13,11 @@
     --silver:#B0B7BE;
 }
 
-
-
-
 .workMode {
     border-color:#32CD32 !important;
     background:radial-gradient(circle at center,#32CD32 0%,#0a2 60%,#000 100%);
     box-shadow:0 0 20px #32CD32, 0 0 50px #32CD32, 0 0 80px #32CD32;
 }
-
-
-
 
 .rotateMode {
     border-color:#FFD700 !important;
@@ -37,17 +25,11 @@
     box-shadow:0 0 20px #FFD700, 0 0 50px #FFD700, 0 0 80px #FFD700;
 }
 
-
-
-
 .breakMode {
     border-color:#FF0000 !important;
     background:radial-gradient(circle at center,#FF1A1A 0%,#8B0000 60%,#000 100%);
     box-shadow:0 0 30px #FF0000, 0 0 70px #FF0000, 0 0 120px #FF0000;
 }
-
-
-
 
 .dressMode {
     border-color:#00E5FF !important;
@@ -55,35 +37,19 @@
     box-shadow:0 0 25px #00E5FF, 0 0 60px #00E5FF, 0 0 110px #00E5FF;
 }
 
-
-
-
 .stretchMode {
     border-color:#FF8C00 !important;
     background:radial-gradient(circle at center,#FFA500 0%,#CC7000 60%,#000 100%);
     box-shadow:0 0 25px #FFA500, 0 0 60px #FF8C00, 0 0 110px #FF8C00;
 }
 
-
-
-
-
-
-
-
 /* ===================== BASE ===================== */
-
-
-
 
 html, body {
     width:100%;
     height:100%;
     overflow:hidden;
 }
-
-
-
 
 body {
     margin:0;
@@ -95,13 +61,7 @@ body {
     flex-direction:column;
 }
 
-
-
-
 /* ===================== HEADER ===================== */
-
-
-
 
 #schoolHeader {
     position:relative;
@@ -117,9 +77,6 @@ body {
     overflow:hidden;
 }
 
-
-
-
 .header-left,
 .header-center,
 .header-right {
@@ -129,13 +86,7 @@ body {
     align-items:center;
 }
 
-
-
-
 /* Watermark */
-
-
-
 
 #schoolHeader::before {
     content:"HARRISONVILLE     WILDCATS     HARRISONVILLE     WILDCATS     HARRISONVILLE     WILDCATS";
@@ -152,13 +103,7 @@ body {
     z-index:0;
 }
 
-
-
-
 /* Shimmer */
-
-
-
 
 #schoolHeader::after {
     content:"";
@@ -178,21 +123,12 @@ body {
     z-index:1;
 }
 
-
-
-
 @keyframes shimmer {
     0% { left:-50%; }
     100% { left:150%; }
 }
 
-
-
-
 /* ===================== CENTER PULSE ===================== */
-
-
-
 
 @keyframes centerPulse {
     0% {
@@ -209,22 +145,13 @@ body {
     }
 }
 
-
-
-
 #schoolHeader span {
     font-size:9vh;
     font-weight:900;
     letter-spacing:2px;
 }
 
-
-
-
 /* ===================== 3D CHAMPIONSHIP TEXT ===================== */
-
-
-
 
 #headerMotto {
     font-size:9vh;
@@ -243,13 +170,7 @@ body {
     text-rendering:optimizeLegibility;
 }
 
-
-
-
 /* ===================== LOGO BASE ===================== */
-
-
-
 
 #teamLogo {
     position:relative;
@@ -258,17 +179,11 @@ body {
     transition:filter 0.25s ease;
 }
 
-
-
-
 .logoDefault {
     filter:
         drop-shadow(0 0 6px #ffffff)
         drop-shadow(0 0 16px #0066FF);
 }
-
-
-
 
 .logoWork {
     filter:
@@ -277,18 +192,12 @@ body {
         drop-shadow(0 0 50px #32CD32);
 }
 
-
-
-
 .logoRotate {
     filter:
         drop-shadow(0 0 10px #FFD700)
         drop-shadow(0 0 28px #FFD700)
         drop-shadow(0 0 50px #FFD700);
 }
-
-
-
 
 .logoBreak {
     filter:
@@ -297,22 +206,13 @@ body {
         drop-shadow(0 0 60px #FF0000);
 }
 
-
-
-
 @keyframes logoPulse {
     0% { transform:scale(1); }
     50% { transform:scale(1.12); }
     100% { transform:scale(1); }
 }
 
-
-
-
 /* ===================== TOOLBAR ===================== */
-
-
-
 
 #toolbar {
     display:flex;
@@ -324,9 +224,6 @@ body {
     border-bottom:4px solid var(--silver);
 }
 
-
-
-
 #toolbar input {
     width:50px;
     text-align:center;
@@ -336,9 +233,6 @@ body {
     background:#000;
     color:#fff;
 }
-
-
-
 
 #toolbar button {
     padding:10px 20px;
@@ -350,32 +244,11 @@ body {
     color:#fff;
 }
 
-
-
-
 #toolbar button:hover {
     background:#0044AA;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ===================== GRID ===================== */
-
-
-
 
 #display {
     position:absolute;
@@ -390,9 +263,6 @@ body {
     padding:2vh;
 }
 
-
-
-
 .quad {
     display:flex;
     flex-direction:column;
@@ -402,27 +272,15 @@ body {
     padding:10px;
 }
 
-
-
-
 .quad-title { font-size:3.5vh; }
 .quad-text  { font-size:6.5vh; font-weight:900; }
-
-
-
 
 .q1{background:#000;color:#fff;border:8px solid var(--silver);}
 .q2{background:#fff;color:#000;border:8px solid var(--silver);}
 .q3{background:#0066FF;color:#fff;border:8px solid var(--silver);}
 .q4{background:#555555d5;color:#fff;border:8px solid var(--silver);}
 
-
-
-
 /* ===================== CENTER CLOCK ===================== */
-
-
-
 
 #center {
     position:absolute;
@@ -440,19 +298,9 @@ body {
     align-items:center;
     transition:all 0.3s ease;
 
-
-
-
     /* ⭐ NEW */
     animation:centerPulse 1.6s ease-in-out infinite;
 }
-
-
-
-
-
-
-
 
 #clock {
     font-size:clamp(48px, 8vmin, 140px);
@@ -460,9 +308,6 @@ body {
     letter-spacing:2px;
     font-variant-numeric:tabular-nums;
 }
-
-
-
 
 #phase {
     font-size:clamp(14px, 2.2vmin, 36px);
@@ -472,18 +317,9 @@ body {
     white-space:pre-line;
 }
 
-
-
-
 .smallPhase { font-size:1.4vh !important; }
 
-
-
-
 /* ===================== ANIMATIONS ===================== */
-
-
-
 
 @keyframes scrollWatermark {
     0%   { transform:translateY(-50%) translateX(100%); }
@@ -492,21 +328,10 @@ body {
 </style>
 </head>
 
-
-
-
 <body>
-
-
-
 
 <div id="schoolHeader">
     <span id="totalTime">00:00</span>
-
-
-
-
-     
 
     <img id="teamLogo" src="../Wildcats-Athletic-Performance/images/wildcat-logo.png" height="80"
   class="logo"
@@ -514,44 +339,23 @@ body {
   onerror="this.src='/Wildcats-Athletic-Performance/images/wildcat-logo.png'" 
 />
 
-
-
-
     <span id="headerMotto">Speed - Strength - Agility</span>
 </div>
-
-
-
 
 <div id="toolbar" style="display:none;">
     WORK:
     <input type="number" id="workTime" value="10" min="1" onchange="syncTime()">
 
-
-
-
     REST:
     <input type="number" id="restTime" value="10" min="1" onchange="syncTime()">
 
-
-
-
     <button onclick="startTimer()" id="startBtn">START</button>
-
-
-
 
     SET:
     <input type="number" id="of" value="3" min="1">
 </div>
 
-
-
-
 <div id="display">
-
-
-
 
     <div class="quad q1" id="q1">
         <div class="quad-title">Core Lift</div>
@@ -560,25 +364,16 @@ body {
         <div class="quad-text">Percentage: 65</div>
     </div>
 
-
-
-
     <div class="quad q2" id="q2">
         <div class="quad-title">Aux Lift</div>
         <div class="quad-text">Aux Lift</div>
         <div class="quad-text">Reps: 10</div>
     </div>
 
-
-
-
     <div class="quad q3" id="q3">
         <div class="quad-title">REST</div>
         <div class="quad-text">Spot</div>
     </div>
-
-
-
 
     <div class="quad q4" id="q4">
         <div class="quad-title">Movement / Stability Skill</div>
@@ -586,35 +381,21 @@ body {
         <div class="quad-text">Reps/Time:</div>
     </div>
 
-
-
-
     <div id="center">
         <div id="clock">30</div>
         <div id="phase">WORK</div>
     </div>
 
-
-
-
 </div>
 
-
-
-
 <script>
-/* ===================== STATE ===================== */
 
-
-
+      /* ===================== STATE ===================== */
 
 let timer = null;
 let timeLeft = 0;
 let totalSeconds = 0;
 let originalTotalSeconds = 0;
-
-
-
 
 let isRunning = false;
 let currentPhase = "idle";
@@ -625,116 +406,59 @@ let nextTickTime = null;
 let workoutData = [];
 window.workoutData = workoutData;
 
-
-
-
 /* ===================== SETS ===================== */
-
-
-
 
 let currentSet = 1;
 let maxSets = 1;
 let rotationCount = 0;
 const maxRotations = 4;
 
-
-
-
 /* ===================== PERIOD AUTO START ===================== */
 
-
-
-
 let autoStartEnabled = false;
-
-
-
-
 let mondayTimes = [];
 let tueWedTimes = [];
 let thuFriTimes = [];
-
-
-
-
 let autoStartTimer = null;
 let lastAutoStartMinute = null;
-
-
-
-
 let todayOnlyMode = false;
 let forceDateString = null;
-
-
-
-
 let sheetWorkDuration = null;
 let sheetRotateDuration = null;
 let manualWorkoutOverride = null;
 
-
-
-
 /* ===================== DURATIONS ===================== */
-
-
-
 
 let mondayMinutes = 45;
 let tueWedMinutes = 90;
 let thuFriMinutes = 90;
 let classBlockLength = 90 * 60;
 
-
-
-
 let dressOutDuration = 600;
 let dynamicStretchDuration = 600;
 let breakDuration = 120;
 let cooldownDuration = 0;
 
-
-
-
 /* ===================== FLAGS ===================== */
 
-
-
-
 let dressWarningSpoken = false;
-
-
-
 
 let onBreak = false;
 let selectedVoice = null;
 let displaySetNumber = 1;
 
-
-
-
 function goFullscreen() {
     document.documentElement.requestFullscreen();
 }
-
-
 
 /* ======================================================
    START / STOP + TOTAL TIME CALCULATION
 ====================================================== */
 
-
-
-
 /* ---------- COUNT TOTAL SETS ---------- */
 function getTotalSets() {
     return workoutData.filter(item => item.type === "set").length;
 }
-
-
-
 
 /* ======================================================
    START TIMER (INITIAL RESET DEFAULTS)
@@ -743,41 +467,23 @@ displaySetNumber = 1;
 rotationCount = 0;
 currentSet = 1;
 
-
-
-
 function applyDaySpecificClassLength() {
     const now = getEffectiveNow();
     const day = now.getDay(); // 0=Sun
 
-
-
-
     let minutes = mondayMinutes; // safe default
-
-
-
 
     if (day === 1) minutes = mondayMinutes;
     else if (day === 2 || day === 3) minutes = tueWedMinutes;
     else if (day === 4 || day === 5) minutes = thuFriMinutes;
 
-
-
-
     classBlockLength = minutes * 60;
-
-
-
 
     console.log("📅 Using class length:", minutes, "minutes");
     console.log("📊 Monday minutes:", mondayMinutes);
     console.log("📊 Tue/Wed minutes:", tueWedMinutes);
     console.log("📊 Thu/Fri minutes:", thuFriMinutes);
 }
-
-
-
 
 /* ======================================================
    CALCULATE TOTAL CLASS TIME
@@ -833,9 +539,6 @@ function calculateTotalTime() {
     /* ---------- FINAL TOTAL (ALWAYS CLASS LENGTH) ---------- */
     return classBlockLength;
 }
-
-
-
 
 function preciseTick() {
 
