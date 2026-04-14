@@ -107,9 +107,9 @@ const res = await fetch("components/header.html");
    ======================================== */
 
 function initHeaderUI() {
-  scaleHeaderText();
+  
   setupMenu();
-  setupResize();
+  
   highlightActiveLink();
 
   // ✅ Move title logic here
