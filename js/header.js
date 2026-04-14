@@ -3,8 +3,8 @@
    ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-  updateStats();
   loadHeader();
+updateStats();
 });
 
 /* ========================================
@@ -93,42 +93,23 @@ window.logout = function () {
 
 async function loadHeader() {
   const container = document.getElementById("header-placeholder");
-
-  if (!container) {
-    console.warn("Missing #header-placeholder");
-    return;
-  }
-
-  if (container.innerHTML.trim() !== "") return;
+  if (!container) return;
 
   try {
-    const base = getBasePath();
-
-    const res = await fetch(base + "components/header.html");
+    const res = await fetch("./components/header.html");
 
     if (!res.ok) throw new Error("Header fetch failed");
 
     const html = await res.text();
 
+    // 🔥 THIS IS THE CRITICAL LINE
     container.innerHTML = html;
 
-    // 🔥 Fix paths automatically
-    const fixPaths = (selector, attr) => {
-      container.querySelectorAll(selector).forEach(el => {
-        const val = el.getAttribute(attr);
-        if (val && !val.startsWith("http") && !val.startsWith("/")) {
-          el.setAttribute(attr, base + val);
-        }
-      });
-    };
-
-    fixPaths("img", "src");
-    fixPaths("a", "href");
-
+    // Init menu + UI AFTER load
     initHeaderUI();
 
   } catch (err) {
-    console.error("Header load error:", err);
+    console.error("HEADER LOAD ERROR:", err);
   }
 }
 
