@@ -203,8 +203,25 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 .header-center {
     position:absolute;
     left:50%;
-    top:50%; /* 🔥 ADD THIS */
-    transform:translate(-50%, -50%); /* 🔥 UPDATE THIS */
+    top:50%;
+    transform:translate(-50%, -50%);
+
+    display:flex;              /* 🔥 ADD THIS */
+    flex-direction:column;     /* 🔥 STACK ITEMS */
+    align-items:center;        /* 🔥 CENTER THEM */
+    justify-content:center;
+}
+
+.school-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+
+    color: #60a5fa;
+
+    text-shadow: 0 0 10px rgba(0,102,255,0.6);
+
+    margin-bottom: 6px;   /* 🔥 ADD THIS */
 }
 
 .header-right {
