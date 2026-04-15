@@ -440,6 +440,17 @@ max-width: 1000px;
         0 0 25px rgba(0,102,255,0.25);
 }
 
+.card,
+.card-mini {
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;  /* 🔥 vertical centering */
+    align-items: center;      /* 🔥 horizontal centering */
+
+    text-align: center;       /* 🔥 ensures text aligns nicely */
+}
+
 animation: cardFadeUp 0.7s cubic-bezier(.2,.8,.2,1) forwards;
 
 /* BIG STAT NUMBERS */
