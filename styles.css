@@ -335,7 +335,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
     grid-template-columns: repeat(4, 1fr);
     gap: 32px;
 
-    max-width: 750px; /* 🔥 was 1000px */
+    max-width: 1500px; /* 🔥 was 1000px */
     margin: 0 auto;
 }
 
