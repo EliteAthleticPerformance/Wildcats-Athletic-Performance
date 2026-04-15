@@ -103,22 +103,20 @@ body {
     position:absolute;
 
     top:0;
-    left:-60%;
-    width:60%;
+    left:-50%;
+    width:50%;
     height:100%;
 
     background:linear-gradient(
         120deg,
-        rgba(0,102,255,0.0),
-        rgba(0,102,255,0.25),
-        rgba(255,255,255,0.2),
-        rgba(0,102,255,0.25),
-        rgba(0,102,255,0.0)
-    );
+        rgba(0,102,255,0.2),
+        rgba(255,255,255,0.1),
+        rgba(0,102,255,0.2),
+        );
 
     transform:skewX(-25deg);
 
-    animation:shimmer 5s infinite;
+    animation:shimmer 3s infinite;
 
     z-index:1;
 }
@@ -126,13 +124,13 @@ body {
           
 /* 🔥 KEYFRAMES */
 @keyframes scrollWatermark {
-    0%   { transform:translateX(0) translateY(-50%); }
-    100% { transform:translateX(-50%) translateY(-50%); }
+    0%   { transform:translateX(100%) translateY(-50%); }
+    100% { transform:translateX(-100%) translateY(-50%); }
 }
 
 @keyframes shimmer {
-    0%   { left:-60%; }
-    100% { left:160%; }
+    0%   { left:-50%; }
+    100% { left:150%; }
 }
 
       #schoolHeader span,
