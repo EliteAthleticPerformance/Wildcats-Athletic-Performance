@@ -204,7 +204,8 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 .header-center {
     position:absolute;
     left:50%;
-    transform:translateX(-50%);
+    top:50%; /* 🔥 ADD THIS */
+    transform:translate(-50%, -50%); /* 🔥 UPDATE THIS */
 }
 
 .header-right {
