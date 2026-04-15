@@ -182,7 +182,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
     padding:34px 40px 20px;
     height:200px;
 
-    overflow:hidden; /* 🔥 keeps effects inside header */
+    overflow:visible; 
 }
 
 .header-left {
