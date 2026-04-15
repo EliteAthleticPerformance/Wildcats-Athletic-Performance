@@ -135,6 +135,18 @@ function initHeaderUI() {
   }
 }
 
+function highlightActiveLink() {
+  const links = document.querySelectorAll("#dropdownMenu a");
+  const current = window.location.pathname.split("/").pop();
+
+  links.forEach(link => {
+    if (link.getAttribute("href") === current) {
+      link.style.color = "#60a5fa";
+      link.style.fontWeight = "700";
+    }
+  });
+}
+
 /* ========================================
    📏 RESPONSIVE TITLE SCALING
    ======================================== */
