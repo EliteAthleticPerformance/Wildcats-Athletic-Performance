@@ -112,6 +112,7 @@ function initHeaderUI() {
   highlightActiveLink();
 
   // 🔥 NEW: dynamic header elements
+   console.log("HEADER JS RUNNING)
   const schoolNameEl = document.getElementById("schoolName");
   const pageTitleEl = document.getElementById("pageTitle");
   const logoEl = document.querySelector(".logo");
@@ -119,6 +120,9 @@ function initHeaderUI() {
   // 🔥 TEMP VALUES (until we wire Google Sheets)
   if (schoolNameEl) {
     schoolNameEl.textContent = "TEST SCHOOL";
+     console.log("FOUND schoolNAME element");
+  } else {
+     console.log("schoolName NOT found");
   }
 
   if (pageTitleEl) {
