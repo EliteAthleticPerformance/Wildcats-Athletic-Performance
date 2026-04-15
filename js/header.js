@@ -109,25 +109,26 @@ const res = await fetch("components/header.html");
 function initHeaderUI() {
   
   setupMenu();
-  
   highlightActiveLink();
 
-  // ✅ Move title logic here
+  // 🔥 NEW: dynamic header elements
+  const schoolNameEl = document.getElementById("schoolName");
   const pageTitleEl = document.getElementById("pageTitle");
-if (pageTitleEl) {
-  pageTitleEl.textContent = "Elite Athletic Performance";
-}
-}
+  const logoEl = document.querySelector(".logo");
 
-function highlightActiveLink() {
-  const links = document.querySelectorAll("#dropdownMenu a");
+  // 🔥 TEMP VALUES (until we wire Google Sheets)
+  if (schoolNameEl) {
+    schoolNameEl.textContent = "Harrisonville Wildcats";
+  }
 
-  links.forEach(link => {
-    if (window.location.href.includes(link.getAttribute("href"))) {
-      link.style.color = "gold";
-      link.style.fontWeight = "700";
-    }
-  });
+  if (pageTitleEl) {
+    pageTitleEl.textContent = "Elite Athletic Performance";
+  }
+
+  // (optional if you want to test logo swap)
+  if (logoEl) {
+    // logoEl.src = "images/wildcat-logo.png";
+  }
 }
 
 /* ========================================
