@@ -247,7 +247,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 }
 
 #schoolHeader::before {
-    content:"STRENGTH - SPEED - AGILITY   STRENGTH - SPEED - AGILITY   STRENGTH - SPEED - AGILITY";
+    content:"STRENGTH - SPEED - AGILITY - STRENGTH - SPEED - AGILITY - STRENGTH - SPEED - AGILITY";
     
     position:absolute;
     top:50%;
