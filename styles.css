@@ -160,8 +160,8 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
     align-items:center;
     justify-content:space-between;
 
-    padding:18px 40px;
-    height:100px;
+    padding:34px 40px 20px;
+    height:150px;
 
     overflow:hidden; /* 🔥 keeps effects inside header */
 }
