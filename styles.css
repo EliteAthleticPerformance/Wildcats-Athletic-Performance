@@ -344,7 +344,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
         rgba(20,20,20,0.95),
         rgba(40,40,40,0.9)
     );
-    min-height: 500px;
+    min-height: 450px;
     border-radius: 16px;
     padding: 48px 48px;
 
@@ -370,6 +370,11 @@ max-width: 1000px;
         0 15px 40px rgba(0,0,0,0.8),
         0 0 25px rgba(0,102,255,0.3);
 }
+
+.card-icon {
+    font-size: 34px;
+
+    filter: drop-shadow(0 0 10px rgba(0,102,255,0.5));
 
 /* MINI CARDS (STATS) */
 .card-mini {
@@ -455,7 +460,11 @@ animation: cardFadeUp 0.7s cubic-bezier(.2,.8,.2,1) forwards;
 
 /* BIG STAT NUMBERS */
 #totalAthletes,
-#totalTests {
+#totalTests, 
+#trainingTimer
+#combineTesting
+#athleteProfiles
+#Leaderboard {
     font-size: 2.4rem;
     font-weight: 900;
 }
