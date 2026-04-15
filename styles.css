@@ -260,7 +260,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
     font-weight:900;
     letter-spacing:8px;
 
-    color:rgba(255,255,255,0.03);
+    color:rgba(255,255,255,0.08);
 
     animation:scrollWatermark 25s linear infinite;
 
@@ -273,27 +273,29 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
     position:absolute;
 
     top:0;
-    left:-50%;
-    width:50%;
+    left:-60%;
+    width:60%;
     height:100%;
 
     background:linear-gradient(
         120deg,
-        rgba(0,102,255,0.2),
-        rgba(255,255,255,0.1),
-        rgba(0,102,255,0.2)
+        rgba(0,102,255,0.0),
+        rgba(0,102,255,0.25),
+        rgba(255,255,255,0.2),
+        rgba(0,102,255,0.25),
+        rgba(0,102,255,0.0)
     );
 
     transform:skewX(-25deg);
 
-    animation:shimmer 3s infinite;
+    animation:shimmer 5s infinite; /* 🔥 slower = more noticeable */
 
     z-index:1;
 }
 
 @keyframes scrollWatermark {
     0%   { transform:translate(0%, -50%); }
-    100% { transform:translate(-50%, -50%); }
+    100% { transform:translate(-100%, -50%); } /* 🔥 bigger movement */
 }
 
 @keyframes shimmer {
