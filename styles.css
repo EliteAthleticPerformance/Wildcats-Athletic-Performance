@@ -125,9 +125,11 @@ text-align: center;
   background: #222;
 }
 
-.dropdown.show {
-  display: flex;
-}
+.dropdown {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: all 0.2s ease;
 
 /* Animation */
 @keyframes fadeSlideDown {
