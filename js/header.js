@@ -174,12 +174,15 @@ function setupMenu() {
   if (!toggle || !dropdown) return;
 
   toggle.addEventListener("click", (e) => {
-    e.stopPropagation();
+    e.stopPropagation(); // 🔥 prevents document click
     dropdown.classList.toggle("show");
   });
 
-  document.addEventListener("click", () => {
-    dropdown.classList.remove("show");
+  document.addEventListener("click", (e) => {
+    // 🔥 ONLY close if clicking outside menu
+    if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
+      dropdown.classList.remove("show");
+    }
   });
 }
 
