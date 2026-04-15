@@ -318,7 +318,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 /* ===== 5. GRID ===== */
 .grid {
     display: grid;
-    gap: 20px;
+    gap: 48px;
 }
 
 .grid-2 {
@@ -332,10 +332,10 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 
 .grid-auto {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(4, 375px);
+    gap: 48px;
 
-    max-width: 1400px; /* 🔥 was 1000px */
+    max-width: 375px; /* 🔥 was 1000px */
     margin: 0 auto;
 }
 
@@ -346,9 +346,9 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
         rgba(20,20,20,0.95),
         rgba(40,40,40,0.9)
     );
-    min-height: 200px;
+    min-height: 300px;
     border-radius: 16px;
-    padding: 40px 30px;
+    padding: 36px 28px;
 
     text-decoration: none;
     color: white;
@@ -361,9 +361,9 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
    }
 
 transform: scale(1.03);
-
+max-width: 800px;
 .card h2 {
-    font-size: 2.1rem;
+    font-size: 1.9rem;
 }
 
 .card:hover {
@@ -375,7 +375,7 @@ transform: scale(1.03);
 
 /* MINI CARDS (STATS) */
 .card-mini {
-    padding: 32px;
+    padding: 38px;
     border-radius: 12px;
 
     background: linear-gradient(
@@ -402,7 +402,7 @@ transform: scale(1.03);
 }
 
 .card-mini p {
-    font-size: 1rem;
+    font-size: 2.6rem;
     font-weight: 700;
 }
 
