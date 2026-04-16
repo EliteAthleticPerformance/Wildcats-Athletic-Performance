@@ -255,37 +255,48 @@ function renderTable(data, tableId, type) {
 }
 
 function renderPodium(data) {
-    
+
   const container = document.getElementById("podium");
   if (!container) return;
 
   const top3 = [...data]
-    .filter(a => a.score > 0)                 // 🔥 use score
-    .sort((a, b) => b.score - a.score)        // 🔥 sort by score
+    .filter(a => a.score > 0)
+    .sort((a, b) => b.score - a.score)
     .slice(0, 3);
 
-  if (!top3.length) {
+  if (top3.length < 3) {
     container.innerHTML = "";
     return;
   }
 
-  const medals = ["🥇", "🥈", "🥉"];
+  const [first, second, third] = top3;
 
-  container.innerHTML = top3.map((a, i) => {
+  container.innerHTML = `
+    <div class="podium">
 
-  const tier = getPerformanceTier(a.score, a.lift); // ✅ DEFINE IT HERE
+      <!-- 2ND -->
+      <div class="podium-item second">
+        <div class="podium-rank">🥈</div>
+        <div class="podium-name">${second.name}</div>
+        <div class="podium-score">${Math.round(second.score)}</div>
+      </div>
 
-  return `
-    <div class="podium-card podium-${i + 1}">
-      <div class="podium-rank">${medals[i]}</div>
-      <div class="podium-name">${a.name}</div>
-      <div class="podium-score">${Math.round(a.score)}</div>
-      <div class="tier ${tier.class}">${tier.label}</div>
-      <div style="font-size:12px; opacity:0.6;">Performance</div>
+      <!-- 1ST -->
+      <div class="podium-item first">
+        <div class="podium-rank">🥇</div>
+        <div class="podium-name">${first.name}</div>
+        <div class="podium-score">${Math.round(first.score)}</div>
+      </div>
+
+      <!-- 3RD -->
+      <div class="podium-item third">
+        <div class="podium-rank">🥉</div>
+        <div class="podium-name">${third.name}</div>
+        <div class="podium-score">${Math.round(third.score)}</div>
+      </div>
+
     </div>
   `;
-
-}).join("");
 }
 
 // ===============================
