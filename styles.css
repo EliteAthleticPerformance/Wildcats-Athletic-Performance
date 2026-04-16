@@ -403,7 +403,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 
     min-height: 350px;
     border-radius: 16px;
-    padding: 48px;
+    padding: 20px 40px 40px 40px;
 
     text-decoration: none;
     color: white;
@@ -529,7 +529,9 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 10px;
+
+  max-height: 600px;      /* 🔥 controls scroll area */
+  overflow-y: auto;       /* 🔥 enables scrolling */
 }
 
 /* ===== TABLE FONT SIZE ===== */
@@ -604,6 +606,15 @@ background: #1a1a1a;
 
 .table {
   box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+/* ===== STICKY TABLE HEADER ===== */
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+
+  background: #050505; /* 🔥 must have background */
 }
 
 /* ===== 8. FORM ===== */
