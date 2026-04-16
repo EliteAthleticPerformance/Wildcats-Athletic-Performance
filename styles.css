@@ -515,18 +515,21 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 /* ===== 7. TABLE ===== */
 .table {
   width: 100%;
-  min-width: 100%;        /* ✅ ensures it stretches */
+  max-width: 1300px;   /* 🔥 THIS is what centers visually */
+  margin: 0 auto;      /* 🔥 fallback centering */
   border-collapse: collapse;
   background: #111;
   border-radius: var(--radius);
   overflow: hidden;
-  table-layout: auto;     /* ✅ important for full width */
+  table-layout: auto;
 }
 
 /* ===== TABLE WRAPPER FIX ===== */
 .table-wrapper {
   width: 100%;
-  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
 }
 
 /* ===== TABLE FONT SIZE ===== */
@@ -575,6 +578,17 @@ th.sort-desc::after {
 
 .table tr:nth-child(even) {
 background: #1a1a1a;
+}
+
+/* ===== ROW HOVER EFFECT ===== */
+.table tbody tr {
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.table tbody tr:hover {
+  background: #2a2a2a;              /* 🔥 highlight color */
+  transform: scale(1.01);           /* 🔥 subtle pop */
+  cursor: pointer;
 }
 
 /* ===== 8. FORM ===== */
