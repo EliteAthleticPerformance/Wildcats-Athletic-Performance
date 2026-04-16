@@ -291,7 +291,7 @@ function renderChart(id, history) {
       labels: {
         color: "#ffffff",
         font: {
-          size: 24   // 🔥 increase legend text (Athlete / Comparison)
+          size: 32   // 🔥 increase legend text (Athlete / Comparison)
         }
       }
     }
@@ -301,14 +301,14 @@ function renderChart(id, history) {
       pointLabels: {
         color: "#ffffff",
         font: {
-          size: 24   // 🔥 Speed / Strength / Power labels
+          size: 32   // 🔥 Speed / Strength / Power labels
         }
       },
       ticks: {
         color: "#aaa",
         backdropColor: "transparent",
         font: {
-          size: 24   // 🔥 numbers (20, 40, 60, etc.)
+          size: 32   // 🔥 numbers (20, 40, 60, etc.)
         }
       }
     }
