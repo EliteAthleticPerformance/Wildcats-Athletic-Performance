@@ -285,37 +285,14 @@ function renderRankings(player) {
 
   const container = document.getElementById("metrics");
 
-  function getColor(val) {
-    if (val >= 85) return "elite";
-    if (val >= 70) return "strong";
-    if (val >= 50) return "developing";
-    return "weak";
-  }
-
-  function card(label, value, index) {
-    const level = getColor(value);
-
-    return `
-      <div class="metric-card ${level}" style="animation-delay:${index * 0.08}s">
-        <div class="metric-label">${label}</div>
-        <div class="metric-value" data-value="${value}">0</div>
-        <div class="metric-bar">
-          <div class="metric-fill" data-width="${value}%"></div>
-        </div>
-      </div>
-    `;
-  }
-
   container.innerHTML = `
-    <div class="metrics-grid">
-      ${card("Speed", player.speed, 0)}
-      ${card("Strength", player.strength, 1)}
-      ${card("Power", player.power, 2)}
-      ${card("Explosive", player.explosive, 3)}
+    <div class="metrics-row">
+      <span><strong>Speed:</strong> ${player.speed}</span>
+      <span><strong>Strength:</strong> ${player.strength}</span>
+      <span><strong>Power:</strong> ${player.power}</span>
+      <span><strong>Explosive:</strong> ${player.explosive}</span>
     </div>
   `;
-
-  animateMetrics(); // 🔥 trigger animation
 }
 
 function animateMetrics() {
