@@ -896,8 +896,20 @@ body {
 
 .leaderboard-card {
   flex: 1;
-  max-width: 50%; /* 🔥 forces side-by-side */
+  max-width: 50%;
   min-width: 0;
+
+  overflow: hidden; /* 🔥 keeps content inside */
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;  /* 🔥 allows scroll INSIDE card */
+}
+
+.leaderboard-table {
+  width: 100%;
+  min-width: 600px; /* 🔥 prevents squishing */
 }
 
 /* ========================================
