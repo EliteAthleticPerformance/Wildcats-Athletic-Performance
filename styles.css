@@ -637,17 +637,9 @@ body {
   color: #3b82f6;
 }
 
-.compare-buttons {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.compare-buttons button {
-  font-size: 18px;        /* 🔥 bigger text */
-  padding: 10px 16px;     /* 🔥 bigger buttons */
+.compare-toggle button {
+  font-size: 18px;
+  padding: 10px 16px;
   border-radius: 8px;
   border: 1px solid #444;
   background: #111;
@@ -656,7 +648,7 @@ body {
   transition: all 0.2s ease;
 }
 
-.compare-buttons button:hover {
+.compare-toggle button:hover {
   background: #2563eb;
   transform: translateY(-2px);
 }
