@@ -529,9 +529,23 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
   max-width: 100%;
 }
 
+/* ===== TABLE FONT SIZE ===== */
+.table {
+  font-size: 16px;   /* 🔥 base size */
+}
+
+.table th {
+  font-size: 17px;   /* slightly bigger headers */
+  font-weight: 700;
+}
+
+.table td {
+  font-size: 15px;
+}
+
 .table th,
 .table td {
-padding: 12px;
+padding: 18px;
 text-align: center;
 }
 
