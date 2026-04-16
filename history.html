@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,10 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Performance Comparison</title>
-<script>
-  window.pageTitle = "Performance Comparison";
-</script>
+<title>Athlete Profile</title>
 
 <link rel="stylesheet" href="styles.css">
 
@@ -21,47 +19,318 @@
 
 <body>
 
-<!-- ===== HEADER ===== -->
-<div id="header-placeholder"></div>
+<main class="section" style="text-align:center;">
 
-<main>
+  <h1 id="name"></h1>
+  <p id="score" style="margin-bottom:20px;"></p>
 
-  <!-- ===== ATHLETE HEADER ===== -->
-  <section class="section" style="text-align:center;">
-    
-    <h1 id="name"></h1>
-    <p id="score" style="margin-bottom:20px;"></p>
+  <div class="compare-toggle">
+    <button onclick="setCompareMode('team')" class="active" id="btn-team">Team</button>
+    <button onclick="setCompareMode('top5')" id="btn-top5">Top 5</button>
+    <button onclick="setCompareMode('weight')" id="btn-weight">Weight Group</button>
+  </div>
 
-    <p style="margin-top:20px;">Compare To:</p>
+  <div style="max-width: 500px; margin: auto;">
+    <canvas id="radarChart"></canvas>
+  </div>
 
-    <div class="compare-toggle">
-  <button onclick="setComparison('last')" id="btn-last">Most Recent Score</button>
-<button onclick="setComparison('team')" class="active" id="btn-team">Team</button>
-<button onclick="setComparison('top5')" id="btn-top5">Top 5</button>
-<button onclick="setComparison('weight')" id="btn-weight">Weight Group</button>
-<button onclick="setComparison('grade')" id="btn-grade">Grade</button>
-</div>
-
-  </section>
-
-  <!-- ===== CHART ===== -->
-  <section class="section" style="text-align:center;">
-    <div style="max-width: 750px; margin: auto;">
-      <canvas id="radarChart"></canvas>
-    </div>
-  </section>
-
-  <!-- ===== METRICS ===== -->
-  <section class="section">
-    <div id="metrics" class="grid"></div>
-  </section>
+  <div id="metrics" class="grid" style="margin-top:30px;"></div>
 
 </main>
 
+<script>
 
-  <!-- ===== SCRIPT ===== -->
-  <script src="js/header.js"></script>
-<script src="js/history.js" defer></script>
+/* ================= CONFIG ================= */
+
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
+
+/* ================= GLOBAL ================= */
+
+let ALL_ROWS = [];
+let CURRENT_ATHLETE = null;
+let compareMode = "team";
+
+/* ================= PARAMS ================= */
+
+const params = new URLSearchParams(window.location.search);
+const selectedName = decodeURIComponent(params.get("name") || "");
+
+document.getElementById("name").textContent = selectedName;
+
+/* ================= HELPERS ================= */
+
+function cleanNum(val) {
+  return Number((val || "").toString().trim()) || 0;
+}
+
+/* 🔥 USE SHEET TOTALS (THIS FIXES EVERYTHING) */
+function extractMetrics(row) {
+
+  if (!row || row.length < 34) {
+    return { speed: 0, strength: 0, power: 0, explosive: 0 };
+  }
+
+  return {
+    speed: cleanNum(row[30]),
+    strength: cleanNum(row[31]),
+    power: cleanNum(row[32]),
+    explosive: cleanNum(row[33])
+  };
+}
+
+function getDominantTrait(metrics) {
+  return Object.entries(metrics)
+    .sort((a, b) => b[1] - a[1])[0][0];
+}
+
+/* ================= LOAD DATA ================= */
+
+Papa.parse(CSV_URL, {
+  download: true,
+  header: false,
+  complete: function(results) {
+
+    const rows = results.data || [];
+
+    // 🔥 CLEAN ROWS (NO CRASHES)
+    ALL_ROWS = rows.filter(r =>
+      Array.isArray(r) &&
+      r.length > 34 &&
+      (r[0] || "").trim() !== ""
+    );
+
+    CURRENT_ATHLETE = getBestRow(ALL_ROWS, selectedName);
+
+    if (!CURRENT_ATHLETE) {
+      document.getElementById("score").textContent = "No data found";
+      return;
+    }
+
+    updateComparison();
+  }
+});
+
+/* ================= BEST PERFORMANCE ================= */
+
+function getBestRow(rows, athleteName) {
+
+  const normalize = str =>
+    (str || "").toLowerCase().trim();
+
+  const target = normalize(athleteName);
+
+  const matches = rows.filter(r =>
+    normalize(r[0]) === target
+  );
+
+  if (!matches.length) return null;
+
+  return matches.reduce((best, current) => {
+    return cleanNum(current[34]) > cleanNum(best[34]) ? current : best;
+  });
+}
+
+/* ================= COMPARE MODE ================= */
+
+function setCompareMode(mode) {
+  compareMode = mode;
+
+  document.querySelectorAll(".compare-toggle button")
+    .forEach(btn => btn.classList.remove("active"));
+
+  document.getElementById(`btn-${mode}`).classList.add("active");
+
+  updateComparison();
+}
+
+/* ================= MAIN ENGINE ================= */
+
+function updateComparison() {
+
+  const player = extractMetrics(CURRENT_ATHLETE);
+  const dominant = getDominantTrait(player);
+
+  const score = cleanNum(CURRENT_ATHLETE[34]);
+
+  document.getElementById("score").innerHTML = `
+    <span style="font-size:18px;">Score: ${score}</span>
+    <div style="margin-top:8px; color:#3b82f6; font-weight:600;">
+      Dominant: ${dominant.toUpperCase()}
+    </div>
+  `;
+
+  let group = [];
+
+  if (compareMode === "team") {
+    group = ALL_ROWS.filter(r => r !== CURRENT_ATHLETE);
+  }
+
+  if (compareMode === "top5") {
+    group = ALL_ROWS
+      .sort((a, b) => cleanNum(b[34]) - cleanNum(a[34]))
+      .slice(0, 5);
+  }
+
+  if (compareMode === "weight") {
+    const weight = cleanNum(CURRENT_ATHLETE[5]);
+
+    group = ALL_ROWS.filter(r => {
+      return Math.abs(cleanNum(r[5]) - weight) <= 10;
+    });
+  }
+
+  if (!group.length) group = [CURRENT_ATHLETE];
+
+  const avg = calculateAverage(group);
+
+  renderRadarChart(player, avg);
+  renderRankings(player);
+}
+
+/* ================= AVERAGES ================= */
+
+function calculateAverage(group) {
+
+  let totals = { speed: 0, strength: 0, power: 0, explosive: 0 };
+  let count = group.length;
+
+  group.forEach(r => {
+    const m = extractMetrics(r);
+    totals.speed += m.speed;
+    totals.strength += m.strength;
+    totals.power += m.power;
+    totals.explosive += m.explosive;
+  });
+
+  return {
+    speed: Math.round(totals.speed / count),
+    strength: Math.round(totals.strength / count),
+    power: Math.round(totals.power / count),
+    explosive: Math.round(totals.explosive / count)
+  };
+}
+
+/* ================= RADAR ================= */
+
+function renderRadarChart(player, avg) {
+
+  const ctx = document.getElementById("radarChart");
+
+  if (window.radarChart && typeof window.radarChart.destroy === "function") {
+  window.radarChart.destroy();
+}
+
+  
+
+  window.radarChart = new Chart(ctx, {
+    type: "radar",
+    data: {
+      labels: ["Speed", "Strength", "Power", "Explosive"],
+      datasets: [
+        {
+          label: "Athlete",
+          data: [
+            player.speed,
+            player.strength,
+            player.power,
+            player.explosive
+          ],
+          borderWidth: 3
+        },
+        {
+          label: "Comparison",
+          data: [
+            avg.speed,
+            avg.strength,
+            avg.power,
+            avg.explosive
+          ]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          beginAtZero: true,
+          suggestedMax: 100
+        }
+      }
+    }
+  });
+}
+
+/* ================= RANKINGS ================= */
+
+function renderRankings(player) {
+
+  const container = document.getElementById("metrics");
+
+  function getColor(val) {
+    if (val >= 85) return "elite";
+    if (val >= 70) return "strong";
+    if (val >= 50) return "developing";
+    return "weak";
+  }
+
+  function card(label, value, index) {
+    const level = getColor(value);
+
+    return `
+      <div class="metric-card ${level}" style="animation-delay:${index * 0.08}s">
+        <div class="metric-label">${label}</div>
+        <div class="metric-value" data-value="${value}">0</div>
+        <div class="metric-bar">
+          <div class="metric-fill" data-width="${value}%"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="metrics-grid">
+      ${card("Speed", player.speed, 0)}
+      ${card("Strength", player.strength, 1)}
+      ${card("Power", player.power, 2)}
+      ${card("Explosive", player.explosive, 3)}
+    </div>
+  `;
+
+  animateMetrics(); // 🔥 trigger animation
+}
+
+function animateMetrics() {
+
+  // 🔢 COUNT-UP NUMBERS
+  document.querySelectorAll(".metric-value").forEach(el => {
+    const target = Number(el.dataset.value);
+    let current = 0;
+
+    const step = Math.ceil(target / 30);
+
+    const interval = setInterval(() => {
+      current += step;
+
+      if (current >= target) {
+        current = target;
+        clearInterval(interval);
+      }
+
+      el.textContent = current;
+    }, 20);
+  });
+
+  // 📊 BAR FILL ANIMATION
+  document.querySelectorAll(".metric-fill").forEach(el => {
+    const width = el.dataset.width;
+
+    setTimeout(() => {
+      el.style.width = width;
+    }, 200);
+  });
+}
+
+</script>
 
 </body>
 </html>
