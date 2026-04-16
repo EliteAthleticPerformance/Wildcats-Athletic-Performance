@@ -782,6 +782,95 @@ body {
   font-size: 15px;
 }
 
+.podium {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.podium-item {
+  width: 150px;
+  text-align: center;
+  padding: 15px 10px;
+  border-radius: 12px;
+  color: white;
+}
+
+/* Heights create podium effect */
+.podium-item.first {
+  height: 220px;
+  background: linear-gradient(to top, #1e3a8a, #3b82f6);
+  transform: scale(1.1);
+  z-index: 2;
+}
+
+.podium-item.second {
+  height: 170px;
+  background: linear-gradient(to top, #374151, #9ca3af);
+}
+
+.podium-item.third {
+  height: 150px;
+  background: linear-gradient(to top, #78350f, #f59e0b);
+}
+
+/* Text */
+.podium-rank {
+  font-size: 28px;
+}
+
+.podium-name {
+  font-size: 15px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.podium-score {
+  font-size: 20px;
+  color: #60a5fa;
+}
+
+/* ===== PODIUM ANIMATION ===== */
+
+.podium-item {
+  transform: translateY(80px);
+  opacity: 0;
+}
+
+/* Animate in */
+.podium-item.show {
+  animation: podiumRise 0.6s ease-out forwards;
+}
+
+/* Stagger timing */
+.podium-item.second.show {
+  animation-delay: 0.2s;
+}
+
+.podium-item.first.show {
+  animation-delay: 0.4s;
+}
+
+.podium-item.third.show {
+  animation-delay: 0s;
+}
+
+@keyframes podiumRise {
+  0% {
+    transform: translateY(80px);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-10px); /* slight bounce */
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
 /* ========================================
 MOBILE (RESPONSIVE)
 ======================================== */
