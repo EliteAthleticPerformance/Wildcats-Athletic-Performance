@@ -16,7 +16,7 @@ Papa.parse(CSV_URL + "&t=" + Date.now(), {
 
     data.slice(1).forEach(row => {
       const name = (row[0] || "").replace(/"/g, "").trim();
-      const score = Number(row[row.length - 1]);
+      const score = Number(row[row.length - 1]) || 0;
 
       if (!name) return;
 
@@ -51,7 +51,8 @@ function getTag(score) {
 
 function render(list) {
   const grid = document.getElementById("athleteGrid");
-  grid.innerHTML = "";
+if (!grid) return;
+grid.innerHTML = "";
 
   const fragment = document.createDocumentFragment();
 
