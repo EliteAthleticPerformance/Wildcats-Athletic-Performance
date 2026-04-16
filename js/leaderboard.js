@@ -265,9 +265,8 @@ function renderPodium(data) {
     .slice(0, 3);
 
   if (top3.length < 3) {
-    container.innerHTML = "";
-    return;
-  }
+  return; // 🔥 DO NOT CLEAR THE PODIUM
+}
 
   const [first, second, third] = top3;
 
