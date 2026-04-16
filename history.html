@@ -167,7 +167,9 @@ function updateComparison() {
 if (compareMode === "last") {
 
   const athleteRows = ALL_ROWS
-    .filter(r => r[0].trim() === selectedName)
+    const normalize = str => (str || "").toLowerCase().trim();
+
+.filter(r => normalize(r[0]) === normalize(selectedName))
     .sort((a, b) => new Date(b[1]) - new Date(a[1]));
 
   if (athleteRows.length > 1) {
@@ -182,9 +184,9 @@ if (compareMode === "team") {
 }
 
 if (compareMode === "top5") {
-  group = ALL_ROWS
-    .sort((a, b) => cleanNum(b[34]) - cleanNum(a[34]))
-    .slice(0, 5);
+  group = [...ALL_ROWS] // clone first
+  .sort((a, b) => cleanNum(b[34]) - cleanNum(a[34]))
+  .slice(0, 5);
 }
 
 if (compareMode === "weight") {
