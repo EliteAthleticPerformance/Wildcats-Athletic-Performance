@@ -23,12 +23,30 @@
 <!-- ===== MAIN ===== -->
 <main>
 
-  <!-- TITLE -->
-  <section class="section" style="text-align:center;">
-    <h1 id="athleteName">Athlete</h1>
-    <p id="rank" style="color: var(--muted);"></p>
-    <p id="percentile" style="color: var(--muted);"></p>
-  </section>
+<!-- ===== PERFORMANCE SUMMARY ===== -->
+<section class="section" style="text-align:center;">
+
+  <h1 id="athleteName">Athlete</h1>
+
+  <h2 class="score" id="scoreDisplay">Score: --</h2>
+  <p class="dominant" id="dominantDisplay">Dominant: --</p>
+
+  <p id="rank" style="color: var(--muted);"></p>
+  <p id="percentile" style="color: var(--muted);"></p>
+
+  <div style="margin-top: 20px;">
+    <h3>Compare To:</h3>
+
+    <div class="compare-buttons">
+      <button onclick="setComparison('team')">Team</button>
+      <button onclick="setComparison('top5')">Top 5</button>
+      <button onclick="setComparison('weight')">Weight Group</button>
+      <button onclick="setComparison('grade')">Grade</button>
+    </div>
+
+  </div>
+
+</section>
 
   <!-- ===== STATS ===== -->
   <section class="section">
