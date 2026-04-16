@@ -164,7 +164,7 @@ function updateComparison() {
 
   let group = [];
 
-  if (comparisonMode === "last") {
+  if (compareMode === "last") {
   if (history.length > 1) {
     comparison = history[1]; // previous test
   }
@@ -183,7 +183,7 @@ function updateComparison() {
   if (compareMode === "weight") {
     const weight = cleanNum(CURRENT_ATHLETE[5]);
 
-    if (comparisonMode === "grade") {
+    if (compareMode === "grade") {
 
   const sameGrade = processedData.filter(a =>
     a.grade === best.grade && a.name !== best.name
