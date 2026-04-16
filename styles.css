@@ -515,7 +515,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 /* ===== 7. TABLE ===== */
 .table {
   width: 100%;
-  max-width: 1300px;   /* 🔥 THIS is what centers visually */
+  max-width: 1500px;   /* 🔥 THIS is what centers visually */
   margin: 0 auto;      /* 🔥 fallback centering */
   border-collapse: collapse;
   background: #111;
@@ -529,26 +529,26 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 10px;
+  padding: 12px;
 }
 
 /* ===== TABLE FONT SIZE ===== */
 .table {
-  font-size: 20px;   /* 🔥 base size */
+  font-size: 24px;   /* 🔥 base size */
 }
 
 .table th {
-  font-size: 24px;   /* slightly bigger headers */
+  font-size: 26px;   /* slightly bigger headers */
   font-weight: 700;
 }
 
 .table td {
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .table th,
 .table td {
-padding: 20px;
+padding: 26px;
 text-align: center;
 }
 
