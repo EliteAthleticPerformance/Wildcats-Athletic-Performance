@@ -305,6 +305,7 @@ function renderPodium(data) {
     el.classList.add("show");
   });
 }, 100);
+}
 
 // ===============================
 // CREATE ROW
