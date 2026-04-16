@@ -227,9 +227,11 @@ function render() {
 
   // 🔥 BUILD PODIUM ONCE ONLY
   if (!podiumBuilt) {
+  setTimeout(() => {
     renderPodium(leaderboardData);
     podiumBuilt = true;
-  }
+  }, 100); // 🔥 delay fixes disappearing
+}
 
   renderTable(filtered, "liftTable", "lift");
   renderTable(filtered, "scoreTable", "score");
