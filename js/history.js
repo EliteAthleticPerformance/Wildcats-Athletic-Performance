@@ -285,19 +285,35 @@ function renderChart(id, history) {
         }
       ]
     },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          labels: { color: "#fff" }
-        }
+    plugins: {
+  legend: {
+    labels: {
+      color: "#fff",
+      font: { 
+        size: 22,   // 🔥 legend text (Athlete / Comparison)
+        weight: "bold"
       },
-      scales: {
-        x: { ticks: { color: "#aaa" } },
-        y: { ticks: { color: "#aaa" }, beginAtZero: true }
+      padding: 20
+    }
+  }
+},
+scales: {
+  r: {
+    pointLabels: {
+      color: "#fff",
+      font: { 
+        size: 20,   // 🔥 labels (Speed, Strength, etc.)
+        weight: "bold"
+      }
+    },
+    ticks: {
+      color: "#aaa",
+      backdropColor: "transparent",
+      font: { 
+        size: 16    // 🔥 numbers (20,40,60, etc.)
       }
     }
-  });
+  }
 }
 
 /* ========================================
