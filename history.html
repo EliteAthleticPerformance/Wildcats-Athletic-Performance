@@ -25,7 +25,7 @@
   <p id="score" style="margin-bottom:20px;"></p>
    Compare To:
   <div class="compare-toggle">
-    <button onclick="setCompareMode('Last')" id="btn-Last">Most Recent Test</button>
+    <button onclick="setCompareMode('last')" id="btn-last">Most Recent Test</button>
     <button onclick="setCompareMode('team')" class="active" id="btn-team">Team</button>
     <button onclick="setCompareMode('top5')" id="btn-top5">Top 5</button>
     <button onclick="setCompareMode('weight')" id="btn-weight">Weight Group</button>
@@ -248,10 +248,8 @@ function renderRadarChart(player, avg) {
   const ctx = document.getElementById("radarChart");
 
   if (window.radarChart && typeof window.radarChart.destroy === "function") {
-  window.radarChart.destroy();
-}
-
-  
+    window.radarChart.destroy();
+  }
 
   window.radarChart = new Chart(ctx, {
     type: "radar",
@@ -279,35 +277,41 @@ function renderRadarChart(player, avg) {
         }
       ]
     },
-    plugins: {
-  legend: {
-    labels: {
-      color: "#fff",
-      font: { 
-        size: 22,   // 🔥 legend text (Athlete / Comparison)
-        weight: "bold"
+
+    // ✅ FIXED SECTION
+    options: {
+      plugins: {
+        legend: {
+          labels: {
+            color: "#fff",
+            font: { 
+              size: 22,
+              weight: "bold"
+            },
+            padding: 20
+          }
+        }
       },
-      padding: 20
-    }
-  }
-},
-scales: {
-  r: {
-    pointLabels: {
-      color: "#fff",
-      font: { 
-        size: 20,   // 🔥 labels (Speed, Strength, etc.)
-        weight: "bold"
+      scales: {
+        r: {
+          pointLabels: {
+            color: "#fff",
+            font: { 
+              size: 20,
+              weight: "bold"
+            }
+          },
+          ticks: {
+            color: "#aaa",
+            backdropColor: "transparent",
+            font: { 
+              size: 16
+            }
+          }
+        }
       }
-    },
-    ticks: {
-      color: "#aaa",
-      backdropColor: "transparent",
-      font: { 
-        size: 16    // 🔥 numbers (20,40,60, etc.)
-      }
     }
-  }
+  });
 }
 
 /* ================= RANKINGS ================= */
