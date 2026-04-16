@@ -754,6 +754,34 @@ body {
   margin-top: 4px;
 }
 
+.insights-box {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.insights-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #60a5fa;
+}
+
+.insights-box ul {
+  list-style: none;
+  padding: 0;
+}
+
+.insights-box li {
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
 /* ========================================
 MOBILE (RESPONSIVE)
 ======================================== */
