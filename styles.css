@@ -624,21 +624,21 @@ input:focus {
 HISTORY / COMPARISON
 ======================================== */
 body {
-  font-size: 20px; /* 🔥 bump everything up */
+  font-size: 28px; /* 🔥 bump everything up */
 }
 
 .score {
-  font-size: 48px;
+  font-size: 32px;
   font-weight: bold;
 }
 
 .dominant {
-  font-size: 30px;
+  font-size: 32px;
   color: #3b82f6;
 }
 
 .compare-buttons button {
-  font-size: 32px;
+  font-size: 24px;
   padding: 20px 24px;
 }
 
