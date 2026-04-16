@@ -47,7 +47,19 @@ async function loadData() {
     const res = await fetch(CSV_URL + "&t=" + Date.now());
     const text = await res.text();
 
-    
+    rawData = parseCSV(text);
+    processedData = processData(rawData);
+
+    // 🔥 filter to selected athlete
+    if (selectedName) {
+      processedData = processedData.filter(a =>
+        normalize(a.name) === normalize(selectedName)
+      );
+    }
+
+    render(processedData); // 🔥 REQUIRED
+
+    setupSearch();
 
   } catch (err) {
     console.error("History load error:", err);
@@ -165,11 +177,6 @@ function extractMetrics(row) {
 /* ========================================
    RENDER
    ======================================== */
-if (selectedName) {
-  data = data.filter(a =>
-    normalize(a.name) === normalize(selectedName)
-  );
-}
 
 function render(data) {
 
