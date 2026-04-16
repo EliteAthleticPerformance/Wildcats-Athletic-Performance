@@ -47,10 +47,7 @@ async function loadData() {
     const res = await fetch(CSV_URL + "&t=" + Date.now());
     const text = await res.text();
 
-    rawData = parseCSV(text);
-    processedData = processData(rawData);
-
-    setupSearch();
+    
 
   } catch (err) {
     console.error("History load error:", err);
