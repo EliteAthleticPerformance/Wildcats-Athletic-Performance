@@ -529,9 +529,7 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
   width: 100%;
   display: flex;
   justify-content: center;
-
-  max-height: 600px;      /* 🔥 controls scroll area */
-  overflow-y: auto;       /* 🔥 enables scrolling */
+  padding: 10px;
 }
 
 /* ===== TABLE FONT SIZE ===== */
