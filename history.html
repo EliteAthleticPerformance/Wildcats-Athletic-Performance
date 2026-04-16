@@ -392,9 +392,9 @@ function renderRankings(player) {
       insights.push(`🟢 ${label} is a major strength (+${diff})`);
     } else if (diff > 5) {
       insights.push(`🟢 ${label} is above average (+${diff})`);
-    } else if (diff < -15) {
-      insights.push(`🔴 ${label} needs improvement (${diff})`);
     } else if (diff < -5) {
+      insights.push(`🔴 ${label} needs improvement (${diff})`);
+    } else if (diff < -15) {
       insights.push(`🟡 ${label} is slightly below average (${diff})`);
     }
   }
