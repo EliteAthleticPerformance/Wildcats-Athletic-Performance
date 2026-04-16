@@ -531,21 +531,21 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
 
 /* ===== TABLE FONT SIZE ===== */
 .table {
-  font-size: 16px;   /* 🔥 base size */
+  font-size: 20px;   /* 🔥 base size */
 }
 
 .table th {
-  font-size: 17px;   /* slightly bigger headers */
+  font-size: 24px;   /* slightly bigger headers */
   font-weight: 700;
 }
 
 .table td {
-  font-size: 15px;
+  font-size: 20px;
 }
 
 .table th,
 .table td {
-padding: 18px;
+padding: 20px;
 text-align: center;
 }
 
