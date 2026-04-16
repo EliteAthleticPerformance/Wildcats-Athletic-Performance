@@ -274,29 +274,29 @@ function renderPodium(data) {
   container.innerHTML = `
     <div class="podium">
 
-      <!-- 2ND -->
-      <div class="podium-item second">
-        <div class="podium-rank">🥈</div>
-        <div class="podium-name">${second.name}</div>
-        <div class="podium-score">${Math.round(second.score)}</div>
-      </div>
-
-      <!-- 1ST -->
-      <div class="podium-item first">
-        <div class="podium-rank">🥇</div>
-        <div class="podium-name">${first.name}</div>
-        <div class="podium-score">${Math.round(first.score)}</div>
-      </div>
-
-      <!-- 3RD -->
-      <div class="podium-item third">
-        <div class="podium-rank">🥉</div>
-        <div class="podium-name">${third.name}</div>
-        <div class="podium-score">${Math.round(third.score)}</div>
-      </div>
-
+    <!-- 2ND -->
+    <div class="podium-item second" onclick="goToAthlete('${second.name}')">
+      <div class="podium-rank">🥈</div>
+      <div class="podium-name">${second.name}</div>
+      <div class="podium-score">${Math.round(second.score)}</div>
     </div>
-  `;
+
+    <!-- 1ST -->
+    <div class="podium-item first" onclick="goToAthlete('${first.name}')">
+      <div class="podium-rank">🥇</div>
+      <div class="podium-name">${first.name}</div>
+      <div class="podium-score">${Math.round(first.score)}</div>
+    </div>
+
+    <!-- 3RD -->
+    <div class="podium-item third" onclick="goToAthlete('${third.name}')">
+      <div class="podium-rank">🥉</div>
+      <div class="podium-name">${third.name}</div>
+      <div class="podium-score">${Math.round(third.score)}</div>
+    </div>
+
+  </div>
+`;
 
   const items = container.querySelectorAll(".podium-item");
 
