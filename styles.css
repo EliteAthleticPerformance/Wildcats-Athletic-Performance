@@ -591,6 +591,21 @@ background: #1a1a1a;
   cursor: pointer;
 }
 
+.table td:first-child {
+  white-space: nowrap;
+}
+
+.table th {
+  background: #050505;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+
+.table {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+}
+
 /* ===== 8. FORM ===== */
 input, select {
 width: 100%;
