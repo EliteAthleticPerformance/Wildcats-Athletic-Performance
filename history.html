@@ -5,7 +5,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Athlete Profile</title>
+<title>Performance Comparison</title>
+<script>
+  window.pageTitle = "Performance Comparison";
+</script>
 
 <link rel="stylesheet" href="styles.css">
 
@@ -18,22 +21,39 @@
 
 <body>
 
-<main class="section" style="text-align:center;">
+<!-- ===== HEADER ===== -->
+<div id="header-placeholder"></div>
 
-  <h1 id="name"></h1>
-  <p id="score" style="margin-bottom:20px;"></p>
+<main>
 
-  <div class="compare-toggle">
-    <button onclick="setCompareMode('team')" class="active" id="btn-team">Team</button>
-    <button onclick="setCompareMode('top5')" id="btn-top5">Top 5</button>
-    <button onclick="setCompareMode('weight')" id="btn-weight">Weight Group</button>
-  </div>
+  <!-- ===== ATHLETE HEADER ===== -->
+  <section class="section" style="text-align:center;">
+    
+    <h1 id="name"></h1>
+    <p id="score" style="margin-bottom:20px;"></p>
 
-  <div style="max-width: 500px; margin: auto;">
-    <canvas id="radarChart"></canvas>
-  </div>
+    <p style="margin-top:10px;">Compare To:</p>
 
-  <div id="metrics" class="grid" style="margin-top:30px;"></div>
+    <div class="compare-toggle">
+      <button onclick="setCompareMode('team')" class="active" id="btn-team">Team</button>
+      <button onclick="setCompareMode('top5')" id="btn-top5">Top 5</button>
+      <button onclick="setCompareMode('weight')" id="btn-weight">Weight Group</button>
+      <button onclick="setCompareMode('grade')" id="btn-grade">Grade</button>
+    </div>
+
+  </section>
+
+  <!-- ===== CHART ===== -->
+  <section class="section" style="text-align:center;">
+    <div style="max-width: 500px; margin: auto;">
+      <canvas id="radarChart"></canvas>
+    </div>
+  </section>
+
+  <!-- ===== METRICS ===== -->
+  <section class="section">
+    <div id="metrics" class="grid"></div>
+  </section>
 
 </main>
 
@@ -330,6 +350,9 @@ function animateMetrics() {
 }
 
 </script>
+  <!-- ===== SCRIPT ===== -->
+  <script src="js/header.js"></script>
+<script src="js/history.js"></script>
 
 </body>
 </html>
