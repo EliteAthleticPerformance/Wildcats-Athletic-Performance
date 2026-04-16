@@ -218,25 +218,21 @@ function render() {
 
   const search = document.getElementById("leaderboardSearch")?.value.toLowerCase() || "";
 
-  // 🔥 FLATTEN ALL TESTS (NOT JUST LATEST)
   const allTests = Object.values(grouped).flat();
-
-  // 🔥 BUILD TRUE LEADERBOARD (BEST PER ATHLETE)
   const leaderboardData = buildLeaderboardData(allTests);
 
-  // 🔍 APPLY SEARCH
   const filtered = leaderboardData.filter(a =>
     a.name.toLowerCase().includes(search)
   );
 
-  console.log("PODIUM DATA:", filtered);
-  
-if (!podiumBuilt) {
-  renderPodium(leaderboardData);
-  podiumBuilt = true;
-}
+  // 🔥 BUILD PODIUM ONCE ONLY
+  if (!podiumBuilt) {
+    renderPodium(leaderboardData);
+    podiumBuilt = true;
+  }
+
   renderTable(filtered, "liftTable", "lift");
-renderTable(filtered, "scoreTable", "score");
+  renderTable(filtered, "scoreTable", "score");
 }
 
 // ===============================
