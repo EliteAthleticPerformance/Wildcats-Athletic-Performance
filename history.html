@@ -32,7 +32,7 @@
     <h1 id="name"></h1>
     <p id="score" style="margin-bottom:20px;"></p>
 
-    <p style="margin-top:10px;">Compare To:</p>
+    <p style="margin-top:20px;">Compare To:</p>
 
     <div class="compare-toggle">
       <button onclick="setCompareMode('team')" class="active" id="btn-team">Team</button>
@@ -45,7 +45,7 @@
 
   <!-- ===== CHART ===== -->
   <section class="section" style="text-align:center;">
-    <div style="max-width: 1300px; margin: auto;">
+    <div style="max-width: 800px; margin: auto;">
       <canvas id="radarChart"></canvas>
     </div>
   </section>
@@ -172,8 +172,8 @@ function updateComparison() {
   const score = cleanNum(CURRENT_ATHLETE[34]);
 
   document.getElementById("score").innerHTML = `
-    <span style="font-size:18px;">Score: ${score}</span>
-    <div style="margin-top:8px; color:#3b82f6; font-weight:600;">
+    <span style="font-size:24px;">Score: ${score}</span>
+    <div style="margin-top:14px; color:#3b82f6; font-weight:600;">
       Dominant: ${dominant.toUpperCase()}
     </div>
   `;
