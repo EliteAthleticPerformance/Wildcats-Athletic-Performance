@@ -153,3 +153,14 @@ function filterAthletes() {
 function goToAthlete(name) {
   window.location.href = `history.html?name=${encodeURIComponent(name)}`;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const name = new URLSearchParams(window.location.search).get("name");
+  const link = document.getElementById("compareLink");
+
+  if (link && name) {
+    link.href = `history.html?name=${encodeURIComponent(name)}`;
+  }
+
+});
