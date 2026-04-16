@@ -297,6 +297,14 @@ function renderPodium(data) {
 
     </div>
   `;
+
+  const items = container.querySelectorAll(".podium-item");
+
+items.forEach(el => el.classList.remove("show"));
+
+setTimeout(() => {
+  items.forEach(el => el.classList.add("show"));
+}, 50);
 }
 
 // ===============================
@@ -399,4 +407,8 @@ function createRow(a, index, type) {
   frag.appendChild(detail);
 
   return frag;
+}
+
+function goToAthlete(name) {
+  window.location.href = `history.html?name=${encodeURIComponent(name)}`;
 }
