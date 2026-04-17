@@ -4,17 +4,21 @@
 
 /* ===== 1. VARIABLES ===== */
 :root {
---bg: #000;
---card: #1a1a1a;
---text: #ffffff;
---muted: #aaa;
---border: rgba(255,255,255,0.08);
+  --background: #000;
+  --card: #1a1a1a;
+  --text: #ffffff;
+  --muted: #aaa;
+  --border: rgba(255,255,255,0.08);
 
---primary: #0066FF;
---accent: #6c5ce7;
+  --primary: #5A2D82;
+  --primaryLight: #8B63B5;
+  --primaryDark: #3A1C57;
 
---radius: 14px;
---transition: 0.25s ease;
+  --secondary: #C62828;
+  --secondaryLight: #F06A6A;
+
+  --radius: 14px;
+  --transition: 0.25s ease;
 }
 
 /* ===== 2. GLOBAL ===== */
@@ -24,7 +28,7 @@
 html, body {
 margin: 0;
 padding: 0;
-background: var(--bg);
+background: var(--background);
 color: var(--text);
 font-family: 'Arial Black', sans-serif;
 }
@@ -82,15 +86,9 @@ text-align: center;
 
     text-transform: uppercase;
 
-    color: #93c5fd;             /* 🔥 brighter blue */
+       margin-bottom: 8px;
 
-    margin-bottom: 8px;
-
-    text-shadow:
-        0 0 6px rgba(147,197,253,0.8),
-        0 0 12px rgba(59,130,246,0.7),
-        0 0 20px rgba(0,102,255,0.6);
-}
+   }
 
 /* Buttons */
 
@@ -183,7 +181,7 @@ text-align: center;
 
 /* ===== 4. BUTTON ===== */
 .btn {
-background: linear-gradient(135deg, var(--accent), var(--primary));
+background: linear-gradient(135deg, var(--secondary), var(--primary));
 padding: 12px 20px;
 border-radius: 10px;
 color: white;
@@ -266,12 +264,11 @@ box-shadow: 0 10px 25px rgba(0,102,255,0.4);
     text-align:center;
 
     text-shadow:
-        0 2px 2px rgba(0,0,0,0.9),
-        0 4px 8px rgba(0,0,0,0.8),
-        0 0 10px rgba(0,102,255,0.9),
-        0 0 20px rgba(0,102,255,0.8),
-        0 0 35px rgba(0,102,255,0.7),
-        0 0 55px rgba(0,102,255,0.6);
+  0 2px 2px rgba(0,0,0,0.9),
+  0 4px 8px rgba(0,0,0,0.8),
+  0 0 10px var(--primary),
+  0 0 20px var(--primaryLight),
+  0 0 35px var(--primaryLight);
 
     background:linear-gradient(
         180deg,
