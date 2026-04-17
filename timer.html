@@ -1868,6 +1868,7 @@ window.addEventListener("unhandledrejection", e => {
     console.warn("Unhandled promise:", e.reason);
 });
 
+<script>
 window.addEventListener("DOMContentLoaded", () => {
 
     applyDaySpecificClassLength();
@@ -1881,20 +1882,12 @@ window.addEventListener("DOMContentLoaded", () => {
     // auto detect if class already started
     setTimeout(autoDetectActiveClass, 2000);
 
-});
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  if (typeof loadTheme === "function") {
-    loadTheme();
-  }
+    // 🔥 APPLY THEME (this was broken before)
+    if (typeof loadTheme === "function") {
+        loadTheme();
+    }
 });
 </script>
-      
-</script>
-</body>
-</html>
-
 
 
 
