@@ -77,3 +77,7 @@ function applyBranding(school, theme) {
 // ===============================
 document.addEventListener("headerLoaded", loadTheme);
 
+// 🔥 FALLBACK (in case event already fired)
+if (document.readyState === "complete" || document.readyState === "interactive") {
+  setTimeout(loadTheme, 50);
+}
