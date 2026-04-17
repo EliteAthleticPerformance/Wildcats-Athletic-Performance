@@ -60,11 +60,13 @@ function applyBranding(school, theme) {
 
   const root = document.documentElement;
 
+  // 🎨 MATCH CSS VARIABLE NAMES EXACTLY
   root.style.setProperty("--primary", theme.primary);
-  root.style.setProperty("--primary-light", theme.primaryLight);
-  root.style.setProperty("--primary-dark", theme.primaryDark);
+  root.style.setProperty("--primaryLight", theme.primaryLight);
+  root.style.setProperty("--primaryDark", theme.primaryDark);
   root.style.setProperty("--secondary", theme.secondary);
-  root.style.setProperty("--bg", theme.background);
+  root.style.setProperty("--secondaryLight", theme.secondaryLight);
+  root.style.setProperty("--background", theme.background);
 
   const logo = document.querySelector(".logo");
   if (logo) logo.src = school.logo;
