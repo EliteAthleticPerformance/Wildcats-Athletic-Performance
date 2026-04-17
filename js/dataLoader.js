@@ -23,11 +23,27 @@ async function loadAthleteData() {
 
   const raw = await loadCSV(url);
 
-  APP_DATA = raw.map(row => ({
-  ...row,
+ APP_DATA = raw.map(row => ({
   name: row["Student-Athlete"]?.trim(),
-  date: row["Test Date"]?.trim()
+  date: row["Test Date"]?.trim(),
+
+  bench: Number(row["Bench Press"]) || 0,
+  squat: Number(row["Squat"]) || 0,
+  clean: Number(row["Hang Clean"]) || 0,
+
+  vertical: Number(row["Vertical Jump"]) || 0,
+  broad: Number(row["Broad Jump"]) || 0,
+  med: Number(row["Med Ball Toss"]) || 0,
+
+  agility: Number(row["Pro Agility"]) || 0,
+  ten: Number(row["10 yd"]) || 0,
+  forty: Number(row["40 yd"]) || 0,
+
+  situps: Number(row["Sit-Ups"]) || 0,
+
+  score: Number(row["Total Athletic Performance"]) || 0
 }));
+  .filter(row => row.name);
 
   console.log("✅ DATA READY:", APP_DATA.length);
 
