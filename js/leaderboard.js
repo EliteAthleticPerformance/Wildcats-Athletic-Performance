@@ -1,4 +1,4 @@
-```js
+js
 // ===============================
 // GLOBAL STATE
 // ===============================
@@ -331,4 +331,4 @@ function createRow(a, index, type) {
 function goToAthlete(name) {
   window.location.href = `history.html?name=${encodeURIComponent(name)}`;
 }
-```
+
