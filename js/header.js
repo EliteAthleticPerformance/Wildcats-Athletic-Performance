@@ -43,13 +43,29 @@ function initHeaderUI() {
   const schoolNameEl = document.getElementById("schoolName");
   const pageTitleEl = document.getElementById("pageTitle");
 
-    if (pageTitleEl) {
+  if (pageTitleEl) {
     pageTitleEl.textContent = "Elite Athletic Performance";
-}
-   document.dispatchEvent(new Event("headerLoaded"));
-}
+  }
 
+  // 🔥 PRESERVE SCHOOL PARAM IN NAV LINKS
+  const school = new URLSearchParams(window.location.search).get("school");
 
+  if (school) {
+    // optional: store for fallback
+    localStorage.setItem("school", school);
+
+    document.querySelectorAll("#dropdownMenu a").forEach(link => {
+      const href = link.getAttribute("href");
+
+      if (href && !href.includes("school=")) {
+        link.setAttribute("href", `${href}?school=${school}`);
+      }
+    });
+  }
+
+  // 🔥 fire AFTER links are updated
+  document.dispatchEvent(new Event("headerLoaded"));
+}
 
 /* ========================================
    🔗 ACTIVE LINK HIGHLIGHT
@@ -60,8 +76,11 @@ function highlightActiveLink() {
   const current = window.location.pathname.split("/").pop();
 
   links.forEach(link => {
-    if (link.getAttribute("href") === current) {
-      link.style.color = "#60a5fa";
+    const href = link.getAttribute("href");
+
+    // handle links WITH ?school=...
+    if (href && href.startsWith(current)) {
+      link.style.color = "var(--primary)";
       link.style.fontWeight = "700";
     }
   });
