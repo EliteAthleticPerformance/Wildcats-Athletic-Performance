@@ -3,7 +3,12 @@
 // UTIL
 // ===============================
 function normalize(str) {
-  return (str || "").trim().toLowerCase().replace(/\s+/g, "");
+  return (str || "")
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^\w]/g, ""); // 🔥 removes hidden chars
 }
 
 function formatSchoolName(name) {
@@ -21,6 +26,9 @@ async function loadTheme() {
 
   const schools = await loadCSV(schoolDBUrl);
   const themes = await loadCSV(themeUrl);
+
+  console.log("Looking for:", school);
+console.log("School list:", schools.map(s => normalize(s.school)));
 
   const schoolRow = schools.find(s => normalize(s.school) === school);
   const themeRow = themes.find(t => normalize(t.school) === school);
