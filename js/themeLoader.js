@@ -1,4 +1,7 @@
-
+function getSchoolFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("school") || "harrisonville"; // default fallback
+}
 // ===============================
 // UTIL
 // ===============================
