@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   const data = await loadAthleteData(); // 🔥 from dataLoader.js
-
+console.log("SAMPLE ROW:", data[0]);
   processDataFromJSON(data);
 
   const search = document.getElementById("leaderboardSearch");
