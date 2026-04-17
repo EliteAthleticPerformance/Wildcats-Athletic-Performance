@@ -19,7 +19,7 @@ async function loadCSV(url) {
 let APP_DATA = [];
 
 async function loadAthleteData() {
-  const url = "PASTE_YOUR_GOOGLE_SHEET_CSV_URL_HERE";
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
 
   const raw = await loadCSV(url);
 
