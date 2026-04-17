@@ -7,11 +7,16 @@
 
       <title>Harrisonville Wildcats | 4 Quadrant Training Timer</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+
+      <script src="themeLoader.js"></script>
       
 <style>
 :root {
-    --royal:#505152;
-    --silver:#B0B7BE;
+  --primary: #0066FF;
+  --primaryLight: #60a5fa;
+  --primaryDark: #1e3a8a;
+  --secondary: #ef4444;
+  --secondaryLight: #f87171;
 }
 
 .workMode {
@@ -1878,7 +1883,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
 });
 
-
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof loadTheme === "function") {
+    loadTheme();
+  }
+});
+</script>
+      
 </script>
 </body>
 </html>
