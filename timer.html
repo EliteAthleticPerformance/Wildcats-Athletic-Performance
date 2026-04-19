@@ -167,25 +167,28 @@ body {
 #headerMotto {
     text-align:center;
     justify-self:center;
+
     font-size:clamp(32px, 5vh, 60px);
     font-weight:900;
     letter-spacing:10px;
-    transform:scaleX(1.25);          /* 🔥 horizontal stretch */ 
-    color:#ffffff;
+    transform:scaleX(1.25);
 
-    /* 🔥 MULTI-LAYER GLOW (THEME-AWARE) */
-text-shadow:
-    0 2px 2px rgba(0,0,0,0.9),          /* depth */
-    0 4px 8px rgba(0,0,0,0.8),          /* shadow */
-    0 0 10px var(--primary),            /* inner glow */
-    0 0 20px var(--primaryLight),
-    0 0 35px var(--primaryLight),
-    0 0 55px var(--secondaryLight);
-
-    /* 🔥 subtle shine */
+    /* ✅ ONLY ONE COLOR */
     color: var(--primaryLight);
-      -webkit-text-stroke: 1px rgba(0,0,0,0.6);
+
+    /* 🔥 CLEAN THEME GLOW */
+    text-shadow:
+        0 2px 2px rgba(0,0,0,0.9),
+        0 4px 8px rgba(0,0,0,0.8),
+        0 0 12px var(--primary),
+        0 0 24px var(--primaryLight),
+        0 0 40px var(--primaryLight),
+        0 0 70px var(--secondaryLight);
+
+    -webkit-text-stroke: 1px rgba(0,0,0,0.6);
+
     animation: eliteGlow 2.5s ease-in-out infinite alternate;
+
     white-space:nowrap;
 }
 
