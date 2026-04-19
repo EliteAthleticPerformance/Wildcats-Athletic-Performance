@@ -670,6 +670,24 @@ body {
   transform: translateY(-2px);
 }
 
+.compare-btn {
+  margin: 10px 0 15px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.compare-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
 .metrics-grid {
   display: flex;
   justify-content: center;
