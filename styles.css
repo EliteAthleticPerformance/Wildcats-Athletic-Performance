@@ -915,6 +915,29 @@ text-shadow:
   margin-bottom: 60px;
 }
 
+/* ========================================
+KEY (IDENTIFIER)
+======================================== */
+
+.key-card {
+  max-width: 1300px;
+  margin: 0 auto 30px auto;
+  text-align: center;
+
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 10px rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.key-content {
+  margin-top: 15px;
+  line-height: 2;
+  font-size: 18px;
+  color: #ccc;
+}
+
+/* Labels row */
 .key-labels {
   display: flex;
   justify-content: center;
@@ -924,109 +947,89 @@ text-shadow:
   font-size: 16px;
 }
 
-.key-description {
-  font-size: 14px;
-  color: #ccc;
-  margin-top: 5px;
-}
-
 .key-labels span {
   font-weight: 700;
 }
 
-.key-labels .elite   { color: #22c55e; }
-.key-labels .strong  { color: #f97316; }
-.key-labels .average { color: #facc15; }
-.key-labels .needs   { color: #ef4444; }
+/* Color coding */
+.key-labels .elite   { color: #22c55e; }  /* Green */
+.key-labels .strong  { color: #f97316; }  /* Orange */
+.key-labels .average { color: #facc15; }  /* Yellow */
+.key-labels .needs   { color: #ef4444; }  /* Red */
 
+/* Divider slash */
 .key-labels span:not(:last-child)::after {
   content: " /";
   color: #666;
   margin-left: 6px;
 }
 
+/* Description text */
+.key-description {
+  font-size: 14px;
+  color: #ccc;
+  margin-top: 5px;
+}
+
+
+/* ========================================
+LEADERBOARD LAYOUT
+======================================== */
+
 .leaderboard-grid {
   display: flex;
   gap: 40px;
   align-items: stretch;
   justify-content: center;
-  flex-wrap: wrap; /* ✅ THIS is the key change */
+  flex-wrap: wrap; /* ✅ ensures ONLY 2 tables, no empty space */
   padding: 0 20px;
 }
 
 .leaderboard-card {
   flex: 1;
-  max-width: 100%;
+  max-width: 600px;  /* keeps tables balanced */
   min-width: 0;
   padding: 10px;
-  overflow: hidden; /* 🔥 keeps content inside */
-}
-
-.table-scroll {
-  width: 100%;
-  overflow-x: auto;  /* 🔥 allows scroll INSIDE card */
-}
-
-.leaderboard-table {
-  width: 100%;
-  min-width: 600px; /* 🔥 prevents squishing */
-}
-
-.leaderboard-table th,
-.leaderboard-table td {
-  padding: 12px 14px; /* 🔥 bigger spacing */
-}
-
-.leaderboard-table {
-  border-collapse: separate;
-  border-spacing: 0 10px; /* 🔥 vertical gap between rows */
-}
-
-.leaderboard-table tbody tr {
-  background: rgba(255,255,255,0.03);
-  border-radius: 8px;
+  overflow: hidden;
 }
 
 .leaderboard-card h2 {
   margin-bottom: 15px;
 }
 
+
+/* ========================================
+TABLE STYLING
+======================================== */
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.leaderboard-table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 12px 14px;
+}
+
 .leaderboard-table tbody tr {
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
   transition: all 0.25s ease;
 }
 
 .leaderboard-table tbody tr:hover {
-  background: rgba(59,130,246,0.08); /* soft blue glow */
-  transform: scale(1.01);             /* slight lift */
+  background: rgba(59,130,246,0.08);
+  transform: scale(1.01);
   box-shadow: 0 0 12px rgba(59,130,246,0.25);
   cursor: pointer;
-}
-
-.key-card {
-  max-width: 1300px;
-  margin: 0 auto 30px auto;
-  text-align: center;
-
-  border: 2px solid rgba(255,255,255,0.1);
-  box-shadow: 0 0 10px rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 20px;
-}
-
-.key-content {
-  margin-top: 15px;
-  line-height: 2.0;
-  font-size: 18px;
-  color: #ccc;
-  text-align: center;
-}
-
-/* Optional glow border to match your theme */
-.key-card {
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 0 10px rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 20px;
 }
 
 
