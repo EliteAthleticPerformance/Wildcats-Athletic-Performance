@@ -270,7 +270,7 @@ if (compareMode === "individual") {
 
   const validRows = ALL_ROWS.filter(r => {
     const m = extractMetrics(r);
-    return !(m.speed === 0 && m.strength === 0 && m.power === 0 && m.explosive === 0);
+    return isValidMetrics(m);
   });
 
   group = validRows
@@ -313,20 +313,18 @@ function calculateAverage(group) {
 
   group.forEach(r => {
 
-    const m = extractMetrics(r);
+  const m = extractMetrics(r);
 
-    // skip bad rows
-    if (m.speed === 0 && m.strength === 0 && m.power === 0 && m.explosive === 0) {
-      return;
-    }
+  // skip bad rows
+  if (!isValidMetrics(m)) return;
 
-    totals.speed += m.speed;
-    totals.strength += m.strength;
-    totals.power += m.power;
-    totals.explosive += m.explosive;
+  totals.speed += m.speed;
+  totals.strength += m.strength;
+  totals.power += m.power;
+  totals.explosive += m.explosive;
 
-    count++;
-  });
+  count++;
+});
 
   if (count === 0) count = 1;
 
