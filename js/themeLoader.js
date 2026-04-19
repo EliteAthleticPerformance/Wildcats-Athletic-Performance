@@ -97,11 +97,19 @@ if (logo && school.logo) {
   logo.src = school.logo;
 }
 
+  const podiumTitle = document.getElementById("podiumTitle");
+
+if (podiumTitle && school.name) {
+  podiumTitle.textContent = `🏆 ${school.name} Top 3 Athletes`;
+}
+
   const titles = document.querySelectorAll(".school-name");
   titles.forEach(el => {
     el.textContent = formatSchoolName(school.name);
   });
 }
+
+
 
 
 // ===============================
