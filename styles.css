@@ -915,6 +915,30 @@ text-shadow:
   margin-bottom: 60px;
 }
 
+.key-content span {
+  font-weight: 700;
+}
+
+/* 🟢 Elite */
+.key-content span.elite {
+  color: #22c55e;
+}
+
+/* 🟠 Strong */
+.key-content span.strongg {
+  color: #f97316;
+}
+
+/* 🟡 Average */
+.key-content span.average {
+  color: #facc15;
+}
+
+/* 🔴 Needs Work */
+.key-content span.needs {
+  color: #ef4444;
+}
+
 .leaderboard-grid {
   display: flex;
   gap: 40px;
@@ -999,29 +1023,6 @@ text-shadow:
   padding: 20px;
 }
 
-.key-content span {
-  font-weight: 700;
-}
-
-/* 🟢 Elite */
-.key-content span.elite {
-  color: #22c55e;
-}
-
-/* 🟠 Strong */
-.key-content span.strongg {
-  color: #f97316;
-}
-
-/* 🟡 Average */
-.key-content span.average {
-  color: #facc15;
-}
-
-/* 🔴 Needs Work */
-.key-content span.needs {
-  color: #ef4444;
-}
 
 /* ========================================
 MOBILE (RESPONSIVE)
