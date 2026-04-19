@@ -364,7 +364,8 @@ text-shadow:
 
 .q1{background:#000;color:#fff;border:8px solid var(--silver);}
 .q2{background:#fff;color:#000;border:8px solid var(--silver);}
-.q3{background: var(--primary);}
+.q3 {background: var(--primary);
+    color: #fff;}
 .q4{background:#555555d5;color:#fff;border:8px solid var(--silver);}
 
 /* ===================== CENTER CLOCK ===================== */
@@ -417,11 +418,7 @@ text-shadow:
     
     <span id="headerMotto">Elite Athletic Performance</span>
 
-    <img id="teamLogo" src="../Elite-Athletic-Performance/images/wildcat-logo.png" 
-  class="logo"
-  alt="Wildcats Logo"
-  onerror="this.src='/Elite-Athletic-Performance/images/wildcat-logo.png'" 
-/>
+    <img id="schoolLogo" class="logoDefault"> 
       
 </div>
 
@@ -1880,4 +1877,28 @@ window.addEventListener("DOMContentLoaded", () => {
     if (typeof loadTheme === "function") {
         loadTheme();
     }
+
+       // 🔥 ADD THIS RIGHT HERE
+    const logo = document.getElementById("schoolLogo");
+
+    if (logo) {
+        setTimeout(() => {
+            const currentLogo = document.querySelector(".logo");
+            if (currentLogo) {
+                logo.src = currentLogo.src;
+            }
+        }, 150);
+    }
+
 });
+
+      // 🔥 LOGO SYNC (CORRECT WAY)
+document.addEventListener("headerLoaded", () => {
+    const headerLogo = document.querySelector(".logo");
+    const timerLogo = document.getElementById("schoolLogo");
+
+    if (headerLogo && timerLogo) {
+        timerLogo.src = headerLogo.src;
+    }
+});
+
