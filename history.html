@@ -235,6 +235,17 @@ if (compareMode === "last") {
   }
 }
 
+if (compareMode === "individual") {
+  const selected = document.getElementById("athleteSelect").value;
+
+  if (!selected) {
+    group = [CURRENT_ATHLETE];
+  } else {
+    const row = getBestRow(ALL_ROWS, selected);
+    group = row ? [row] : [CURRENT_ATHLETE];
+  }
+}
+  
 if (compareMode === "team") {
   group = ALL_ROWS.filter(r => r !== CURRENT_ATHLETE);
 }
