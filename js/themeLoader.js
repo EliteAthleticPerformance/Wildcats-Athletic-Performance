@@ -1,7 +1,12 @@
 function getSchoolFromURL() {
   const params = new URLSearchParams(window.location.search);
-  return params.get("school") || "harrisonville"; // default fallback
-}
+  const urlSchool = params.get("school");
+
+  // If URL has school → store it
+  if (urlSchool) {
+    sessionStorage.setItem("school", urlSchool);
+    return urlSchool;
+  }
 // ===============================
 // UTIL
 // ===============================
