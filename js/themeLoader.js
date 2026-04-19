@@ -18,6 +18,24 @@ function formatSchoolName(name) {
   return (name || "").replace(/\b\w/g, c => c.toUpperCase());
 }
 
+async function loadCSV(url) {
+  const res = await fetch(url);
+  const text = await res.text();
+
+  const rows = text.split("\n").map(r => r.split(","));
+  const headers = rows.shift().map(h => h.trim());
+
+  return rows
+    .filter(r => r.length && r[0])
+    .map(row => {
+      const obj = {};
+      headers.forEach((h, i) => {
+        obj[h] = (row[i] || "").trim();
+      });
+      return obj;
+    });
+}
+
 // ===============================
 // LOAD THEME (EVENT-DRIVEN)
 // ===============================
