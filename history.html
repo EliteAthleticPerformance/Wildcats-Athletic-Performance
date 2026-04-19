@@ -168,14 +168,17 @@ function setCompareMode(mode) {
 
   const dropdown = document.getElementById("athleteSelect");
 
-  if (mode === "individual") {
-    dropdown.style.display = "block";
-    populateAthleteDropdown(); // 👈 important
-  } else {
-    dropdown.style.display = "none";
-  }
+if (mode === "individual") {
+  dropdown.style.display = "block";
+  populateAthleteDropdown();
 
-  updateComparison();
+  setTimeout(() => dropdown.classList.add("show"), 10); // animation
+} else {
+  dropdown.classList.remove("show");
+
+  setTimeout(() => {
+    dropdown.style.display = "none";
+  }, 200); // matches CSS transition
 }
 
 /* ================= MAIN ENGINE ================= */
