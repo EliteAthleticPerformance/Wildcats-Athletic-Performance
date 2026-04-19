@@ -183,32 +183,27 @@ text-shadow:
     0 0 55px var(--secondaryLight);
 
     /* 🔥 subtle shine */
-    background:linear-gradient(
-        180deg,
-        #ffffff 0%,
-        #dce6ff 40%,
-        #ffffff 100%
-    );
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
+    color: var(--primaryLight);
       -webkit-text-stroke: 1px rgba(0,0,0,0.6);
     animation: eliteGlow 2.5s ease-in-out infinite alternate;
     white-space:nowrap;
 }
 
-      @keyframes eliteGlow {
+     @keyframes eliteGlow {
     from {
         text-shadow:
             0 2px 2px rgba(0,0,0,0.9),
-            0 0 10px var(--primary),
-            0 0 20px var(--primaryLight);
+            0 0 12px var(--primary),
+            0 0 24px var(--primaryLight),
+            0 0 40px var(--primaryLight);
     }
-    to { 
+    to {
         text-shadow:
             0 2px 4px rgba(0,0,0,1),
             0 0 20px var(--primary),
             0 0 40px var(--primaryLight),
-            0 0 70px var(--secondaryLight);
+            0 0 70px var(--secondaryLight),
+            0 0 110px var(--secondaryLight);
     }
 }
 
