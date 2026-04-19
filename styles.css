@@ -919,10 +919,6 @@ text-shadow:
 KEY (IDENTIFIER)
 ======================================== */
 
-/* ========================================
-KEY (IDENTIFIER)
-======================================== */
-
 .key-card {
   max-width: 1300px;
   margin: 0 auto 30px auto;
@@ -1001,6 +997,10 @@ LEADERBOARD LAYOUT
   margin-bottom: 15px;
 }
 
+.leaderboard-card td div {
+  margin-top: 4px;
+}
+
 
 /* ========================================
 TABLE STYLING
@@ -1057,7 +1057,7 @@ BADGE STYLES (FOR TABLE)
 }
 
 /* 🟠 Above Average */
-.badge.above, {
+.badge.above {
   background: rgba(249,115,22,0.15);
   color: #f97316;
   border: 1px solid #f97316;
@@ -1075,6 +1075,9 @@ BADGE STYLES (FOR TABLE)
   background: rgba(239,68,68,0.15);
   color: #ef4444;
   border: 1px solid #ef4444;
+}
+.badge {
+  white-space: nowrap;
 }
 
 /* ========================================
