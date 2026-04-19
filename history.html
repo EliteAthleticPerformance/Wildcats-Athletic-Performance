@@ -158,6 +158,25 @@ function getBestRow(rows, athleteName) {
 
 /* ================= COMPARE MODE ================= */
 
+function populateAthleteDropdown() {
+  const dropdown = document.getElementById("athleteSelect");
+
+  if (!dropdown) return;
+
+  dropdown.innerHTML = '<option value="">Select Athlete</option>';
+
+  const names = [...new Set(ALL_ROWS.map(r => r[0]))];
+
+  names.forEach(name => {
+    if (!name || name === selectedName) return;
+
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    dropdown.appendChild(option);
+  });
+}
+  
 function setCompareMode(mode) {
   compareMode = mode;
 
