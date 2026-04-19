@@ -143,24 +143,25 @@ updateComparison();
 
 /* ================= BEST PERFORMANCE ================= */
 
-function getBestRow(rows, athleteName) {
+function getBestRow(rows) {
 
-  const normalize = str =>
-  (str || "")
-    .toLowerCase()
-    .replace(/[^a-z]/g, "");
+  let best = null;
+  let bestScore = -Infinity;
 
-  const target = normalize(athleteName);
+  rows.forEach(r => {
+    const score = cleanNum(r[34]);
+    const m = extractMetrics(r);
 
-  const matches = rows.filter(r =>
-    normalize(r[0]) === target
-  );
+    // 🔥 ONLY allow complete rows
+    if (!isValidMetrics(m)) return;
 
-  if (!matches.length) return null;
-
-  return matches.reduce((best, current) => {
-    return cleanNum(current[34]) > cleanNum(best[34]) ? current : best;
+    if (score > bestScore) {
+      best = r;
+      bestScore = score;
+    }
   });
+
+  return best;
 }
 
 /* ================= COMPARE MODE ================= */
