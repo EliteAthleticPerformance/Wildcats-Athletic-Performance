@@ -920,12 +920,13 @@ text-shadow:
   gap: 20px;
   align-items: stretch;
   justify-content: center;
-  flex-wrap: nowrap;
+  flex-wrap: nowrap; /* 🔥 THIS is the key */
 }
 
 .leaderboard-card {
   flex: 1;
   max-width: 50%;
+  min-width: 0;
 
   overflow: hidden; /* 🔥 keeps content inside */
 }
