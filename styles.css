@@ -689,7 +689,7 @@ body {
 }
 
 .compare-dropdown {
-  margin: 15px auto 20px;
+  margin: 20px auto 30px;
   padding: 10px 14px;
   font-size: 15px;
   border-radius: 10px;
@@ -704,6 +704,17 @@ body {
   cursor: pointer;
 
   transition: 0.2s;
+}
+
+.compare-dropdown {
+  position: relative;
+  z-index: 10;
+}
+
+.compare-dropdown {
+  width: 260px;
+  max-width: 90%;
+  text-align: center;
 }
 
 .compare-dropdown:hover {
