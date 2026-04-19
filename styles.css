@@ -925,8 +925,20 @@ text-shadow:
 
 .leaderboard-card {
   flex: 1;
-  max-width: 50%;
   min-width: 0;
+  padding: 10px;
+}
+
+/* LEFT + MIDDLE tables */
+.leaderboard-card:not(.key-card) {
+  max-width: 600px;
+}
+
+/* RIGHT key panel */
+.key-card {
+  flex: 0 0 300px; /* 🔥 fixed width */
+  max-width: 300px;
+
 
   overflow: hidden; /* 🔥 keeps content inside */
 }
@@ -1019,6 +1031,6 @@ MOBILE (RESPONSIVE)
 
 @media (max-width: 900px) {
   .leaderboard-grid {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 }
