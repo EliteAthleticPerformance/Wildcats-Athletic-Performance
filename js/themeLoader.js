@@ -7,6 +7,16 @@ function getSchoolFromURL() {
     sessionStorage.setItem("school", urlSchool);
     return urlSchool;
   }
+
+  // Otherwise use stored value
+  const storedSchool = sessionStorage.getItem("school");
+  if (storedSchool) return storedSchool;
+
+  // Final fallback
+  return "harrisonville";
+}
+
+  
 // ===============================
 // UTIL
 // ===============================
