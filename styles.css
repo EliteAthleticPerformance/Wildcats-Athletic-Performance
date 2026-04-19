@@ -917,7 +917,7 @@ text-shadow:
 
 .leaderboard-grid {
   display: flex;
-  gap: 40px;
+  gap: 20px;
   align-items: stretch;
   justify-content: center;
   flex-wrap: nowrap;
@@ -925,20 +925,7 @@ text-shadow:
 
 .leaderboard-card {
   flex: 1;
-  min-width: 0;
-  padding: 10px;
-}
-
-/* LEFT + MIDDLE tables */
-.leaderboard-card:not(.key-card) {
-  max-width: 600px;
-}
-
-/* RIGHT key panel */
-.key-card {
-  flex: 0 0 300px; /* 🔥 fixed width */
-  max-width: 300px;
-
+  max-width: 50%;
 
   overflow: hidden; /* 🔥 keeps content inside */
 }
@@ -1031,6 +1018,6 @@ MOBILE (RESPONSIVE)
 
 @media (max-width: 900px) {
   .leaderboard-grid {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 }
