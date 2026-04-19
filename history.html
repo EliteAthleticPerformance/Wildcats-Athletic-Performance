@@ -263,9 +263,15 @@ if (compareMode === "individual") {
 
   if (compareMode === "top5") {
   comparisonName = "Top 5 Avg";
-  group = [...ALL_ROWS] // clone first
-  .sort((a, b) => cleanNum(b[34]) - cleanNum(a[34]))
-  .slice(0, 5);
+
+  const validRows = ALL_ROWS.filter(r => {
+    const m = extractMetrics(r);
+    return !(m.speed === 0 && m.strength === 0 && m.power === 0 && m.explosive === 0);
+  });
+
+  group = validRows
+    .sort((a, b) => cleanNum(b[34]) - cleanNum(a[34]))
+    .slice(0, 5);
 }
 
   if (compareMode === "weight") {
