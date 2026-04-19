@@ -87,27 +87,7 @@ function cleanNum(val) {
   return !(m.speed === 0 && m.strength === 0 && m.power === 0 && m.explosive === 0);
 }
 
-  if (!row[30] && !row[31] && !row[32] && !row[33]) {
-    return { speed: 0, strength: 0, power: 0, explosive: 0 };
-  }
-
-  console.log("DEBUG →", {
-    name: row[0],
-    speed: row[30],
-    strength: row[31],
-    power: row[32],
-    explosive: row[33]
-  });
-
-  return {
-    speed: cleanNum(row[30]),
-    strength: cleanNum(row[31]),
-    power: cleanNum(row[32]),
-    explosive: cleanNum(row[33])
-  };
-}
-
-function getDominantTrait(metrics) {
+  function getDominantTrait(metrics) {
   return Object.entries(metrics)
     .sort((a, b) => b[1] - a[1])[0][0];
 }
