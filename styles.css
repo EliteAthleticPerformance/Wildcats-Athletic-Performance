@@ -973,11 +973,11 @@ text-shadow:
 }
 
 .key-card {
-  max-width: 800px;
+  max-width: 1300px;
   margin: 0 auto 30px auto;
   text-align: center;
 
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.1);
   box-shadow: 0 0 10px rgba(255,255,255,0.05);
   border-radius: 12px;
   padding: 20px;
@@ -985,8 +985,8 @@ text-shadow:
 
 .key-content {
   margin-top: 15px;
-  line-height: 1.6;
-  font-size: 14px;
+  line-height: 2.0;
+  font-size: 18px;
   color: #ccc;
   text-align: center;
 }
