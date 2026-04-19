@@ -950,7 +950,7 @@ text-shadow:
   gap: 40px;
   align-items: stretch;
   justify-content: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap; /* ✅ THIS is the key change */
   padding: 0 20px;
 }
 
