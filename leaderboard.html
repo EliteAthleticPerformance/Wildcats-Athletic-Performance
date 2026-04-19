@@ -32,75 +32,72 @@
   </section>
 
   <!-- SEARCH -->
-  <section class="section">
-    <input id="leaderboardSearch" class="search" placeholder="Search athlete...">
-  </section>
+ <section class="section">
 
-  <!-- GRID -->
-  <section class="section">
-<div class="podium-wrapper">
-  <h2 id="podiumTitle" class="podium-title">🏆 Top 3 Athletes</h2>
-  <div id="podium" class="podium-container"></div>
-</div>
-    <div class="leaderboard-grid">
-
-      <!-- ===== LIFT TOTALS ===== -->
-      
-
-<div class="leaderboard-grid">
-
-  <!-- LEFT: 3 LIFT -->
-  <div class="leaderboard-card">
-    <h2>🏋️ 3 Lift Max Totals</h2>
-
-    <div class="table-scroll">
-      <table id="liftTable" class="leaderboard-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Total</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  <div class="podium-wrapper">
+    <h2 id="podiumTitle" class="podium-title">🏆 Top 3 Athletes</h2>
+    <div id="podium" class="podium-container"></div>
   </div>
 
-  <!-- RIGHT: PERFORMANCE -->
-  <div class="leaderboard-card">
-    <h2>⚡ Athletic Performance Scores</h2>
+  <!-- ✅ ONE GRID ONLY -->
+  <div class="leaderboard-grid">
 
-    <div class="table-scroll">
-      <table id="scoreTable" class="leaderboard-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Score</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    Elite / Strong / Average / Needs Work Identifiers = Correlation of Athletic Movement Skills Compared to Weight Lifted 
-  </div>
+    <!-- LEFT: 3 LIFT -->
+    <div class="leaderboard-card">
+      <h2>🏋️ 3 Lift Max Totals</h2>
 
-</div>
-
-        <!-- MOBILE -->
-        <div id="mobileLift" class="mobile-cards"></div>
-      
-
-        <!-- MOBILE -->
-        <div id="mobileScore" class="mobile-cards"></div>
+      <div class="table-scroll">
+        <table id="liftTable" class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Total</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
-
     </div>
 
-  </section>
+    <!-- MIDDLE: PERFORMANCE -->
+    <div class="leaderboard-card">
+      <h2>⚡ Athletic Performance Scores</h2>
+
+      <div class="table-scroll">
+        <table id="scoreTable" class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Score</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: KEY -->
+    <div class="leaderboard-card key-card">
+      <h2>🔑 Identifier Key</h2>
+
+      <div class="key-content">
+        Elite / Strong / Average / Needs Work Identifiers =
+        <br><br>
+        Correlation of Athletic Movement Skills Compared to Weight Lifted
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MOBILE -->
+  <div id="mobileLift" class="mobile-cards"></div>
+  <div id="mobileScore" class="mobile-cards"></div>
+
+</section>
 
 </main>
 
