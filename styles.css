@@ -726,6 +726,17 @@ body {
   box-shadow: 0 0 10px var(--primary);
 }
 
+.compare-dropdown {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.25s ease;
+}
+
+.compare-dropdown.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .metrics-grid {
   display: flex;
   justify-content: center;
