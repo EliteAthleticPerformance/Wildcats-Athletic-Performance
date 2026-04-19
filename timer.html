@@ -1883,15 +1883,6 @@ window.addEventListener("DOMContentLoaded", () => {
     // ✅ RIGHT HERE (THIS IS THE CORRECT SPOT)
     const logo = document.getElementById("schoolLogo");
 
-    if (logo) {
-        setTimeout(() => {
-            const themeLogo = localStorage.getItem("schoolLogo");
-            if (themeLogo) {
-                logo.src = themeLogo;
-            }
-        }, 100);
-    }
-
-});
+    });
 
       
