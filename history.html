@@ -37,15 +37,9 @@
   <button onclick="setCompareMode('top5')" id="btn-top5">Top 5</button>
   <button onclick="setCompareMode('weight')" id="btn-weight">Weight Group</button>
   <button onclick="setCompareMode('grade')" id="btn-grade">Grade</button>
-  <button onclick="setCompareMode('individual')" id="btn-individual">Individual</button>
-</div>
+  </div>
 
-<div class="compare-dropdown-wrapper">
-  <select id="athleteSelect" class="compare-dropdown">
-    <option value="">Select Athlete</option>
-  </select>
-</div>
-  
+ 
 
   <div style="max-width: 750px; margin: auto;">
     <canvas id="radarChart"></canvas>
@@ -166,24 +160,7 @@ function getBestRow(rows) {
 
 /* ================= COMPARE MODE ================= */
 
-function populateAthleteDropdown() {
-  const dropdown = document.getElementById("athleteSelect");
 
-  if (!dropdown) return;
-
-  dropdown.innerHTML = '<option value="">Select Athlete</option>';
-
-  const names = [...new Set(ALL_ROWS.map(r => r[0]))];
-
-  names.forEach(name => {
-    if (!name || name === selectedName) return;
-
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = name;
-    dropdown.appendChild(option);
-  });
-}
   
 function setCompareMode(mode) {
   compareMode = mode;
@@ -193,20 +170,6 @@ function setCompareMode(mode) {
 
   document.getElementById(`btn-${mode}`).classList.add("active");
 
-  const dropdown = document.getElementById("athleteSelect");
-
-if (mode === "individual") {
-  dropdown.style.display = "block";
-  populateAthleteDropdown();
-
-  setTimeout(() => dropdown.classList.add("show"), 10); // animation
-} else {
-  dropdown.classList.remove("show");
-
-  setTimeout(() => {
-    dropdown.style.display = "none";
-  }, 200); // matches CSS transition
-}
   updateComparison();
 }
 
@@ -252,18 +215,6 @@ function updateComparison() {
   group = previous ? [previous] : [CURRENT_ATHLETE];
 }
 
-if (compareMode === "individual") {
-  const selected = document.getElementById("athleteSelect").value;
-
-  if (!selected) {
-    group = [CURRENT_ATHLETE];
-    comparisonName = "Comparison";
-  } else {
-    const row = getBestRow(ALL_ROWS, selected);
-    group = row ? [row] : [CURRENT_ATHLETE];
-    comparisonName = selected;
-  }
-}
 
   if (compareMode === "team") {
   comparisonName = "Team Avg";
@@ -560,9 +511,7 @@ function animateMetrics() {
   });
 }
 
-document.getElementById("athleteSelect")
-  .addEventListener("change", updateComparison);
-  
+ 
   </script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="./js/themeLoader.js"></script>
