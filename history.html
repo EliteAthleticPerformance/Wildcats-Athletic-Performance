@@ -68,6 +68,7 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl6
 let ALL_ROWS = [];
 let CURRENT_ATHLETE = null;
 let compareMode = "team";
+  let comparisonName = "Comparison";
 
 /* ================= PARAMS ================= */
 
@@ -219,6 +220,9 @@ function updateComparison() {
 
   let group = [];
 
+  if (compareMode === "last") {
+  comparisonName = "Previous Test";
+}
 if (compareMode === "last") {
 
   const normalize = str => (str || "").toLowerCase().trim();
@@ -240,22 +244,33 @@ if (compareMode === "individual") {
 
   if (!selected) {
     group = [CURRENT_ATHLETE];
+    comparisonName = "Comparison";
   } else {
     const row = getBestRow(ALL_ROWS, selected);
     group = row ? [row] : [CURRENT_ATHLETE];
+    comparisonName = selected; // 🔥 THIS is key
   }
 }
-  
+
+  if (compareMode === "team") {
+  comparisonName = "Team Avg";
+}
 if (compareMode === "team") {
   group = ALL_ROWS.filter(r => r !== CURRENT_ATHLETE);
 }
 
+  if (compareMode === "top5") {
+  comparisonName = "Top 5 Avg";
+}
 if (compareMode === "top5") {
   group = [...ALL_ROWS] // clone first
   .sort((a, b) => cleanNum(b[34]) - cleanNum(a[34]))
   .slice(0, 5);
 }
 
+  if (compareMode === "weight") {
+  comparisonName = "Weight Group";
+}
 if (compareMode === "weight") {
   const weight = cleanNum(CURRENT_ATHLETE[5]);
 
@@ -264,6 +279,9 @@ if (compareMode === "weight") {
   });
 }
 
+  if (compareMode === "grade") {
+  comparisonName = "Grade Group";
+}
 if (compareMode === "grade") {
   const grade = CURRENT_ATHLETE[3];
 
@@ -330,26 +348,26 @@ function renderRadarChart(player, avg) {
     data: {
       labels: ["Speed", "Strength", "Power", "Explosive"],
       datasets: [
-        {
-          label: "Athlete",
-          data: [
-            player.speed,
-            player.strength,
-            player.power,
-            player.explosive
-          ],
-          borderWidth: 5
-        },
-        {
-          label: "Comparison",
-          data: [
-            avg.speed,
-            avg.strength,
-            avg.power,
-            avg.explosive
-          ]
-        }
-      ]
+  {
+    label: selectedName, // 🔥 current athlete name
+    data: [
+      player.speed,
+      player.strength,
+      player.power,
+      player.explosive
+    ],
+    borderWidth: 5
+  },
+  {
+    label: comparisonName, // 🔥 dynamic comparison name
+    data: [
+      avg.speed,
+      avg.strength,
+      avg.power,
+      avg.explosive
+    ]
+  }
+]
     },
 
     // ✅ FIXED SECTION
