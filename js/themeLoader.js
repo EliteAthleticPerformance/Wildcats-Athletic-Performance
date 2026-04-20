@@ -32,7 +32,15 @@ function normalize(str) {
   // 🔥 apply as soon as DOM is ready
   document.addEventListener("DOMContentLoaded", () => {
     const logo = document.getElementById("schoolLogo");
-    if (logo) logo.src = finalLogo;
+    if (logo) {
+  logo.classList.remove("loaded");
+
+  logo.onload = () => {
+    logo.classList.add("loaded");
+  };
+
+  logo.src = finalLogo;
+}
   });
 })();
 
