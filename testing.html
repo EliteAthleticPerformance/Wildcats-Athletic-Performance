@@ -37,11 +37,9 @@
   const logo = sessionStorage.getItem("logo-" + school);
 
   if (logo) {
-    // 🔥 preload image immediately
     const img = new Image();
     img.src = logo;
 
-    // 🔥 apply ASAP when DOM is ready
     document.addEventListener("DOMContentLoaded", () => {
       const el = document.getElementById("schoolLogo");
       if (el) el.src = logo;
