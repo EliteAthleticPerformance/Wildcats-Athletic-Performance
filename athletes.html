@@ -1,35 +1,44 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Athletes | Wildcats Performance</title>
+<!-- 🔖 FAVICON (controlled by themeLoader.js) -->
+
+<link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
+
+<title>Athletes | Performance System</title>
 
 <link rel="stylesheet" href="styles.css">
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
 </head>
 
 <body>
 
 <!-- HEADER -->
+
 <div id="header-placeholder"></div>
 <script src="js/header.js"></script>
 
 <main>
 
   <!-- TITLE -->
+
   <section class="section center">
     <h1 class="page-title">👥 Athletes</h1>
   </section>
 
   <!-- A-Z BAR -->
+
   <section class="section">
     <div id="alphabetBar" class="alphabet-bar"></div>
   </section>
 
   <!-- SEARCH -->
+
   <section class="section">
     <input 
       type="text" 
@@ -41,6 +50,7 @@
   </section>
 
   <!-- GRID -->
+
   <section class="section">
     <div id="athleteGrid" class="grid grid-auto"></div>
   </section>
@@ -48,6 +58,13 @@
 </main>
 
 <!-- SCRIPTS -->
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script src="./js/themeLoader.js"></script>
+
+<script src="js/dataLoader.js"></script>
+
 <script src="js/athlete.js"></script>
 
 </body>
