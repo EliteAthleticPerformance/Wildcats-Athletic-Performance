@@ -11,7 +11,7 @@ function normalize(str) {
 }
 
 // ===============================
-// INSTANT LOGO (NO FLICKER)
+// INSTANT LOGO (NO FLICKER + FALLBACK)
 // ===============================
 (function () {
   const school =
@@ -22,15 +22,18 @@ function normalize(str) {
   const key = "logo-" + normalize(school);
   const cachedLogo = sessionStorage.getItem(key);
 
-  if (cachedLogo) {
-    const img = new Image();
-    img.src = cachedLogo; // preload
+  const fallback = "images/roosters-logo.png";
+  const finalLogo = cachedLogo || fallback;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const logo = document.getElementById("schoolLogo");
-      if (logo) logo.src = cachedLogo;
-    });
-  }
+  // 🔥 preload image
+  const img = new Image();
+  img.src = finalLogo;
+
+  // 🔥 apply as soon as DOM is ready
+  document.addEventListener("DOMContentLoaded", () => {
+    const logo = document.getElementById("schoolLogo");
+    if (logo) logo.src = finalLogo;
+  });
 })();
 
 function getSchoolFromURL() {
