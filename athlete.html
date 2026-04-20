@@ -28,23 +28,32 @@
     root.style.setProperty("--background", theme.background);
   }
 
-  // 🖼️ LOGO
+  // 🖼️ LOGO (BULLETPROOF)
   const logo = sessionStorage.getItem("logo-" + school);
+
   if (logo) {
-    const img = new Image();
-    img.src = logo;
-
-    document.addEventListener("headerLoaded", () => {
+    const applyLogo = () => {
       const el = document.getElementById("schoolLogo");
+      if (!el) return false;
 
-      if (el) {
-        el.src = logo;
+      el.src = logo;
 
-        el.onload = () => {
-          el.classList.add("loaded");
-        };
-      }
-    });
+      el.onload = () => {
+        el.classList.add("loaded");
+      };
+
+      return true;
+    };
+
+    // Try immediately
+    if (!applyLogo()) {
+      // Retry until header exists
+      const interval = setInterval(() => {
+        if (applyLogo()) {
+          clearInterval(interval);
+        }
+      }, 50);
+    }
   }
 })();
 </script>
