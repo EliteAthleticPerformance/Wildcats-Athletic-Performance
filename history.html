@@ -148,11 +148,19 @@ Papa.parse(CSV_URL, {
 
     const rows = results.data || [];
 
-    ALL_ROWS = rows.filter(r =>
-      Array.isArray(r) &&
-      r.length > 34 &&
-      (r[0] || "").trim() !== ""
-    );
+    ALL_ROWS = rows.filter(r => {
+  if (!Array.isArray(r)) return false;
+  if (r.length <= 34) return false;
+
+  const rowString = r.join("");
+
+  return (
+    (r[0] || "").trim() !== "" &&
+    !rowString.includes("#REF") &&
+    !rowString.includes("NaN") &&
+    !rowString.includes("Invalid")
+  );
+});
 
     CURRENT_ATHLETE = getBestRow(
       ALL_ROWS.filter(r => r[0] === selectedName)
