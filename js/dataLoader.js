@@ -15,92 +15,11 @@ async function loadCSV(url) {
   return parsed.data;
 }
 
-// ===============================
-// SCHOOL DB (🔥 CACHE THIS)
-// ===============================
-const SCHOOL_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXJVxlKWqu-JbdJp9S0_lNzbetCfbhXGSgny11mq7uKYUJh-PdB0zQGonz56iA0tjJtJrMu2EF2Xoa/pub?gid=0&single=true&output=csv";
-
-let SCHOOL_DB_CACHE = null;
-
-async function getSchoolDB() {
-  if (SCHOOL_DB_CACHE) return SCHOOL_DB_CACHE;
-
-  const data = await loadCSV(SCHOOL_DB_URL);
-  SCHOOL_DB_CACHE = data;
-  return data;
-}
-
-// ===============================
-// GET CURRENT SCHOOL KEY
-// ===============================
-function getCurrentSchool() {
-  return (sessionStorage.getItem("school") || "harrisonville")
-    .toLowerCase()
-    .replace(/\s+/g, "");
-}
-
-// ===============================
-// GET SCHOOL ROW (🔥 CORE)
-// ===============================
-async function getSchoolRow() {
-  const school = getCurrentSchool();
-  const schools = await getSchoolDB();
-
-  const match = schools.find(s =>
-    (s.school || "")
-      .toLowerCase()
-      .replace(/\s+/g, "") === school
-  );
-
-  if (!match) {
-    console.error("❌ School not found:", school);
-    return null;
-  }
-
-  return match;
-}
-
-// ===============================
-// GET DATA URL
-// ===============================
-async function getSchoolDataURL() {
-  const row = await getSchoolRow();
-
-  if (!row || !row.dataURL) {
-    console.error("❌ No dataURL found");
-    return null;
-  }
-
-  return row.dataURL + "&t=" + Date.now(); // cache-buster
-}
-
-// ===============================
-// GET SUBMIT URL (🔥 NEW)
-// ===============================
-async function getSchoolSubmitURL() {
-  const row = await getSchoolRow();
-
-  if (!row || !row.submitURL) {
-    console.error("❌ No submitURL found");
-    return null;
-  }
-
-  return row.submitURL;
-}
-
-// ===============================
-// CENTRALIZED DATA ACCESS
-// ===============================
+// 🔥 CENTRALIZED DATA ACCESS
 let APP_DATA = [];
 
 async function loadAthleteData() {
-
-  const url = await getSchoolDataURL();
-
-  if (!url) {
-    console.error("❌ Data URL missing");
-    return [];
-  }
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv&t=" + Date.now();
 
   const raw = await loadCSV(url);
 
@@ -154,7 +73,7 @@ async function loadAthleteData() {
     );
   });
 
-  console.log(`✅ DATA READY (${APP_DATA.length}) →`, url);
+  console.log("✅ DATA READY:", APP_DATA.length);
 
   return APP_DATA;
 }
