@@ -374,6 +374,19 @@ box-shadow: 0 10px 25px var(--primaryLight)
     z-index:2;
 }
 
+#schoolLogo {
+  height: 75px;
+  width: auto;
+
+  opacity: 0;                /* start hidden */
+  transition: opacity 0.6s ease;  /* smooth fade */
+}
+
+/* when ready */
+#schoolLogo.loaded {
+  opacity: 1;
+}
+
 /* ===== 5. GRID ===== */
 .grid {
     display: grid;
