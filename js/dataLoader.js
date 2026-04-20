@@ -1,7 +1,7 @@
 // ===============================
 // GLOBAL DATA LOADER (CSV → JSON)
 // ===============================
-
+ 
 async function loadCSV(url) {
   const response = await fetch(url);
   const csvText = await response.text();
