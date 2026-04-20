@@ -5,7 +5,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Wildcats Performance System</title>
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const school = params.get("school") || sessionStorage.getItem("school") || "harrisonville";
+
+  sessionStorage.setItem("school", school);
+
+  const theme = JSON.parse(sessionStorage.getItem("theme-" + school));
+
+  if (theme) {
+    const root = document.documentElement;
+
+    root.style.setProperty("--primary", theme.primary);
+    root.style.setProperty("--primaryLight", theme.primaryLight);
+    root.style.setProperty("--primaryDark", theme.primaryDark);
+    root.style.setProperty("--secondary", theme.secondary);
+    root.style.setProperty("--secondaryLight", theme.secondaryLight);
+    root.style.setProperty("--background", theme.background);
+  }
+})();
+</script>
+  
+<title>Eltice Athletic Performance System</title>
   <script>
   window.pageTitle = "Dashboard";
 </script>
