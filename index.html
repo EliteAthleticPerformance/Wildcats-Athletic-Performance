@@ -1,30 +1,34 @@
-
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Wildcats Performance System</title>
-  <script>
-  window.pageTitle = "Dashboard";
-</script>
+<!-- 🔖 FAVICON (handled by themeLoader.js) -->
+
+<link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
+
+<title>Elite Athletic Performance System</title>
 
 <link rel="stylesheet" href="styles.css">
+
 </head>
 
 <body>
 
 <!-- ===== HEADER ===== -->
+
 <div id="header-placeholder"></div>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="js/header.js"></script>
 
 <!-- ===== MAIN ===== -->
+
 <main>
 
   <!-- ===== HERO ===== -->
+
   <section class="section" style="text-align:center;">
     <h1 class="hero-title">Track. Compete. Improve.</h1>
     <p style="color: var(--muted); margin-top:10px;">
@@ -33,68 +37,96 @@
   </section>
 
   <!-- ===== PRIMARY ACTION ===== -->
+
   <section class="section" style="text-align:center;">
     <button class="btn" onclick="goToEnterTest()">
       ➕ Enter Test
     </button>
   </section>
 
- <!-- ===== QUICK STATS ===== -->
-<section class="section">
+  <!-- ===== QUICK STATS ===== -->
 
-  <div class="grid-2">
+  <section class="section">
 
-<div class="card-mini">
-  <div class="card-icon">👥</div>
-  <h3>Athletes</h3>
-  <p id="totalAthletes">169</p>
-</div>
 
-    <div class="card-mini">
-  <div class="card-icon">📊</div>
-  <h3>Tests</h3>
-  <p id="totalTests">343</p>
-</div>
+<div class="grid-2">
 
+  <div class="card-mini">
+    <div class="card-icon">👥</div>
+    <h3>Athletes</h3>
+    <p id="totalAthletes">--</p>
   </div>
 
-</section>
-
-<!-- ===== DASHBOARD ===== -->
-<section class="section">
-
-  <div class="grid grid-auto">
-
-    <a class="card" href="timer.html">
-<div class="card-icon">⏱️</div>
-  <h2>Training Timer</h2>
-  <p>4 Quadrant Weight Room Timer</p>
-
-    </a>
-
-    <a class="card" href="testing.html">
-      <div class="card-icon">📋</div>
-  <h2>Combine Testing</h2>
-  <p>Record and Analyze Results</p>
-    </a>
-
-    <a class="card" href="athletes.html">
-      <div class="card-icon">🧑</div>
-  <h2>Athlete Profiles</h2>
-  <p>View Performance Ratings</p>
-    </a>
-
-    <a class="card" href="leaderboard.html">
-      <div class="card-icon">🏆</div>
-  <h2>Leaderboard</h2>
-  <p>Athlete Rankings</p>
-    </a>
-
+  <div class="card-mini">
+    <div class="card-icon">📊</div>
+    <h3>Tests</h3>
+    <p id="totalTests">--</p>
   </div>
 
-</section>
+</div>
+
+
+  </section>
+
+  <!-- ===== DASHBOARD ===== -->
+
+  <section class="section">
+
+
+<div class="grid grid-auto">
+
+  <a class="card" href="timer.html">
+    <div class="card-icon">⏱️</div>
+    <h2>Training Timer</h2>
+    <p>4 Quadrant Weight Room Timer</p>
+  </a>
+
+  <a class="card" href="testing.html">
+    <div class="card-icon">📋</div>
+    <h2>Combine Testing</h2>
+    <p>Record and Analyze Results</p>
+  </a>
+
+  <a class="card" href="athletes.html">
+    <div class="card-icon">🧑</div>
+    <h2>Athlete Profiles</h2>
+    <p>View Performance Ratings</p>
+  </a>
+
+  <a class="card" href="leaderboard.html">
+    <div class="card-icon">🏆</div>
+    <h2>Leaderboard</h2>
+    <p>Athlete Rankings</p>
+  </a>
+
+</div>
+
+
+  </section>
 
 </main>
+
+<!-- ===== SCRIPTS ===== -->
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script src="./js/themeLoader.js"></script>
+
+<script src="js/dataLoader.js"></script>
+
+<script>
+// ===== LOAD LIVE STATS =====
+(async function () {
+  const data = await loadAthleteData();
+
+  // total tests
+  document.getElementById("totalTests").textContent = data.length;
+
+  // unique athletes
+  const unique = new Set(data.map(d => d.name));
+  document.getElementById("totalAthletes").textContent = unique.size;
+})();
+</script>
 
 </body>
 </html>
