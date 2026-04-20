@@ -1,80 +1,44 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
+<!-- 🔖 FAVICON (controlled by themeLoader.js) -->
 
-<script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  const school = params.get("school") || sessionStorage.getItem("school") || "harrisonville";
+<link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
 
-  sessionStorage.setItem("school", school);
-
-  const theme = JSON.parse(sessionStorage.getItem("theme-" + school));
-
-  if (theme) {
-    const root = document.documentElement;
-
-    root.style.setProperty("--primary", theme.primary);
-    root.style.setProperty("--primaryLight", theme.primaryLight);
-    root.style.setProperty("--primaryDark", theme.primaryDark);
-    root.style.setProperty("--secondary", theme.secondary);
-    root.style.setProperty("--secondaryLight", theme.secondaryLight);
-    root.style.setProperty("--background", theme.background);
-  }
-})();
-</script>
-
-  <script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  const school = params.get("school") || sessionStorage.getItem("school") || "harrisonville";
-
-  sessionStorage.setItem("school", school);
-
-  const logo = sessionStorage.getItem("logo-" + school);
-
-  if (logo) {
-    const img = new Image();
-    img.src = logo;
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const el = document.getElementById("schoolLogo");
-      if (el) el.src = logo;
-    });
-  }
-})();
-</script>
-  
-<title>Athletes | Wildcats Performance</title>
+<title>Athletes | Performance System</title>
 
 <link rel="stylesheet" href="styles.css">
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
 </head>
 
 <body>
 
 <!-- HEADER -->
+
 <div id="header-placeholder"></div>
 <script src="js/header.js"></script>
 
 <main>
 
   <!-- TITLE -->
+
   <section class="section center">
     <h1 class="page-title">👥 Athletes</h1>
   </section>
 
   <!-- A-Z BAR -->
+
   <section class="section">
     <div id="alphabetBar" class="alphabet-bar"></div>
   </section>
 
   <!-- SEARCH -->
+
   <section class="section">
     <input 
       type="text" 
@@ -86,6 +50,7 @@
   </section>
 
   <!-- GRID -->
+
   <section class="section">
     <div id="athleteGrid" class="grid grid-auto"></div>
   </section>
@@ -93,9 +58,13 @@
 </main>
 
 <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="./js/themeLoader.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script src="./js/themeLoader.js"></script>
+
 <script src="js/dataLoader.js"></script>
+
 <script src="js/athlete.js"></script>
 
 </body>
