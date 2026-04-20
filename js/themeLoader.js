@@ -1,3 +1,38 @@
+// ===============================
+// UTIL
+// ===============================
+function normalize(str) {
+  return (str || "")
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^\w]/g, ""); // 🔥 removes hidden chars
+}
+
+// ===============================
+// INSTANT LOGO (NO FLICKER)
+// ===============================
+(function () {
+  const school =
+    new URLSearchParams(window.location.search).get("school") ||
+    sessionStorage.getItem("school") ||
+    "harrisonville";
+
+  const key = "logo-" + normalize(school);
+  const cachedLogo = sessionStorage.getItem(key);
+
+  if (cachedLogo) {
+    const img = new Image();
+    img.src = cachedLogo; // preload
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const logo = document.getElementById("schoolLogo");
+      if (logo) logo.src = cachedLogo;
+    });
+  }
+})();
+
 function getSchoolFromURL() {
   const params = new URLSearchParams(window.location.search);
   const urlSchool = params.get("school");
@@ -17,18 +52,6 @@ function getSchoolFromURL() {
 }
 
   
-// ===============================
-// UTIL
-// ===============================
-function normalize(str) {
-  return (str || "")
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "")
-    .replace(/[^\w]/g, ""); // 🔥 removes hidden chars
-}
-
 function formatSchoolName(name) {
   return (name || "").replace(/\b\w/g, c => c.toUpperCase());
 }
