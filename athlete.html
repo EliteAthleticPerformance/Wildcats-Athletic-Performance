@@ -31,30 +31,22 @@
   // 🖼️ LOGO (BULLETPROOF)
   const logo = sessionStorage.getItem("logo-" + school);
 
-  if (logo) {
-    const applyLogo = () => {
-      const el = document.getElementById("schoolLogo");
-      if (!el) return false;
+if (logo) {
+  document.addEventListener("headerLoaded", () => {
+    const el = document.getElementById("schoolLogo");
 
-      el.src = logo;
-
-      el.onload = () => {
-        el.classList.add("loaded");
-      };
-
-      return true;
-    };
-
-    // Try immediately
-    if (!applyLogo()) {
-      // Retry until header exists
-      const interval = setInterval(() => {
-        if (applyLogo()) {
-          clearInterval(interval);
-        }
-      }, 50);
+    if (!el) {
+      console.warn("Logo element not found");
+      return;
     }
-  }
+
+    el.src = logo;
+
+    el.onload = () => {
+      el.classList.add("loaded");
+    };
+  });
+}
 })();
 </script>
 
