@@ -32,20 +32,24 @@
   const logo = sessionStorage.getItem("logo-" + school);
 
 if (logo) {
-  document.addEventListener("headerLoaded", () => {
+  const applyLogo = () => {
     const el = document.getElementById("schoolLogo");
-
-    if (!el) {
-      console.warn("Logo element not found");
-      return;
-    }
+    if (!el) return false;
 
     el.src = logo;
 
     el.onload = () => {
       el.classList.add("loaded");
     };
-  });
+
+    return true;
+  };
+
+  // Try immediately (handles already-loaded header)
+  if (!applyLogo()) {
+    // Fallback if header loads later
+    document.addEventListener("headerLoaded", applyLogo);
+  }
 }
 })();
 </script>
