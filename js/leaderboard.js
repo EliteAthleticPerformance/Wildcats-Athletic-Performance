@@ -1,4 +1,3 @@
-
 // ===============================
 // GLOBAL STATE
 // ===============================
@@ -12,12 +11,19 @@ let podiumBuilt = false;
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
-  const data = await loadAthleteData(); // 🔥 from dataLoader.js
-console.log("SAMPLE ROW:", data[0]);
-  processDataFromJSON(data);
+  try {
+    const data = await loadAthleteData(); // from dataLoader.js
 
-  const search = document.getElementById("leaderboardSearch");
-  if (search) search.addEventListener("input", render);
+    console.log("🧪 SAMPLE ROW:", data[0]);
+
+    processDataFromJSON(data);
+
+    const search = document.getElementById("leaderboardSearch");
+    if (search) search.addEventListener("input", render);
+
+  } catch (err) {
+    console.error("❌ Leaderboard init error:", err);
+  }
 }
 
 // ===============================
@@ -39,6 +45,11 @@ function medal(i) {
   return "";
 }
 
+function parseDateSafe(val) {
+  const d = new Date(val);
+  return isNaN(d) ? null : d;
+}
+
 // ===============================
 // PROCESS DATA (FROM JSON)
 // ===============================
@@ -50,10 +61,12 @@ function processDataFromJSON(data) {
     const squat = toNumber(row.squat);
     const clean = toNumber(row.clean);
 
+    const score = toNumber(row.score || row.overall);
+
     return {
       name: row.name,
       dateRaw: row.date,
-      date: new Date(row.date),
+      date: parseDateSafe(row.date),
 
       bench,
       squat,
@@ -69,17 +82,13 @@ function processDataFromJSON(data) {
 
       sit: toNumber(row.situps),
 
-      score: toNumber(row.score),
-
+      score,
       lift: bench + squat + clean
     };
 
-  }).filter(a =>
-  a.name &&
-  typeof a.name === "string"
-);
+  }).filter(a => a.name && typeof a.name === "string");
 
-  // GROUP
+  // GROUP BY ATHLETE
   grouped = {};
 
   parsed.forEach(a => {
@@ -87,19 +96,19 @@ function processDataFromJSON(data) {
     grouped[a.name].push(a);
   });
 
-  // SORT each athlete by date
+  // SORT each athlete by date (latest first)
   Object.values(grouped).forEach(arr => {
-    arr.sort((a, b) => b.date - a.date);
+    arr.sort((a, b) => (b.date || 0) - (a.date || 0));
   });
 
-  // TAKE latest
+  // TAKE LATEST SNAPSHOT
   athletes = Object.keys(grouped).map(name => grouped[name][0]);
 
   render();
 }
 
 // ===============================
-// RENDER
+// BUILD LEADERBOARD DATA
 // ===============================
 function buildLeaderboardData(data) {
   const map = {};
@@ -132,6 +141,9 @@ function buildLeaderboardData(data) {
   return Object.values(map);
 }
 
+// ===============================
+// RENDER
+// ===============================
 function render() {
 
   const search = document.getElementById("leaderboardSearch")?.value.toLowerCase() || "";
@@ -148,7 +160,7 @@ function render() {
     setTimeout(() => {
       renderPodium(leaderboardData);
       podiumBuilt = true;
-    }, 100);
+    }, 50);
   }
 
   renderTable(filtered, "liftTable", "lift");
@@ -170,8 +182,7 @@ function renderTable(data, tableId, type) {
     .sort((a, b) => b[type] - a[type]);
 
   sorted.forEach((a, i) => {
-    const tr = createRow(a, i, type);
-    tbody.appendChild(tr);
+    tbody.appendChild(createRow(a, i, type));
   });
 }
 
@@ -230,6 +241,8 @@ function formatDate(date) {
   if (!date) return "-";
 
   const d = new Date(date);
+  if (isNaN(d)) return "-";
+
   const month = d.toLocaleString("en-US", { month: "short" });
   const year = d.getFullYear();
 
@@ -237,39 +250,34 @@ function formatDate(date) {
 }
 
 function getPerformanceTier(score, lift) {
+
   if (!score || !lift) {
-  return { label: "Incomplete", class: "tier-incomplete" };
-}
+    return { label: "Incomplete", class: "tier-incomplete" };
+  }
 
   const pct = score / lift;
 
   if (pct >= 0.90) return { label: "Elite", class: "tier-elite" };
   if (pct >= 0.80) return { label: "Above Average", class: "tier-above" };
   if (pct >= 0.70) return { label: "Average", class: "tier-average" };
-  if (pct < 0.69)  return { label: "Needs Work", class: "tier-needs" };
+  return { label: "Needs Work", class: "tier-needs" };
 }
 
 function getBadgeHTML(tier) {
+
   if (!tier || !tier.label) return "";
 
-  const label = tier.label.toLowerCase();
-  if (label.includes("incomplete")) {
-  return `<span class="badge incomplete">Incomplete</span>`;
-}
-  if (label.includes("elite")) {
-    return `<span class="badge elite">Elite</span>`;
-  }
-  if (label.includes("above")) {
-    return `<span class="badge above">Above Average</span>`;
-  }
-  if (label.includes("average")) {
-    return `<span class="badge average">Average</span>`;
-  }
-  if (label.includes("needs")) {
-    return `<span class="badge needs">Needs Work</span>`;
-  }
+  const map = {
+    "Elite": "elite",
+    "Above Average": "above",
+    "Average": "average",
+    "Needs Work": "needs",
+    "Incomplete": "incomplete"
+  };
 
-  return "";
+  const cls = map[tier.label] || "";
+
+  return `<span class="badge ${cls}">${tier.label}</span>`;
 }
 
 function createRow(a, index, type) {
@@ -282,7 +290,7 @@ function createRow(a, index, type) {
     <td class="${medal(index)}">${index + 1}</td>
     <td>
       ${a.name}
-      ${type === "score" && tier ? `<div style="margin-top:4px;">${getBadgeHTML(tier)}</div>` : ""}
+      ${type === "score" ? `<div style="margin-top:4px;">${getBadgeHTML(tier)}</div>` : ""}
     </td>
     <td>${safe(a[type])}</td>
     <td>${formatDate(type === "lift" ? a.liftDate : a.scoreDate)}</td>
@@ -297,12 +305,8 @@ function createRow(a, index, type) {
 
   tr.onclick = () => {
 
-    if (detail.style.display === "table-row") {
-      detail.style.display = "none";
-      return;
-    }
-
-    detail.style.display = "table-row";
+    detail.style.display =
+      detail.style.display === "table-row" ? "none" : "table-row";
 
     const latest = grouped[a.name][0];
     const prev = grouped[a.name][1];
@@ -354,4 +358,3 @@ function createRow(a, index, type) {
 function goToAthlete(name) {
   window.location.href = `history.html?name=${encodeURIComponent(name)}`;
 }
-
