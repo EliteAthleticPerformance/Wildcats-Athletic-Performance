@@ -133,19 +133,20 @@ sessionStorage.setItem(
 );
 
 // 🔥 CACHE LOGO (ADD THIS HERE)
+const logo = document.getElementById("schoolLogo");
+
 if (school && school.logo) {
   const versionedLogo = school.logo + "?v=" + Date.now();
-  sessionStorage.setItem("logo-" + schoolKey, versionedLogo);
-}
 
-// 🔥 APPLY LOGO TO DOM
-const logo = document.getElementById("schoolLogo");
-if (logo) {
-  if (school.logo) {
-    logo.src = school.logo + "?v=" + Date.now(); // cache-buster
-  } else {
-    logo.src = "images/roosters-logo.png"; // fallback
+  // cache + apply SAME value
+  sessionStorage.setItem("logo-" + schoolKey, versionedLogo);
+
+  if (logo) {
+    logo.src = versionedLogo;
   }
+
+} else if (logo) {
+  logo.src = "images/roosters-logo.png";
 }
 
   // PODIUM TITLE
