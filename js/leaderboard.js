@@ -1,53 +1,23 @@
-// ===============================
-// CONFIG
-// ===============================
-
 
 // ===============================
 // GLOBAL STATE
 // ===============================
 let grouped = {};
 let athletes = [];
+let podiumBuilt = false;
 
 // ===============================
 // INIT
 // ===============================
 document.addEventListener("DOMContentLoaded", init);
 
-function init() {
-  loadData();
+async function init() {
+  const data = await loadAthleteData(); // 🔥 from dataLoader.js
+console.log("SAMPLE ROW:", data[0]);
+  processDataFromJSON(data);
+
   const search = document.getElementById("leaderboardSearch");
   if (search) search.addEventListener("input", render);
-}
-
-// ===============================
-// CSV PARSER (SAFE)
-// ===============================
-function parseCSV(text) {
-  return text.trim().split(/\r?\n/).map(row => {
-    const cols = [];
-    let current = '';
-    let insideQuotes = false;
-
-    for (let i = 0; i < row.length; i++) {
-      const char = row[i];
-
-      if (char === '"' && row[i + 1] === '"') {
-        current += '"';
-        i++;
-      } else if (char === '"') {
-        insideQuotes = !insideQuotes;
-      } else if (char === ',' && !insideQuotes) {
-        cols.push(current);
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-
-    cols.push(current);
-    return cols.map(c => c.trim());
-  });
 }
 
 // ===============================
@@ -70,91 +40,44 @@ function medal(i) {
 }
 
 // ===============================
-// LOAD DATA
+// PROCESS DATA (FROM JSON)
 // ===============================
-async function loadData() {
-  try {
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
+function processDataFromJSON(data) {
 
-    const res = await fetch(CSV_URL + "&t=" + Date.now());
-    const text = await res.text();
+  const parsed = data.map(row => {
 
-    console.log("RAW CSV:", text); // 👈 ADD THIS
-
-    const rows = parseCSV(text);
-    processData(rows);
-
-  } catch (err) {
-    console.error("LOAD ERROR:", err);
-  }
-}
-
-function processData(rows) {
-
-  const headers = rows[0];
-
-  const idx = (name) =>
-    headers.findIndex(h =>
-      h.toLowerCase().includes(name.toLowerCase())
-    );
-
-  const i = {
-    name: idx("Student-Athlete"),
-    date: idx("Test Date"),
-
-    bench: idx("Bench Press"),
-    squat: idx("Squat"),
-    clean: idx("Hang Clean"),
-
-    vertical: idx("Vertical Jump"),
-    broad: idx("Broad Jump"),
-    med: idx("Med Ball Toss"),
-
-    pro: idx("Pro Agility"),
-    ten: idx("10 yd"),
-    forty: idx("40 yd"),
-
-    sit: idx("Sit-Ups"),
-
-    score: idx("Total Athletic Performance"),
-    lift: idx("3 Lift Projected Max Total")
-  }; // ✅ 🔥 THIS LINE WAS MISSING
-
-  const parsed = rows.slice(1).map(row => {
-
-    const bench = toNumber(row[i.bench]);
-    const squat = toNumber(row[i.squat]);
-    const clean = toNumber(row[i.clean]);
+    const bench = toNumber(row.bench);
+    const squat = toNumber(row.squat);
+    const clean = toNumber(row.clean);
 
     return {
-      name: row[i.name],
-      dateRaw: row[i.date],
-      date: new Date(row[i.date]),
+      name: row.name,
+      dateRaw: row.date,
+      date: new Date(row.date),
 
       bench,
       squat,
       clean,
 
-      vertical: toNumber(row[i.vertical]),
-      broad: toNumber(row[i.broad]),
-      med: toNumber(row[i.med]),
+      vertical: toNumber(row.vertical),
+      broad: toNumber(row.broad),
+      med: toNumber(row.med),
 
-      pro: toNumber(row[i.pro]),
-      ten: toNumber(row[i.ten]),
-      forty: toNumber(row[i.forty]),
+      pro: toNumber(row.agility),
+      ten: toNumber(row.ten),
+      forty: toNumber(row.forty),
 
-      sit: toNumber(row[i.sit]),
+      sit: toNumber(row.situps),
 
-      score: toNumber(row[i.score]),
+      score: toNumber(row.score),
 
-      lift: toNumber(row[i.lift]) || (bench + squat + clean)
+      lift: bench + squat + clean
     };
 
   }).filter(a =>
-    a.name &&
-    typeof a.name === "string" &&
-    a.name.includes(",")
-  );
+  a.name &&
+  typeof a.name === "string"
+);
 
   // GROUP
   grouped = {};
@@ -164,7 +87,7 @@ function processData(rows) {
     grouped[a.name].push(a);
   });
 
-  // SORT each athlete
+  // SORT each athlete by date
   Object.values(grouped).forEach(arr => {
     arr.sort((a, b) => b.date - a.date);
   });
@@ -178,13 +101,11 @@ function processData(rows) {
 // ===============================
 // RENDER
 // ===============================
-
 function buildLeaderboardData(data) {
   const map = {};
 
   data.forEach(a => {
 
-   
     if (!map[a.name]) {
       map[a.name] = {
         name: a.name,
@@ -197,13 +118,11 @@ function buildLeaderboardData(data) {
 
     const athlete = map[a.name];
 
-    // 🏋️ BEST 3 LIFT
     if (a.lift > athlete.lift) {
       athlete.lift = a.lift;
       athlete.liftDate = a.date;
     }
 
-    // ⚡ BEST SCORE
     if (a.score > athlete.score) {
       athlete.score = a.score;
       athlete.scoreDate = a.date;
@@ -217,21 +136,23 @@ function render() {
 
   const search = document.getElementById("leaderboardSearch")?.value.toLowerCase() || "";
 
-  // 🔥 FLATTEN ALL TESTS (NOT JUST LATEST)
   const allTests = Object.values(grouped).flat();
-
-  // 🔥 BUILD TRUE LEADERBOARD (BEST PER ATHLETE)
   const leaderboardData = buildLeaderboardData(allTests);
 
-  // 🔍 APPLY SEARCH
   const filtered = leaderboardData.filter(a =>
     a.name.toLowerCase().includes(search)
   );
 
-  console.log("PODIUM DATA:", filtered);
-  renderPodium(leaderboardData);
+  // BUILD PODIUM ONCE
+  if (!podiumBuilt) {
+    setTimeout(() => {
+      renderPodium(leaderboardData);
+      podiumBuilt = true;
+    }, 100);
+  }
+
   renderTable(filtered, "liftTable", "lift");
-renderTable(filtered, "scoreTable", "score");
+  renderTable(filtered, "scoreTable", "score");
 }
 
 // ===============================
@@ -245,8 +166,8 @@ function renderTable(data, tableId, type) {
   tbody.innerHTML = "";
 
   const sorted = [...data]
-  .filter(a => a[type] > 0)
-  .sort((a, b) => b[type] - a[type]);
+    .filter(a => a[type] > 0)
+    .sort((a, b) => b[type] - a[type]);
 
   sorted.forEach((a, i) => {
     const tr = createRow(a, i, type);
@@ -254,48 +175,61 @@ function renderTable(data, tableId, type) {
   });
 }
 
+// ===============================
+// PODIUM
+// ===============================
 function renderPodium(data) {
-    
+
   const container = document.getElementById("podium");
   if (!container) return;
 
   const top3 = [...data]
-    .filter(a => a.score > 0)                 // 🔥 use score
-    .sort((a, b) => b.score - a.score)        // 🔥 sort by score
+    .filter(a => a.score > 0)
+    .sort((a, b) => b.score - a.score)
     .slice(0, 3);
 
-  if (!top3.length) {
-    container.innerHTML = "";
-    return;
-  }
+  if (top3.length < 3) return;
 
-  const medals = ["🥇", "🥈", "🥉"];
+  const [first, second, third] = top3;
 
-  container.innerHTML = top3.map((a, i) => {
+  container.innerHTML = `
+    <div class="podium">
 
-  const tier = getPerformanceTier(a.score, a.lift); // ✅ DEFINE IT HERE
+      <div class="podium-item second" onclick="goToAthlete('${second.name}')">
+        <div class="podium-rank">🥈</div>
+        <div class="podium-name">${second.name}</div>
+        <div class="podium-score">${Math.round(second.score)}</div>
+      </div>
 
-  return `
-    <div class="podium-card podium-${i + 1}">
-      <div class="podium-rank">${medals[i]}</div>
-      <div class="podium-name">${a.name}</div>
-      <div class="podium-score">${Math.round(a.score)}</div>
-      <div class="tier ${tier.class}">${tier.label}</div>
-      <div style="font-size:12px; opacity:0.6;">Performance</div>
+      <div class="podium-item first" onclick="goToAthlete('${first.name}')">
+        <div class="podium-rank">🥇</div>
+        <div class="podium-name">${first.name}</div>
+        <div class="podium-score">${Math.round(first.score)}</div>
+      </div>
+
+      <div class="podium-item third" onclick="goToAthlete('${third.name}')">
+        <div class="podium-rank">🥉</div>
+        <div class="podium-name">${third.name}</div>
+        <div class="podium-score">${Math.round(third.score)}</div>
+      </div>
+
     </div>
   `;
 
-}).join("");
+  setTimeout(() => {
+    container.querySelectorAll(".podium-item").forEach(el => {
+      el.classList.add("show");
+    });
+  }, 100);
 }
 
 // ===============================
-// CREATE ROW
+// ROW CREATION
 // ===============================
 function formatDate(date) {
   if (!date) return "-";
 
   const d = new Date(date);
-
   const month = d.toLocaleString("en-US", { month: "short" });
   const year = d.getFullYear();
 
@@ -303,15 +237,39 @@ function formatDate(date) {
 }
 
 function getPerformanceTier(score, lift) {
-  if (!score || !lift) return "";
+  if (!score || !lift) {
+  return { label: "Incomplete", class: "tier-incomplete" };
+}
 
   const pct = score / lift;
 
-  if (pct >= 0.89) return { label: "Elite", class: "tier-elite" };
-  if (pct >= 0.79) return { label: "Strong", class: "tier-strong" };
-  if (pct >= 0.69) return { label: "Average", class: "tier-average" };
+  if (pct >= 0.90) return { label: "Elite", class: "tier-elite" };
+  if (pct >= 0.80) return { label: "Above Average", class: "tier-above" };
+  if (pct >= 0.70) return { label: "Average", class: "tier-average" };
+  if (pct < 0.69)  return { label: "Needs Work", class: "tier-needs" };
+}
 
-  return { label: "Needs Work", class: "tier-needs" };
+function getBadgeHTML(tier) {
+  if (!tier || !tier.label) return "";
+
+  const label = tier.label.toLowerCase();
+  if (label.includes("incomplete")) {
+  return `<span class="badge incomplete">Incomplete</span>`;
+}
+  if (label.includes("elite")) {
+    return `<span class="badge elite">Elite</span>`;
+  }
+  if (label.includes("above")) {
+    return `<span class="badge above">Above Average</span>`;
+  }
+  if (label.includes("average")) {
+    return `<span class="badge average">Average</span>`;
+  }
+  if (label.includes("needs")) {
+    return `<span class="badge needs">Needs Work</span>`;
+  }
+
+  return "";
 }
 
 function createRow(a, index, type) {
@@ -321,14 +279,14 @@ function createRow(a, index, type) {
   const tr = document.createElement("tr");
 
   tr.innerHTML = `
-  <td class="${medal(index)}">${index + 1}</td>
-  <td>
-  ${a.name}
-  ${type === "score" ? `<div class="tier ${tier.class}">${tier.label}</div>` : ""}
-</td>
-  <td>${safe(a[type])}</td>
-  <td>${formatDate(type === "lift" ? a.liftDate : a.scoreDate)}</td>
-`;
+    <td class="${medal(index)}">${index + 1}</td>
+    <td>
+      ${a.name}
+      ${type === "score" && tier ? `<div style="margin-top:4px;">${getBadgeHTML(tier)}</div>` : ""}
+    </td>
+    <td>${safe(a[type])}</td>
+    <td>${formatDate(type === "lift" ? a.liftDate : a.scoreDate)}</td>
+  `;
 
   const detail = document.createElement("tr");
   detail.style.display = "none";
@@ -389,3 +347,11 @@ function createRow(a, index, type) {
 
   return frag;
 }
+
+// ===============================
+// NAVIGATION
+// ===============================
+function goToAthlete(name) {
+  window.location.href = `history.html?name=${encodeURIComponent(name)}`;
+}
+
