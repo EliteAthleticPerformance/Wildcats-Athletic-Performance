@@ -1,70 +1,88 @@
 // ===============================
-// UTIL
+// GLOBAL THEME + LOGO + FAVICON
 // ===============================
+
+// 🔍 GET SCHOOL
+function getSchool() {
+  const params = new URLSearchParams(window.location.search);
+  let school = params.get("school");
+
+  if (school) {
+    sessionStorage.setItem("school", school);
+  } else {
+    school = sessionStorage.getItem("school");
+  }
+
+  return school || "harrisonville";
+}
+
+// ===============================
+// APPLY CACHED THEME INSTANTLY
+// ===============================
+(function () {
+  const school = getSchool();
+  const theme = JSON.parse(sessionStorage.getItem("theme-" + school));
+
+  if (!theme) return;
+
+  const root = document.documentElement;
+
+  root.style.setProperty("--primary", theme.primary);
+  root.style.setProperty("--primaryLight", theme.primaryLight);
+  root.style.setProperty("--primaryDark", theme.primaryDark);
+  root.style.setProperty("--secondary", theme.secondary);
+  root.style.setProperty("--secondaryLight", theme.secondaryLight);
+  root.style.setProperty("--background", theme.background);
+})();
+
+// ===============================
+// APPLY LOGO + FAVICON (INSTANT)
+// ===============================
+(function () {
+  const school = getSchool();
+  const logo = sessionStorage.getItem("logo-" + school);
+
+  if (!logo) return;
+
+  // preload
+  const img = new Image();
+  img.src = logo;
+
+  document.addEventListener("DOMContentLoaded", () => {
+
+    // 🖼️ LOGO
+    const el = document.getElementById("schoolLogo");
+    if (el) {
+      el.src = logo;
+      el.onload = () => el.classList.add("loaded");
+    }
+
+    // 🔖 FAVICON
+    let favicon = document.getElementById("dynamicFavicon");
+
+    // create if missing
+    if (!favicon) {
+      favicon = document.createElement("link");
+      favicon.id = "dynamicFavicon";
+      favicon.rel = "icon";
+      document.head.appendChild(favicon);
+    }
+
+    favicon.href = logo;
+  });
+})();
+
+// ===============================
+// LOAD DATA FROM GOOGLE SHEETS
+// ===============================
+
 function normalize(str) {
   return (str || "")
     .toString()
     .trim()
     .toLowerCase()
     .replace(/\s+/g, "")
-    .replace(/[^\w]/g, ""); // 🔥 removes hidden chars
-}
-
-// ===============================
-// INSTANT LOGO (NO FLICKER + FALLBACK)
-// ===============================
-(function () {
-  const school =
-    new URLSearchParams(window.location.search).get("school") ||
-    sessionStorage.getItem("school") ||
-    "harrisonville";
-
-  const key = "logo-" + normalize(school);
-  const cachedLogo = sessionStorage.getItem(key);
-
-  const fallback = "images/roosters-logo.png";
-  const finalLogo = cachedLogo || fallback;
-
-  // 🔥 preload image
-  const img = new Image();
-  img.src = finalLogo;
-
-  // 🔥 apply as soon as DOM is ready
-  document.addEventListener("DOMContentLoaded", () => {
-    const logo = document.getElementById("schoolLogo");
-    if (logo) {
-  logo.classList.remove("loaded");
-
-  logo.onload = () => {
-    logo.classList.add("loaded");
-  };
-
-  logo.src = finalLogo;
-}
-  });
-})();
-
-function getSchoolFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  const urlSchool = params.get("school");
-
-  // If URL has school → store it
-  if (urlSchool) {
-    sessionStorage.setItem("school", urlSchool);
-    return urlSchool;
-  }
-
-  // Otherwise use stored value
-  const storedSchool = sessionStorage.getItem("school");
-  if (storedSchool) return storedSchool;
-
-  // Final fallback
-  return "harrisonville";
-}
-
-  
-function formatSchoolName(name) {
-  return (name || "").replace(/\b\w/g, c => c.toUpperCase());
+    .replace(/[^\w]/g, "");
 }
 
 async function loadCSV(url) {
@@ -86,7 +104,7 @@ async function loadCSV(url) {
 }
 
 // ===============================
-// LOAD THEME (EVENT-DRIVEN)
+// LOAD THEME FROM SHEET
 // ===============================
 
 let themeLoaded = false;
@@ -95,7 +113,7 @@ async function loadTheme() {
   if (themeLoaded) return;
   themeLoaded = true;
 
-  const school = normalize(getSchoolFromURL());
+  const school = normalize(getSchool());
 
   const schoolDBUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXJVxlKWqu-JbdJp9S0_lNzbetCfbhXGSgny11mq7uKYUJh-PdB0zQGonz56iA0tjJtJrMu2EF2Xoa/pub?gid=0&single=true&output=csv";
   const themeUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXJVxlKWqu-JbdJp9S0_lNzbetCfbhXGSgny11mq7uKYUJh-PdB0zQGonz56iA0tjJtJrMu2EF2Xoa/pub?gid=2096720635&single=true&output=csv";
@@ -116,17 +134,9 @@ async function loadTheme() {
 // ===============================
 function applyBranding(school, theme) {
 
-  // 🔥 SET FAVICON
-const favicon = document.getElementById("dynamicFavicon");
-if (favicon && school.logo) {
-  favicon.href = school.logo;
-}
-
-  favicon.href = school.logo + "?v=" + Date.now();
-
   const root = document.documentElement;
 
-  // 🎨 APPLY CSS VARIABLES
+  // 🎨 APPLY THEME
   root.style.setProperty("--primary", theme.primary);
   root.style.setProperty("--primaryLight", theme.primaryLight);
   root.style.setProperty("--primaryDark", theme.primaryDark);
@@ -134,66 +144,50 @@ if (favicon && school.logo) {
   root.style.setProperty("--secondaryLight", theme.secondaryLight);
   root.style.setProperty("--background", theme.background);
 
-  // 🔥 CACHE THEME
-const schoolKey = normalize(getSchoolFromURL());
-sessionStorage.setItem(
-  "theme-" + schoolKey,
-  JSON.stringify({
-    primary: theme.primary,
-    primaryLight: theme.primaryLight,
-    primaryDark: theme.primaryDark,
-    secondary: theme.secondary,
-    secondaryLight: theme.secondaryLight,
-    background: theme.background
-  })
-);
+  const schoolKey = normalize(getSchool());
 
-// 🔥 CACHE LOGO (ADD THIS HERE)
-const logo = document.getElementById("schoolLogo");
+  // cache theme
+  sessionStorage.setItem("theme-" + schoolKey, JSON.stringify(theme));
 
-if (school && school.logo) {
-  const versionedLogo = school.logo + "?v=" + Date.now();
+  const logo = document.getElementById("schoolLogo");
 
-  // cache + apply SAME value
-  sessionStorage.setItem("logo-" + schoolKey, versionedLogo);
+  if (school.logo) {
+    const versionedLogo = school.logo + "?v=" + Date.now();
 
-  if (logo) {
-    logo.classList.remove("loaded"); // reset
+    // cache logo
+    sessionStorage.setItem("logo-" + schoolKey, versionedLogo);
 
-logo.onload = () => {
-  logo.classList.add("loaded"); // fade in when ready
-};
+    if (logo) {
+      logo.classList.remove("loaded");
 
-logo.src = versionedLogo;
+      logo.onload = () => {
+        logo.classList.add("loaded");
+      };
+
+      logo.src = versionedLogo;
+    }
+
+    // 🔖 update favicon
+    let favicon = document.getElementById("dynamicFavicon");
+    if (!favicon) {
+      favicon = document.createElement("link");
+      favicon.id = "dynamicFavicon";
+      favicon.rel = "icon";
+      document.head.appendChild(favicon);
+    }
+
+    favicon.href = versionedLogo;
   }
 
-} else if (logo) {
-  logo.src = "images/roosters-logo.png";
-}
-
-  // PODIUM TITLE
-  const podiumTitle = document.getElementById("podiumTitle");
-  if (podiumTitle && school.name) {
-    podiumTitle.textContent = `🏆 ${school.name} Top 3 Athletes`;
-  }
-
-  // HEADER TITLE
-  const titles = document.querySelectorAll(".school-name");
-  titles.forEach(el => {
-    el.textContent = formatSchoolName(school.name);
+  // update school name text
+  document.querySelectorAll(".school-name").forEach(el => {
+    el.textContent = school.name || "";
   });
 }
 
-
-
-
 // ===============================
-// SAFE INIT (handles all cases)
+// INIT
 // ===============================
 document.addEventListener("headerLoaded", loadTheme);
-
-// Fallback if headerLoaded already fired
 setTimeout(loadTheme, 50);
-
-// Also run for pages without header
 window.addEventListener("DOMContentLoaded", loadTheme);
