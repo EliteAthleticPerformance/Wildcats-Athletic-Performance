@@ -135,18 +135,16 @@ function setupSearch() {
   });
 }
 
-/* ========================================
-   METRICS (TEMP)
-   ======================================== */
 
 function extractMetrics(row) {
   return {
-    speed: row.score || 0,
+    speed: row.score || 0,   // temp until we map full sheet
     strength: row.total || 0,
     power: row.total || 0,
     explosive: row.score || 0
   };
 }
+
 
 /* ========================================
    RENDER
@@ -190,17 +188,14 @@ function render(data) {
     const card = document.createElement("div");
     card.className = "card history-card";
 
-    const best = history[0];
-    const metrics = extractMetrics(best);
+    const best = history[0]; // most recent (already sorted)
 
-    card.innerHTML = `
+const metrics = extractMetrics(best);
+
+card.innerHTML = `
   <h2>${name}</h2>
 
-  <button class="compare-btn" onclick="goToCompare('${encodeURIComponent(name)}')">
-    Compare This Athlete
-  </button>
-
-  ${renderRankings(metrics)}
+  ${renderRankings(metrics)}   <!-- 🔥 NEW ELITE CARDS -->
 
   <canvas id="${chartId}" height="120"></canvas>
 
@@ -229,10 +224,6 @@ function render(data) {
     renderChart(chartId, history);
   });
 }
-
-/* ========================================
-   RANKING CARDS
-   ======================================== */
 
 function renderRankings(player) {
 
@@ -293,6 +284,18 @@ function renderChart(id, history) {
           tension: 0.3
         }
       ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          labels: { color: "#fff" }
+        }
+      },
+      scales: {
+        x: { ticks: { color: "#aaa" } },
+        y: { ticks: { color: "#aaa" }, beginAtZero: true }
+      }
     }
   });
 }
@@ -337,10 +340,6 @@ function normalize(str) {
 function clearResults() {
   const container = document.getElementById("historyContainer");
   container.innerHTML = "";
-}
-
-function goToCompare(name) {
-  window.location.href = `history.html?name=${name}`;
 }
 
 function showError(msg) {
