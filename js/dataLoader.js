@@ -16,16 +16,35 @@ async function loadCSV(url) {
 }
 
 // ===============================
-// GET SCHOOL DATA URL (🔥 NEW)
+// SCHOOL DB (🔥 CACHE THIS)
 // ===============================
-async function getSchoolDataURL() {
-  const school = (sessionStorage.getItem("school") || "harrisonville")
+const SCHOOL_DB_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXJVxlKWqu-JbdJp9S0_lNzbetCfbhXGSgny11mq7uKYUJh-PdB0zQGonz56iA0tjJtJrMu2EF2Xoa/pub?gid=0&single=true&output=csv";
+
+let SCHOOL_DB_CACHE = null;
+
+async function getSchoolDB() {
+  if (SCHOOL_DB_CACHE) return SCHOOL_DB_CACHE;
+
+  const data = await loadCSV(SCHOOL_DB_URL);
+  SCHOOL_DB_CACHE = data;
+  return data;
+}
+
+// ===============================
+// GET CURRENT SCHOOL KEY
+// ===============================
+function getCurrentSchool() {
+  return (sessionStorage.getItem("school") || "harrisonville")
     .toLowerCase()
     .replace(/\s+/g, "");
+}
 
-  const schoolDBUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXJVxlKWqu-JbdJp9S0_lNzbetCfbhXGSgny11mq7uKYUJh-PdB0zQGonz56iA0tjJtJrMu2EF2Xoa/pub?gid=0&single=true&output=csv";
-
-  const schools = await loadCSV(schoolDBUrl);
+// ===============================
+// GET SCHOOL ROW (🔥 CORE)
+// ===============================
+async function getSchoolRow() {
+  const school = getCurrentSchool();
+  const schools = await getSchoolDB();
 
   const match = schools.find(s =>
     (s.school || "")
@@ -33,13 +52,40 @@ async function getSchoolDataURL() {
       .replace(/\s+/g, "") === school
   );
 
-  if (!match || !match.dataURL) {
-    console.error("❌ No dataURL found for school:", school);
+  if (!match) {
+    console.error("❌ School not found:", school);
     return null;
   }
 
-  // 🔥 cache-buster ensures fresh data
-  return match.dataURL + "&t=" + Date.now();
+  return match;
+}
+
+// ===============================
+// GET DATA URL
+// ===============================
+async function getSchoolDataURL() {
+  const row = await getSchoolRow();
+
+  if (!row || !row.dataURL) {
+    console.error("❌ No dataURL found");
+    return null;
+  }
+
+  return row.dataURL + "&t=" + Date.now(); // cache-buster
+}
+
+// ===============================
+// GET SUBMIT URL (🔥 NEW)
+// ===============================
+async function getSchoolSubmitURL() {
+  const row = await getSchoolRow();
+
+  if (!row || !row.submitURL) {
+    console.error("❌ No submitURL found");
+    return null;
+  }
+
+  return row.submitURL;
 }
 
 // ===============================
