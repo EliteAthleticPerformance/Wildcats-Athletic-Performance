@@ -15,11 +15,46 @@ async function loadCSV(url) {
   return parsed.data;
 }
 
-// 🔥 CENTRALIZED DATA ACCESS
+// ===============================
+// GET SCHOOL DATA URL (🔥 NEW)
+// ===============================
+async function getSchoolDataURL() {
+  const school = (sessionStorage.getItem("school") || "harrisonville")
+    .toLowerCase()
+    .replace(/\s+/g, "");
+
+  const schoolDBUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXJVxlKWqu-JbdJp9S0_lNzbetCfbhXGSgny11mq7uKYUJh-PdB0zQGonz56iA0tjJtJrMu2EF2Xoa/pub?gid=0&single=true&output=csv";
+
+  const schools = await loadCSV(schoolDBUrl);
+
+  const match = schools.find(s =>
+    (s.school || "")
+      .toLowerCase()
+      .replace(/\s+/g, "") === school
+  );
+
+  if (!match || !match.dataURL) {
+    console.error("❌ No dataURL found for school:", school);
+    return null;
+  }
+
+  // 🔥 cache-buster ensures fresh data
+  return match.dataURL + "&t=" + Date.now();
+}
+
+// ===============================
+// CENTRALIZED DATA ACCESS
+// ===============================
 let APP_DATA = [];
 
 async function loadAthleteData() {
-  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv&t=" + Date.now();
+
+  const url = await getSchoolDataURL();
+
+  if (!url) {
+    console.error("❌ Data URL missing");
+    return [];
+  }
 
   const raw = await loadCSV(url);
 
@@ -73,7 +108,7 @@ async function loadAthleteData() {
     );
   });
 
-  console.log("✅ DATA READY:", APP_DATA.length);
+  console.log(`✅ DATA READY (${APP_DATA.length}) →`, url);
 
   return APP_DATA;
 }
