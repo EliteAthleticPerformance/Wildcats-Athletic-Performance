@@ -152,3 +152,12 @@ function filterAthletes() {
 function goToAthlete(name) {
   window.location.href = `history.html?name=${encodeURIComponent(name)}`;
 }
+
+window.addEventListener("dataUpdated", (e) => {
+  const newEntry = e.detail;
+
+  if (newEntry.name === currentAthleteName) {
+    console.log("🔄 Athlete page updating...");
+    renderAthlete(); // your existing function
+  }
+});
