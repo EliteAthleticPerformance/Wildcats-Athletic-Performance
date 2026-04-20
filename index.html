@@ -115,17 +115,25 @@
 <script src="js/dataLoader.js"></script>
 
 <script>
-// ===== LOAD LIVE STATS =====
-(async function () {
-  const data = await loadAthleteData();
-
-  // total tests
+// ===== SHARED FUNCTION =====
+function updateStats(data) {
   document.getElementById("totalTests").textContent = data.length;
 
-  // unique athletes
   const unique = new Set(data.map(d => d.name));
   document.getElementById("totalAthletes").textContent = unique.size;
+}
+
+// ===== INITIAL LOAD =====
+(async function () {
+  const data = await loadAthleteData();
+  updateStats(data);
 })();
+
+// ===== LIVE UPDATE =====
+window.addEventListener("dataUpdated", () => {
+  console.log("🔄 Updating homepage stats...");
+  updateStats(APP_DATA);
+});
 </script>
 
 </body>
