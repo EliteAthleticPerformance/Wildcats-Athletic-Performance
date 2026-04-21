@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -7,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- 🔖 FAVICON (handled by themeLoader.js) -->
-
 <link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
 
 <title>Elite Athletic Performance System</title>
@@ -39,32 +37,41 @@
   <!-- ===== PRIMARY ACTION ===== -->
 
   <section class="section" style="text-align:center;">
-    <button class="btn" onclick="goToEnterTest()">
+    
+    <!-- ✅ FIXED BUTTON -->
+    <button 
+      type="button" 
+      class="btn" 
+      onclick="goToEnterTest()">
       ➕ Enter Test
     </button>
+
+    <!-- 🔥 Fallback if JS fails (optional but smart) -->
+    <noscript>
+      <a href="enter.html" class="btn">➕ Enter Test</a>
+    </noscript>
+
   </section>
 
   <!-- ===== QUICK STATS ===== -->
 
   <section class="section">
 
+    <div class="grid-2">
 
-<div class="grid-2">
+      <div class="card-mini">
+        <div class="card-icon">👥</div>
+        <h3>Athletes</h3>
+        <p id="totalAthletes">--</p>
+      </div>
 
-  <div class="card-mini">
-    <div class="card-icon">👥</div>
-    <h3>Athletes</h3>
-    <p id="totalAthletes">--</p>
-  </div>
+      <div class="card-mini">
+        <div class="card-icon">📊</div>
+        <h3>Tests</h3>
+        <p id="totalTests">--</p>
+      </div>
 
-  <div class="card-mini">
-    <div class="card-icon">📊</div>
-    <h3>Tests</h3>
-    <p id="totalTests">--</p>
-  </div>
-
-</div>
-
+    </div>
 
   </section>
 
@@ -72,35 +79,33 @@
 
   <section class="section">
 
+    <div class="grid grid-auto">
 
-<div class="grid grid-auto">
+      <a class="card" href="timer.html">
+        <div class="card-icon">⏱️</div>
+        <h2>Training Timer</h2>
+        <p>4 Quadrant Weight Room Timer</p>
+      </a>
 
-  <a class="card" href="timer.html">
-    <div class="card-icon">⏱️</div>
-    <h2>Training Timer</h2>
-    <p>4 Quadrant Weight Room Timer</p>
-  </a>
+      <a class="card" href="testing.html">
+        <div class="card-icon">📋</div>
+        <h2>Combine Testing</h2>
+        <p>Record and Analyze Results</p>
+      </a>
 
-  <a class="card" href="testing.html">
-    <div class="card-icon">📋</div>
-    <h2>Combine Testing</h2>
-    <p>Record and Analyze Results</p>
-  </a>
+      <a class="card" href="athletes.html">
+        <div class="card-icon">🧑</div>
+        <h2>Athlete Profiles</h2>
+        <p>View Performance Ratings</p>
+      </a>
 
-  <a class="card" href="athletes.html">
-    <div class="card-icon">🧑</div>
-    <h2>Athlete Profiles</h2>
-    <p>View Performance Ratings</p>
-  </a>
+      <a class="card" href="leaderboard.html">
+        <div class="card-icon">🏆</div>
+        <h2>Leaderboard</h2>
+        <p>Athlete Rankings</p>
+      </a>
 
-  <a class="card" href="leaderboard.html">
-    <div class="card-icon">🏆</div>
-    <h2>Leaderboard</h2>
-    <p>Athlete Rankings</p>
-  </a>
-
-</div>
-
+    </div>
 
   </section>
 
@@ -111,20 +116,24 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script src="./js/themeLoader.js"></script>
-
 <script src="js/dataLoader.js"></script>
 
+<!-- ===== LIVE STATS ===== -->
 <script>
-// ===== LOAD LIVE STATS =====
 (async function () {
-  const data = await loadAthleteData();
+  try {
+    const data = await loadAthleteData();
 
-  // total tests
-  document.getElementById("totalTests").textContent = data.length;
+    // total tests
+    document.getElementById("totalTests").textContent = data.length;
 
-  // unique athletes
-  const unique = new Set(data.map(d => d.name));
-  document.getElementById("totalAthletes").textContent = unique.size;
+    // unique athletes
+    const unique = new Set(data.map(d => d.name));
+    document.getElementById("totalAthletes").textContent = unique.size;
+
+  } catch (err) {
+    console.warn("Stats load failed:", err);
+  }
 })();
 </script>
 
