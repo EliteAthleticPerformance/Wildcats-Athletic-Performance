@@ -5,13 +5,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
+<link id="dynamicFavicon" rel="icon" type="image/png">
 
 <title>Enter Athlete Data</title>
 
 <link rel="stylesheet" href="styles.css">
 
-<!-- 🔒 COACH ACCESS (PRODUCTION SAFE UX) -->
+<!-- 🔒 COACH ACCESS -->
 <script>
 (function () {
   const PASSWORD = "Coach123"; // 🔥 CHANGE THIS
@@ -35,56 +35,50 @@
 
 <body>
 
-<!-- ===== HEADER ===== -->
 <div id="header-placeholder"></div>
 <script src="js/header.js"></script>
 
-<!-- ===== MAIN ===== -->
 <main>
 
-  <!-- TITLE -->
-  <section class="section" style="text-align:center;">
-    <h1>🏋️ Enter Athlete Test</h1>
-    <p style="color: var(--muted)">Record performance data</p>
-  </section>
+<section class="section" style="text-align:center;">
+  <h1>🏋️ Enter Athlete Test</h1>
+  <p style="color: var(--muted)">Record performance data</p>
+</section>
 
-  <!-- FORM -->
-  <section class="section">
+<section class="section">
 
-    <div class="card">
+<div class="card">
 
-      <!-- MESSAGE -->
-      <div id="formMessage" style="text-align:center; margin-bottom:10px;"></div>
+<div id="formMessage" style="text-align:center; margin-bottom:10px;"></div>
 
-      <!-- ===== ATHLETE INFO ===== -->
-      <div class="form-section">
-        <h2>ATHLETE INFO</h2>
+<!-- ATHLETE INFO -->
+<div class="form-section">
+  <h2>ATHLETE INFO</h2>
 
-        <div class="form-grid cols-4">
-          <input id="name" placeholder="Last, First Name">
-          <input id="date" type="date">
+  <div class="form-grid cols-4">
+    <input id="name" placeholder="Last, First Name">
+    <input id="date" type="date">
 
-          <select id="hour">
-            <option value="">Hour</option>
-            <option>0</option><option>1</option><option>2</option>
-            <option>3</option><option>4</option><option>5</option>
-            <option>6</option><option>7</option><option>8</option><option>9</option>
-          </select>
+    <select id="hour">
+      <option value="">Hour</option>
+      <option>0</option><option>1</option><option>2</option>
+      <option>3</option><option>4</option><option>5</option>
+      <option>6</option><option>7</option><option>8</option><option>9</option>
+    </select>
 
-          <select id="grade">
-            <option value="">Grade</option>
-            <option>6</option><option>7</option><option>8</option>
-            <option>9</option><option>10</option><option>11</option><option>12</option>
-          </select>
+    <select id="grade">
+      <option value="">Grade</option>
+      <option>6</option><option>7</option><option>8</option>
+      <option>9</option><option>10</option><option>11</option><option>12</option>
+    </select>
 
-          <input id="weight" type="number" placeholder="Weight (lbs)">
-        </div>
-      </div>
+    <input id="weight" type="number" placeholder="Weight (lbs)">
+  </div>
+</div>
 
-     <!-- ===== STRENGTH ===== -->
+<!-- STRENGTH -->
 <div class="form-section">
   <h2>STRENGTH</h2>
-
   <div class="form-grid cols-3">
     <input id="bench" type="number" placeholder="Bench">
     <input id="squat" type="number" placeholder="Squat">
@@ -96,20 +90,19 @@
   </div>
 </div>
 
-<!-- ===== EXPLOSIVE ===== -->
+<!-- EXPLOSIVE -->
 <div class="form-section">
   <h2>EXPLOSIVE</h2>
-
   <div class="form-grid cols-3">
     <select id="vertical">
-      <option value="">Vertical Jump</option>
+      <option value="">Vertical</option>
       <option>20</option><option>22</option><option>24</option>
       <option>26</option><option>28</option><option>30</option>
       <option>32</option><option>34</option><option>36</option>
     </select>
 
     <select id="broad">
-      <option value="">Broad Jump</option>
+      <option value="">Broad</option>
       <option>6.00</option><option>7.00</option>
       <option>8.00</option><option>9.00</option><option>10.00</option>
     </select>
@@ -121,14 +114,12 @@
     </select>
   </div>
 </div>
-      
-<!-- ===== POWER ===== -->
+
+<!-- POWER -->
 <div class="form-section">
   <h2>POWER</h2>
-
   <div class="form-grid cols-2">
     <input id="clean" type="number" placeholder="Clean">
-
     <select id="medball">
       <option value="">Med Ball Toss</option>
       <option>10</option><option>12</option><option>14</option>
@@ -137,15 +128,14 @@
   </div>
 </div>
 
-<!-- ===== SPEED ===== -->
+<!-- SPEED -->
 <div class="form-section">
   <h2>SPEED</h2>
-
   <div class="form-grid cols-2">
     <select id="ten">
       <option value="">10 Yard</option>
-      <option>1.20</option><option>1.40</option>
-      <option>1.60</option><option>1.80</option><option>2.00</option>
+      <option>1.2</option><option>1.4</option>
+      <option>1.6</option><option>1.8</option><option>2.0</option>
     </select>
 
     <select id="forty">
@@ -156,27 +146,74 @@
   </div>
 </div>
 
+<div style="text-align:center; margin-top:20px;">
+  <button class="save-btn" id="submitBtn">💾 Save Test</button>
+</div>
 
-
-      <!-- SAVE BUTTON -->
-      <div style="text-align:center; margin-top:20px;">
-        <button type="button" class="save-btn" onclick="saveAthlete()">
-          💾 Save Test
-        </button>
-      </div>
-
-    </div>
-
-  </section>
+</div>
+</section>
 
 </main>
 
-<!-- ===== SCRIPTS ===== -->
-
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<!-- THEME ENGINE -->
 <script src="js/themeLoader.js"></script>
-<script src="js/dataLoader.js"></script>
-<script src="js/enter.js"></script>
+
+<script>
+
+/* WAIT FOR CONFIG */
+async function waitForConfig() {
+  let tries = 0;
+  while (!window.SCHOOL_CONFIG && tries < 50) {
+    await new Promise(r => setTimeout(r, 50));
+    tries++;
+  }
+}
+
+/* SUBMIT */
+async function submitForm() {
+
+  await waitForConfig();
+
+  if (!SCHOOL_CONFIG.submitURL) {
+    alert("No submit URL configured");
+    return;
+  }
+
+  const formData = new FormData();
+
+  // ⚠️ REPLACE THESE ENTRY IDs
+  formData.append("entry.1111111111", document.getElementById("name").value);
+  formData.append("entry.2222222222", document.getElementById("date").value);
+  formData.append("entry.3333333333", document.getElementById("grade").value);
+  formData.append("entry.4444444444", document.getElementById("weight").value);
+  formData.append("entry.5555555555", document.getElementById("bench").value);
+  formData.append("entry.6666666666", document.getElementById("squat").value);
+  formData.append("entry.7777777777", document.getElementById("clean").value);
+  formData.append("entry.8888888888", document.getElementById("forty").value);
+
+  try {
+    await fetch(SCHOOL_CONFIG.submitURL, {
+      method: "POST",
+      mode: "no-cors",
+      body: formData
+    });
+
+    document.getElementById("formMessage").innerHTML =
+      "<span style='color:lime;'>✅ Saved successfully</span>";
+
+    document.querySelectorAll("input, select").forEach(el => el.value = "");
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("formMessage").innerHTML =
+      "<span style='color:red;'>❌ Submit failed</span>";
+  }
+}
+
+/* BUTTON */
+document.getElementById("submitBtn").addEventListener("click", submitForm);
+
+</script>
 
 </body>
 </html>
