@@ -54,7 +54,6 @@
 <!-- ATHLETE INFO -->
 <div class="form-section">
   <h2>ATHLETE INFO</h2>
-
   <div class="form-grid cols-4">
     <input id="name" placeholder="Last, First Name">
     <input id="date" type="date">
@@ -80,8 +79,8 @@
 <div class="form-section">
   <h2>STRENGTH</h2>
   <div class="form-grid cols-3">
-    <input id="bench" type="number" placeholder="Bench">
-    <input id="squat" type="number" placeholder="Squat">
+    <input id="bench" type="number">
+    <input id="squat" type="number">
     <select id="situps">
       <option value="">Sit Ups</option>
       <option>30</option><option>40</option>
@@ -119,7 +118,7 @@
 <div class="form-section">
   <h2>POWER</h2>
   <div class="form-grid cols-2">
-    <input id="clean" type="number" placeholder="Clean">
+    <input id="clean" type="number">
     <select id="medball">
       <option value="">Med Ball Toss</option>
       <option>10</option><option>12</option><option>14</option>
@@ -155,12 +154,9 @@
 
 </main>
 
-<!-- THEME ENGINE -->
 <script src="js/themeLoader.js"></script>
 
 <script>
-
-/* WAIT FOR CONFIG */
 async function waitForConfig() {
   let tries = 0;
   while (!window.SCHOOL_CONFIG && tries < 50) {
@@ -169,9 +165,7 @@ async function waitForConfig() {
   }
 }
 
-/* SUBMIT */
 async function submitForm() {
-
   await waitForConfig();
 
   if (!SCHOOL_CONFIG.submitURL) {
@@ -179,40 +173,42 @@ async function submitForm() {
     return;
   }
 
-  const formData = new FormData();
-
-  // ⚠️ REPLACE THESE ENTRY IDs
-  formData.append("entry.1111111111", document.getElementById("name").value);
-  formData.append("entry.2222222222", document.getElementById("date").value);
-  formData.append("entry.3333333333", document.getElementById("grade").value);
-  formData.append("entry.4444444444", document.getElementById("weight").value);
-  formData.append("entry.5555555555", document.getElementById("bench").value);
-  formData.append("entry.6666666666", document.getElementById("squat").value);
-  formData.append("entry.7777777777", document.getElementById("clean").value);
-  formData.append("entry.8888888888", document.getElementById("forty").value);
+  const payload = {
+    name: name.value,
+    date: date.value,
+    hour: hour.value,
+    grade: grade.value,
+    weight: weight.value,
+    bench: bench.value,
+    squat: squat.value,
+    situps: situps.value,
+    vertical: vertical.value,
+    broad: broad.value,
+    agility: agility.value,
+    clean: clean.value,
+    medball: medball.value,
+    ten: ten.value,
+    forty: forty.value
+  };
 
   try {
     await fetch(SCHOOL_CONFIG.submitURL, {
       method: "POST",
-      mode: "no-cors",
-      body: formData
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
 
-    document.getElementById("formMessage").innerHTML =
-      "<span style='color:lime;'>✅ Saved successfully</span>";
+    formMessage.innerHTML = "<span style='color:lime;'>✅ Saved</span>";
 
     document.querySelectorAll("input, select").forEach(el => el.value = "");
 
   } catch (err) {
     console.error(err);
-    document.getElementById("formMessage").innerHTML =
-      "<span style='color:red;'>❌ Submit failed</span>";
+    formMessage.innerHTML = "<span style='color:red;'>❌ Failed</span>";
   }
 }
 
-/* BUTTON */
 document.getElementById("submitBtn").addEventListener("click", submitForm);
-
 </script>
 
 </body>
