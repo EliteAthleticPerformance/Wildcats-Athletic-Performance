@@ -165,6 +165,7 @@ async function loadTheme() {
       name: schoolRow.name || "",
       logo: schoolRow.logo || "",
       dataURL: schoolRow.dataURL || "", // 🔥 THIS DRIVES EVERYTHING
+      submitURL: schoolRow.submitURL || "", 
       theme: themeRow || {}
     };
 
