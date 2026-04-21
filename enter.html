@@ -11,14 +11,22 @@
 
 <link rel="stylesheet" href="styles.css">
 
-<!-- 🔒 COACH ACCESS GUARD -->
+<!-- 🔒 COACH ACCESS (PRODUCTION SAFE UX) -->
 <script>
 (function () {
-  const allowed = sessionStorage.getItem("coachAccess") === "true";
+  const PASSWORD = "wildcats"; // 🔥 CHANGE THIS
 
-  if (!allowed) {
-    alert("Coach access required");
-    window.location.href = "index.html";
+  let access = sessionStorage.getItem("coachAccess");
+
+  if (access !== "true") {
+    const pass = prompt("Enter coach password:");
+
+    if (pass === PASSWORD) {
+      sessionStorage.setItem("coachAccess", "true");
+    } else {
+      alert("Access denied");
+      window.location.href = "index.html";
+    }
   }
 })();
 </script>
@@ -45,7 +53,7 @@
 
     <div class="card">
 
-      <!-- MESSAGE AREA -->
+      <!-- MESSAGE -->
       <div id="formMessage" style="text-align:center; margin-bottom:10px;"></div>
 
       <!-- ===== ATHLETE INFO ===== -->
