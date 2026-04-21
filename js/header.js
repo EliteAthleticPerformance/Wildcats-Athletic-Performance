@@ -1,10 +1,12 @@
 /* ========================================
+   🔥 ELITE V3 HEADER ENGINE (PRODUCTION)
+======================================== */
+
+/* ========================================
    INIT
 ======================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadHeader();
-});
+document.addEventListener("DOMContentLoaded", loadHeader);
 
 /* ========================================
    🧱 HEADER LOAD
@@ -19,16 +21,13 @@ async function loadHeader() {
     if (!res.ok) throw new Error("Header fetch failed");
 
     const html = await res.text();
-
     container.innerHTML = html;
 
-    // 🔥 wait for DOM to update
-    setTimeout(() => {
-      initHeaderUI();
-    }, 0);
+    // ✅ Initialize AFTER DOM inject (no setTimeout needed)
+    initHeaderUI();
 
   } catch (err) {
-    console.error("HEADER LOAD ERROR:", err);
+    console.error("❌ HEADER LOAD ERROR:", err);
   }
 }
 
@@ -39,32 +38,48 @@ async function loadHeader() {
 function initHeaderUI() {
   setupMenu();
   highlightActiveLink();
+  injectSchoolIntoLinks();
+  setPageTitle();
 
-  const schoolNameEl = document.getElementById("schoolName");
+  // 🔥 notify other systems (themeLoader)
+  document.dispatchEvent(new Event("headerLoaded"));
+}
+
+/* ========================================
+   🏫 SCHOOL HANDLING
+======================================== */
+
+function getSchoolParam() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("school") || localStorage.getItem("school") || "";
+}
+
+function injectSchoolIntoLinks() {
+  const school = getSchoolParam();
+  if (!school) return;
+
+  localStorage.setItem("school", school);
+
+  document.querySelectorAll("#dropdownMenu a").forEach(link => {
+    let href = link.getAttribute("href");
+    if (!href) return;
+
+    // remove existing school param
+    href = href.split("?")[0];
+
+    link.setAttribute("href", `${href}?school=${school}`);
+  });
+}
+
+/* ========================================
+   🏷️ PAGE TITLE
+======================================== */
+
+function setPageTitle() {
   const pageTitleEl = document.getElementById("pageTitle");
-
   if (pageTitleEl) {
     pageTitleEl.textContent = "Elite Athletic Performance";
   }
-
-  // 🔥 PRESERVE SCHOOL PARAM IN NAV LINKS
-  const school = new URLSearchParams(window.location.search).get("school");
-
-  if (school) {
-    // optional: store for fallback
-    localStorage.setItem("school", school);
-
-    document.querySelectorAll("#dropdownMenu a").forEach(link => {
-      const href = link.getAttribute("href");
-
-      if (href && !href.includes("school=")) {
-        link.setAttribute("href", `${href}?school=${school}`);
-      }
-    });
-  }
-
-  // 🔥 fire AFTER links are updated
-  document.dispatchEvent(new Event("headerLoaded"));
 }
 
 /* ========================================
@@ -77,9 +92,11 @@ function highlightActiveLink() {
 
   links.forEach(link => {
     const href = link.getAttribute("href");
+    if (!href) return;
 
-    // handle links WITH ?school=...
-    if (href && href.startsWith(current)) {
+    const cleanHref = href.split("?")[0];
+
+    if (cleanHref === current) {
       link.style.color = "var(--primary)";
       link.style.fontWeight = "700";
     }
@@ -96,14 +113,49 @@ function setupMenu() {
 
   if (!toggle || !dropdown) return;
 
-  toggle.addEventListener("click", (e) => {
+  // prevent duplicate listeners
+  toggle.onclick = (e) => {
     e.stopPropagation();
     dropdown.classList.toggle("show");
-  });
+  };
 
   document.addEventListener("click", (e) => {
     if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
       dropdown.classList.remove("show");
     }
   });
+}
+
+/* ========================================
+   🚀 NAVIGATION HELPERS (FIXES YOUR ERROR)
+======================================== */
+
+// 🔥 THIS fixes: goToEnterTest is not defined
+function goToEnterTest() {
+  const school = getSchoolParam();
+  window.location.href = school
+    ? `enter.html?school=${school}`
+    : "enter.html";
+}
+
+// Optional helpers (future-proof navigation)
+function goToLeaderboard() {
+  const school = getSchoolParam();
+  window.location.href = school
+    ? `leaderboard.html?school=${school}`
+    : "leaderboard.html";
+}
+
+function goToTesting() {
+  const school = getSchoolParam();
+  window.location.href = school
+    ? `testing.html?school=${school}`
+    : "testing.html";
+}
+
+function goToAthletes() {
+  const school = getSchoolParam();
+  window.location.href = school
+    ? `athletes.html?school=${school}`
+    : "athletes.html";
 }
