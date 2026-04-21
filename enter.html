@@ -1,12 +1,9 @@
 <!DOCTYPE html>
+<html lang="en">
 
-<html lang="en"> 
-
-<head> 
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- 🔖 FAVICON (handled dynamically by themeLoader.js) -->
 
 <link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
 
@@ -15,11 +12,15 @@
 <link rel="stylesheet" href="styles.css">
 
 <!-- 🔒 COACH ACCESS GUARD -->
-
 <script>
-if (sessionStorage.getItem("coachAccess") !== "true") {
-  window.location.href = "index.html";
-}
+(function () {
+  const allowed = sessionStorage.getItem("coachAccess") === "true";
+
+  if (!allowed) {
+    alert("Coach access required");
+    window.location.href = "index.html";
+  }
+})();
 </script>
 
 </head>
@@ -27,134 +28,134 @@ if (sessionStorage.getItem("coachAccess") !== "true") {
 <body>
 
 <!-- ===== HEADER ===== -->
-
 <div id="header-placeholder"></div>
 <script src="js/header.js"></script>
 
 <!-- ===== MAIN ===== -->
-
 <main>
 
   <!-- TITLE -->
-
   <section class="section" style="text-align:center;">
     <h1>🏋️ Enter Athlete Test</h1>
+    <p style="color: var(--muted)">Record performance data</p>
   </section>
 
   <!-- FORM -->
-
   <section class="section">
 
+    <div class="card">
 
-<div class="card">
+      <!-- MESSAGE AREA -->
+      <div id="formMessage" style="text-align:center; margin-bottom:10px;"></div>
 
-  <!-- ===== ATHLETE INFO ===== -->
-  <div class="form-section">
-    <h2>ATHLETE INFO</h2>
+      <!-- ===== ATHLETE INFO ===== -->
+      <div class="form-section">
+        <h2>ATHLETE INFO</h2>
 
-    <div class="form-grid cols-4">
-      <input id="name" placeholder="Last, First Name">
-      <input id="date" type="date">
-      
-      <select id="hour">
-        <option value="">Hour</option>
-        <option>0</option><option>1</option><option>2</option>
-        <option>3</option><option>4</option><option>5</option>
-        <option>6</option><option>7</option><option>8</option><option>9</option>
-      </select>
+        <div class="form-grid cols-4">
+          <input id="name" placeholder="Last, First Name">
+          <input id="date" type="date">
 
-      <select id="grade">
-        <option value="">Grade</option>
-        <option>6</option><option>7</option><option>8</option>
-        <option>9</option><option>10</option><option>11</option><option>12</option>
-      </select>
+          <select id="hour">
+            <option value="">Hour</option>
+            <option>0</option><option>1</option><option>2</option>
+            <option>3</option><option>4</option><option>5</option>
+            <option>6</option><option>7</option><option>8</option><option>9</option>
+          </select>
 
-      <input id="weight" type="number" placeholder="Weight (lbs)">
+          <select id="grade">
+            <option value="">Grade</option>
+            <option>6</option><option>7</option><option>8</option>
+            <option>9</option><option>10</option><option>11</option><option>12</option>
+          </select>
+
+          <input id="weight" type="number" placeholder="Weight (lbs)">
+        </div>
+      </div>
+
+      <!-- ===== STRENGTH ===== -->
+      <div class="form-section">
+        <h2>STRENGTH</h2>
+
+        <div class="form-grid cols-3">
+          <input id="bench" type="number" placeholder="Bench">
+          <input id="squat" type="number" placeholder="Squat">
+          <input id="clean" type="number" placeholder="Clean">
+        </div>
+      </div>
+
+      <!-- ===== EXPLOSIVENESS ===== -->
+      <div class="form-section">
+        <h2>EXPLOSIVENESS</h2>
+
+        <div class="form-grid cols-3">
+          <select id="vertical">
+            <option value="">Vertical Jump</option>
+            <option>20</option><option>22</option><option>24</option>
+            <option>26</option><option>28</option><option>30</option>
+            <option>32</option><option>34</option><option>36</option>
+          </select>
+
+          <select id="broad">
+            <option value="">Broad Jump</option>
+            <option>6.00</option><option>7.00</option>
+            <option>8.00</option><option>9.00</option><option>10.00</option>
+          </select>
+
+          <select id="medball">
+            <option value="">Med Ball Toss</option>
+            <option>10</option><option>12</option><option>14</option>
+            <option>16</option><option>18</option><option>20</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ===== SPEED ===== -->
+      <div class="form-section">
+        <h2>SPEED & AGILITY</h2>
+
+        <div class="form-grid cols-4">
+          <select id="agility">
+            <option value="">Pro Agility</option>
+            <option>4.2</option><option>4.4</option>
+            <option>4.6</option><option>4.8</option><option>5.0</option>
+          </select>
+
+          <select id="ten">
+            <option value="">10 Yard</option>
+            <option>1.20</option><option>1.40</option>
+            <option>1.60</option><option>1.80</option><option>2.00</option>
+          </select>
+
+          <select id="forty">
+            <option value="">40 Yard</option>
+            <option>4.4</option><option>4.6</option>
+            <option>4.8</option><option>5.0</option><option>5.2</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ===== ENDURANCE ===== -->
+      <div class="form-section">
+        <h2>ENDURANCE</h2>
+
+        <div class="form-grid cols-2">
+          <select id="situps">
+            <option value="">Sit Ups</option>
+            <option>30</option><option>40</option>
+            <option>50</option><option>60</option><option>70</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SAVE BUTTON -->
+      <div style="text-align:center; margin-top:20px;">
+        <button type="button" class="save-btn" onclick="saveAthlete()">
+          💾 Save Test
+        </button>
+      </div>
+
     </div>
-  </div>
-
-  <!-- ===== STRENGTH ===== -->
-  <div class="form-section">
-    <h2>STRENGTH</h2>
-
-    <div class="form-grid cols-3">
-      <input id="bench" type="number" placeholder="Bench">
-      <input id="squat" type="number" placeholder="Squat">
-      <input id="clean" type="number" placeholder="Clean">
-    </div>
-  </div>
-
-  <!-- ===== EXPLOSIVENESS ===== -->
-  <div class="form-section">
-    <h2>EXPLOSIVENESS</h2>
-
-    <div class="form-grid cols-3">
-      <select id="vertical">
-        <option value="">Vertical Jump</option>
-        <option>20</option><option>22</option><option>24</option>
-        <option>26</option><option>28</option><option>30</option>
-        <option>32</option><option>34</option><option>36</option>
-      </select>
-
-      <select id="broad">
-        <option value="">Broad Jump</option>
-        <option>6.00</option><option>7.00</option>
-        <option>8.00</option><option>9.00</option><option>10.00</option>
-      </select>
-
-      <select id="medball">
-        <option value="">Med Ball Toss</option>
-        <option>10</option><option>12</option><option>14</option>
-        <option>16</option><option>18</option><option>20</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- ===== SPEED & AGILITY ===== -->
-  <div class="form-section">
-    <h2>SPEED & AGILITY</h2>
-
-    <div class="form-grid cols-4">
-      <select id="agility">
-        <option value="">Pro Agility</option>
-        <option>4.2</option><option>4.4</option>
-        <option>4.6</option><option>4.8</option><option>5.0</option>
-      </select>
-
-      <select id="ten">
-        <option value="">10 Yard</option>
-        <option>1.20</option><option>1.40</option>
-        <option>1.60</option><option>1.80</option><option>2.00</option>
-      </select>
-
-      <select id="forty">
-        <option value="">40 Yard</option>
-        <option>4.4</option><option>4.6</option>
-        <option>4.8</option><option>5.0</option><option>5.2</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- ===== ENDURANCE ===== -->
-  <div class="form-section">
-    <h2>ENDURANCE</h2>
-
-    <div class="form-grid cols-3">
-      <select id="situps">
-        <option value="">Sit Ups</option>
-        <option>30</option><option>40</option>
-        <option>50</option><option>60</option><option>70</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- SAVE BUTTON -->
-  <button class="save-btn" onclick="saveAthlete()">
-    💾 Save Test
-  </button>
-
-</div>
-
 
   </section>
 
@@ -163,11 +164,8 @@ if (sessionStorage.getItem("coachAccess") !== "true") {
 <!-- ===== SCRIPTS ===== -->
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-<script src="./js/themeLoader.js"></script>
-
+<script src="js/themeLoader.js"></script>
 <script src="js/dataLoader.js"></script>
-
 <script src="js/enter.js"></script>
 
 </body>
