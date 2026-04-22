@@ -1,184 +1,50 @@
 /* ========================================
-   🔥 ELITE V3 TESTING ENGINE (PRODUCTION)
-   ======================================== */
-
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
-
-/* ========================================
-   HELPERS
-   ======================================== */
-
-const format = (val) => (!val ? "-" : Math.round(val));
-const formatDecimal = (val) => (!val ? "-" : Number(val).toFixed(2));
-
-const cleanNumber = (val) => {
-  if (!val) return 0;
-  val = String(val).replace(/"/g, "").trim();
-  if (val === "#DIV/0!" || val === "") return 0;
-  return parseFloat(val) || 0;
-};
-
-const formatDate = (raw) => {
-  if (!raw) return "-";
-  const d = new Date(raw);
-  if (isNaN(d)) return "-";
-  return `${d.toLocaleString("default", { month: "short" })} ${d.getFullYear()}`;
-};
-
-function findIndex(headers, keywords) {
-  const lower = headers.map(h => h.toLowerCase());
-  for (let key of keywords) {
-    const idx = lower.findIndex(h => h.includes(key));
-    if (idx !== -1) return idx;
-  }
-  return -1;
-}
-
-/* ========================================
-   STATE
+   🔥 ELITE TESTING ENGINE (API VERSION)
    ======================================== */
 
 let tableData = [];
-let currentSort = { col: null, dir: "asc" };
 let currentLetter = "ALL";
 
 /* ========================================
    INIT
-   ======================================== */
+======================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadData();
-  setupSearch();
-  window.addEventListener("resize", () => renderTable(tableData)); // ✅ FIXED (only once)
-});
+document.addEventListener("DOMContentLoaded", init);
 
-/* ========================================
-   LOAD DATA
-   ======================================== */
-
-async function loadData() {
+async function init() {
   try {
-    const res = await fetch(CSV_URL + "&t=" + Date.now());
-    const text = await res.text();
+    const data = await loadAthleteData();
 
-    const parsed = parseCSV(text);
-    const headers = parsed.shift().map(h => h.trim());
-
-    const idx = {
-      name: findIndex(headers, ["student", "athlete", "name"]),
-      date: findIndex(headers, ["date"]),
-      hour: findIndex(headers, ["hour"]),
-      grade: findIndex(headers, ["grade"]),
-      weight: findIndex(headers, ["weight"]),
-      group: findIndex(headers, ["group"]),
-
-      bench: findIndex(headers, ["bench"]),
-      squat: findIndex(headers, ["squat"]),
-      clean: findIndex(headers, ["clean"]),
-      vertical: findIndex(headers, ["vertical"]),
-      broad: findIndex(headers, ["broad"]),
-      med: findIndex(headers, ["med"]),
-      agility: findIndex(headers, ["agility"]),
-      situps: findIndex(headers, ["sit"]),
-      ten: findIndex(headers, ["10"]),
-      forty: findIndex(headers, ["40"]),
-
-      score: findIndex(headers, [
-        "total athletic performance",
-        "performance",
-        "points",
-        "score"
-      ])
-    };
-
-    console.log("🧪 COLUMN MAP:", idx);
-
-    tableData = parsed
-      .map(cols => buildAthlete(cols, idx))
-      .filter(Boolean);
+    tableData = data;
 
     renderAlphabet();
     renderTable(tableData);
+    setupSearch();
 
-    localStorage.setItem("athleteScores", JSON.stringify(tableData));
+    window.addEventListener("resize", () => renderTable(tableData));
 
   } catch (err) {
-    console.error("❌ Sheet load error:", err);
+    console.error("❌ Load error:", err);
   }
 }
 
 /* ========================================
-   CSV PARSER
-   ======================================== */
+   HELPERS
+======================================== */
 
-function parseCSV(text) {
-  const rows = [];
-  let current = "";
-  let insideQuotes = false;
-  let row = [];
+const format = (val) => (!val ? "-" : Math.round(val));
+const formatDecimal = (val) => (!val ? "-" : Number(val).toFixed(2));
 
-  for (let char of text) {
-    if (char === '"') insideQuotes = !insideQuotes;
-    else if (char === "," && !insideQuotes) {
-      row.push(current);
-      current = "";
-    }
-    else if (char === "\n" && !insideQuotes) {
-      row.push(current);
-      rows.push(row);
-      row = [];
-      current = "";
-    }
-    else {
-      current += char;
-    }
-  }
-
-  if (current) {
-    row.push(current);
-    rows.push(row);
-  }
-
-  return rows;
-}
-
-/* ========================================
-   BUILD ATHLETE
-   ======================================== */
-
-function buildAthlete(cols, idx) {
-
-  const name = (cols[idx.name] || "").replace(",", ", ").trim();
-  if (!name) return null;
-
-  return {
-    name,
-    date: formatDate(cols[idx.date]),
-    hour: cleanNumber(cols[idx.hour]),
-    grade: cleanNumber(cols[idx.grade]),
-    weight: cleanNumber(cols[idx.weight]),
-    group: cols[idx.group] || "",
-
-    bench: cleanNumber(cols[idx.bench]),
-    squat: cleanNumber(cols[idx.squat]),
-    clean: cleanNumber(cols[idx.clean]),
-
-    vertical: cleanNumber(cols[idx.vertical]),
-    broad: cleanNumber(cols[idx.broad]),
-    med: cleanNumber(cols[idx.med]),
-
-    agility: cleanNumber(cols[idx.agility]),
-    situps: cleanNumber(cols[idx.situps]),
-    ten: cleanNumber(cols[idx.ten]),
-    forty: cleanNumber(cols[idx.forty]),
-
-    score: cleanNumber(cols[idx.score])
-  };
+function formatDate(date) {
+  if (!date) return "-";
+  const d = new Date(date);
+  if (isNaN(d)) return "-";
+  return `${d.toLocaleString("default", { month: "short" })} ${d.getFullYear()}`;
 }
 
 /* ========================================
    PR CALCULATION
-   ======================================== */
+======================================== */
 
 function computeAthletePRs(data) {
   const map = {};
@@ -212,8 +78,8 @@ function computeAthletePRs(data) {
 }
 
 /* ========================================
-   RENDER TABLE
-   ======================================== */
+   TABLE RENDER
+======================================== */
 
 function renderTable(data) {
 
@@ -240,11 +106,9 @@ function renderTable(data) {
 
     tr.innerHTML = `
       <td>${a.name}</td>
-      <td>${a.date}</td>
-      <td>${a.hour}</td>
-      <td>${a.grade}</td>
+      <td>${formatDate(a.date)}</td>
+      <td>${a.grade || "-"}</td>
       <td>${format(a.weight)}</td>
-      <td>${a.group}</td>
 
       <td class="${a.bench === prs.bench ? 'pr' : ''}">${format(a.bench)}</td>
       <td class="${a.squat === prs.squat ? 'pr' : ''}">${format(a.squat)}</td>
@@ -266,7 +130,7 @@ function renderTable(data) {
 
 /* ========================================
    MOBILE
-   ======================================== */
+======================================== */
 
 function renderMobileCards(data) {
   const container = document.getElementById("mobileCards");
@@ -285,7 +149,7 @@ function renderMobileCards(data) {
     card.innerHTML = `
       <div class="card-header">
         <div class="name">${a.name}</div>
-        <div class="meta">${a.grade} | ${a.group}</div>
+        <div class="meta">${a.grade || "-"} | ${format(a.weight)}</div>
       </div>
 
       <div class="card-grid">
@@ -307,7 +171,7 @@ function renderMobileCards(data) {
 
 /* ========================================
    SEARCH
-   ======================================== */
+======================================== */
 
 function setupSearch() {
   const input = document.getElementById("searchInput");
@@ -326,7 +190,7 @@ function setupSearch() {
 
 /* ========================================
    A-Z FILTER
-   ======================================== */
+======================================== */
 
 function renderAlphabet() {
   const bar = document.getElementById("alphabetBar");
