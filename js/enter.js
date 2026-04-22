@@ -1,5 +1,5 @@
 /* ========================================
-   🔥 ELITE ENTER ENGINE (FINAL CLEAN PROD)
+   🔥 ELITE ENTER ENGINE (FINAL PROD - FIXED)
    ======================================== */
 
 /* ========================================
@@ -50,11 +50,10 @@ function getWeightClass(weight) {
 }
 
 /* ========================================
-   BUILD ENTRY (USED BY HTML)
+   BUILD ENTRY
    ======================================== */
 
 function buildEntry() {
-
   const weight = toNumber(getValue("weight"));
 
   return {
@@ -86,7 +85,6 @@ function buildEntry() {
    ======================================== */
 
 function validateEntry(entry) {
-
   if (!entry.name) {
     showMessage("Enter athlete name", "error");
     return false;
@@ -101,11 +99,67 @@ function validateEntry(entry) {
 }
 
 /* ========================================
+   🚀 SUBMIT (FIXED - NO MORE 403)
+   ======================================== */
+
+async function submitToGoogle(entry, url) {
+  try {
+    console.log("🚀 Submitting to:", url);
+
+    await fetch(url, {
+      method: "POST",
+      mode: "no-cors", // 🔥 CRITICAL FIX
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams(entry)
+    });
+
+    showMessage("✅ Saved to Google Sheets!", "success");
+    clearForm();
+
+  } catch (err) {
+    console.error(err);
+    showMessage("❌ Failed to save", "error");
+  }
+}
+
+/* ========================================
+   🔧 CONFIG LOADER
+   (uses themeLoader config already on page)
+   ======================================== */
+
+function getSubmitURL() {
+  if (window.SCHOOL_CONFIG && window.SCHOOL_CONFIG.submitURL) {
+    return window.SCHOOL_CONFIG.submitURL;
+  }
+
+  console.error("❌ Missing submitURL");
+  showMessage("Config error", "error");
+  return null;
+}
+
+/* ========================================
+   🧠 MAIN SAVE FUNCTION (HOOK THIS TO BUTTON)
+   ======================================== */
+
+async function saveAthlete() {
+
+  const entry = buildEntry();
+
+  if (!validateEntry(entry)) return;
+
+  const submitURL = getSubmitURL();
+  if (!submitURL) return;
+
+  await submitToGoogle(entry, submitURL);
+}
+
+/* ========================================
    UI HELPERS
    ======================================== */
 
 function showMessage(msg, type) {
-
   let el = document.getElementById("formMessage");
 
   if (!el) {
@@ -158,10 +212,11 @@ function setupEnterSubmit() {
 }
 
 /* ========================================
-   GLOBAL ACCESS (HTML USES THESE)
+   GLOBAL ACCESS
    ======================================== */
 
 window.buildEntry = buildEntry;
 window.validateEntry = validateEntry;
 window.showMessage = showMessage;
 window.clearForm = clearForm;
+window.saveAthlete = saveAthlete;
