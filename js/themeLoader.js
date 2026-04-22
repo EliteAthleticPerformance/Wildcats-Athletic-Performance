@@ -1,10 +1,10 @@
 // ===============================
-// 🔥 ELITE V3 THEME ENGINE (PRODUCTION)
+// 🔥 ELITE V4 THEME + DATA ENGINE
 // ===============================
 
 /* ========================================
    GET SCHOOL (URL → SESSION → DEFAULT)
-   ======================================== */
+======================================== */
 
 function getSchool() {
   const params = new URLSearchParams(window.location.search);
@@ -21,7 +21,7 @@ function getSchool() {
 
 /* ========================================
    NORMALIZE
-   ======================================== */
+======================================== */
 
 function normalize(str) {
   return (str || "")
@@ -34,7 +34,7 @@ function normalize(str) {
 
 /* ========================================
    SAFE JSON PARSE
-   ======================================== */
+======================================== */
 
 function safeJSONParse(val) {
   try {
@@ -46,7 +46,7 @@ function safeJSONParse(val) {
 
 /* ========================================
    APPLY CACHED THEME (INSTANT)
-   ======================================== */
+======================================== */
 
 (function applyCachedTheme() {
   const school = normalize(getSchool());
@@ -65,8 +65,8 @@ function safeJSONParse(val) {
 })();
 
 /* ========================================
-   APPLY LOGO + FAVICON (INSTANT)
-   ======================================== */
+   APPLY CACHED LOGO (INSTANT)
+======================================== */
 
 (function applyCachedLogo() {
   const school = normalize(getSchool());
@@ -74,11 +74,7 @@ function safeJSONParse(val) {
 
   if (!logo) return;
 
-  const img = new Image();
-  img.src = logo;
-
   document.addEventListener("DOMContentLoaded", () => {
-
     const el = document.getElementById("schoolLogo");
     if (el) {
       el.src = logo;
@@ -99,52 +95,14 @@ function safeJSONParse(val) {
 })();
 
 /* ========================================
-   ROBUST CSV PARSER
-   ======================================== */
+   SIMPLE CSV PARSER
+======================================== */
 
 function parseCSV(text) {
-  const rows = [];
-  let current = "";
-  let insideQuotes = false;
-  let row = [];
+  const rows = text.split("\n").map(r => r.split(","));
+  const headers = rows.shift().map(h => h.trim());
 
-  for (let char of text) {
-    if (char === '"') insideQuotes = !insideQuotes;
-    else if (char === "," && !insideQuotes) {
-      row.push(current);
-      current = "";
-    }
-    else if (char === "\n" && !insideQuotes) {
-      row.push(current);
-      rows.push(row);
-      row = [];
-      current = "";
-    }
-    else {
-      current += char;
-    }
-  }
-
-  if (current) {
-    row.push(current);
-    rows.push(row);
-  }
-
-  return rows;
-}
-
-/* ========================================
-   LOAD CSV
-   ======================================== */
-
-async function loadCSV(url) {
-  const res = await fetch(url);
-  const text = await res.text();
-
-  const parsed = parseCSV(text);
-  const headers = parsed.shift().map(h => h.trim());
-
-  return parsed.map(row => {
+  return rows.map(row => {
     const obj = {};
     headers.forEach((h, i) => {
       obj[h] = (row[i] || "").trim();
@@ -154,14 +112,30 @@ async function loadCSV(url) {
 }
 
 /* ========================================
-   LOAD THEME FROM SHEETS
-   ======================================== */
+   LOAD CSV
+======================================== */
 
-let themeLoaded = false;
+async function loadCSV(url) {
+  const res = await fetch(url);
+  const text = await res.text();
+  return parseCSV(text);
+}
+
+/* ========================================
+   GLOBAL CONFIG CACHE
+======================================== */
+
+let SCHOOL_CONFIG = null;
+
+/* ========================================
+   LOAD THEME + SCHOOL CONFIG
+======================================== */
+
+let loaded = false;
 
 async function loadTheme() {
-  if (themeLoaded) return;
-  themeLoaded = true;
+  if (loaded) return;
+  loaded = true;
 
   try {
     const schoolKey = normalize(getSchool());
@@ -180,12 +154,22 @@ async function loadTheme() {
     const schoolRow = schools.find(s => normalize(s.school) === schoolKey);
     const themeRow = themes.find(t => normalize(t.school) === schoolKey);
 
-    if (!schoolRow || !themeRow) {
-      console.warn("⚠️ Theme not found for:", schoolKey);
+    if (!schoolRow) {
+      console.warn("❌ School not found:", schoolKey);
       return;
     }
 
-    applyBranding(schoolRow, themeRow);
+    // 🔥 STORE FULL CONFIG (THIS IS NEW)
+    SCHOOL_CONFIG = {
+      key: schoolKey,
+      name: schoolRow.name || "",
+      logo: schoolRow.logo || "",
+      dataURL: schoolRow.dataURL || "", // 🔥 THIS DRIVES EVERYTHING
+      submitURL: schoolRow.submitURL || "", 
+      theme: themeRow || {}
+    };
+
+    applyBranding(SCHOOL_CONFIG);
 
   } catch (err) {
     console.error("❌ Theme load error:", err);
@@ -194,43 +178,32 @@ async function loadTheme() {
 
 /* ========================================
    APPLY BRANDING
-   ======================================== */
+======================================== */
 
-function applyBranding(school, theme) {
-
+function applyBranding(config) {
   const root = document.documentElement;
+  const theme = config.theme;
 
-  root.style.setProperty("--primary", theme.primary);
-  root.style.setProperty("--primaryLight", theme.primaryLight);
-  root.style.setProperty("--primaryDark", theme.primaryDark);
-  root.style.setProperty("--secondary", theme.secondary);
-  root.style.setProperty("--secondaryLight", theme.secondaryLight);
-  root.style.setProperty("--background", theme.background);
+  root.style.setProperty("--primary", theme.primary || "#000");
+  root.style.setProperty("--primaryLight", theme.primaryLight || "#333");
+  root.style.setProperty("--primaryDark", theme.primaryDark || "#000");
+  root.style.setProperty("--secondary", theme.secondary || "#666");
+  root.style.setProperty("--secondaryLight", theme.secondaryLight || "#999");
+  root.style.setProperty("--background", theme.background || "#111");
 
-  const schoolKey = normalize(getSchool());
+  sessionStorage.setItem("theme-" + config.key, JSON.stringify(theme));
 
-  // cache theme safely
-  sessionStorage.setItem("theme-" + schoolKey, JSON.stringify(theme));
+  if (config.logo) {
+    const versionedLogo = config.logo + "?v=" + Date.now();
+    sessionStorage.setItem("logo-" + config.key, versionedLogo);
 
-  const logoEl = document.getElementById("schoolLogo");
-
-  if (school.logo) {
-    const versionedLogo = school.logo + "?v=" + Date.now();
-
-    sessionStorage.setItem("logo-" + schoolKey, versionedLogo);
-
+    const logoEl = document.getElementById("schoolLogo");
     if (logoEl) {
-      logoEl.classList.remove("loaded");
-
-      logoEl.onload = () => {
-        logoEl.classList.add("loaded");
-      };
-
       logoEl.src = versionedLogo;
+      logoEl.onload = () => logoEl.classList.add("loaded");
     }
 
     let favicon = document.getElementById("dynamicFavicon");
-
     if (!favicon) {
       favicon = document.createElement("link");
       favicon.id = "dynamicFavicon";
@@ -241,18 +214,34 @@ function applyBranding(school, theme) {
     favicon.href = versionedLogo;
   }
 
-  // update school name text
   document.querySelectorAll(".school-name").forEach(el => {
-    el.textContent = school.name || "";
+    el.textContent = config.name;
   });
 }
 
 /* ========================================
-   INIT (MULTI-TRIGGER SAFE)
-   ======================================== */
+   🔥 LOAD ATHLETE DATA (NEW)
+======================================== */
+
+async function loadSchoolData() {
+  if (!SCHOOL_CONFIG || !SCHOOL_CONFIG.dataURL) {
+    console.warn("⚠️ No dataURL for this school");
+    return [];
+  }
+
+  try {
+    const data = await loadCSV(SCHOOL_CONFIG.dataURL);
+    return data;
+  } catch (err) {
+    console.error("❌ Data load failed:", err);
+    return [];
+  }
+}
+
+/* ========================================
+   INIT
+======================================== */
 
 document.addEventListener("headerLoaded", loadTheme);
 window.addEventListener("DOMContentLoaded", loadTheme);
-
-// fallback trigger
 setTimeout(loadTheme, 100);

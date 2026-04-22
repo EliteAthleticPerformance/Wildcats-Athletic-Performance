@@ -1,398 +1,153 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- 🔖 FAVICON (controlled by themeLoader.js) -->
+<link id="dynamicFavicon" rel="icon" type="image/png">
 
-<link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
-
-<title>Performance Comparison</title>
+<title>Enter Performance</title>
 
 <link rel="stylesheet" href="styles.css">
-
-<!-- Chart.js -->
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- PapaParse -->
-
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
 </head>
 
 <body>
 
 <!-- HEADER -->
-
 <div id="header-placeholder"></div>
 <script src="js/header.js"></script>
 
 <main class="section" style="text-align:center;">
 
-<h1 id="name"></h1>
-<p id="score" style="margin-bottom:20px;"></p>
+<h1 class="school-name"></h1>
 
-Compare To:
+<h2>Enter Athlete Performance</h2>
 
-<div class="compare-toggle">
-  <button onclick="setCompareMode('last')" id="btn-last">Most Recent Test</button>
-  <button onclick="setCompareMode('team')" class="active" id="btn-team">Team</button>
-  <button onclick="setCompareMode('top5')" id="btn-top5">Top 5</button>
-  <button onclick="setCompareMode('weight')" id="btn-weight">Weight Group</button>
-  <button onclick="setCompareMode('grade')" id="btn-grade">Grade</button>
+<div class="form">
+
+<input id="name" placeholder="Athlete Name">
+
+<h3>Strength</h3>
+<input id="bench" placeholder="Bench">
+<input id="squat" placeholder="Squat">
+<input id="situps" placeholder="Sit-ups">
+
+<h3>Power</h3>
+<input id="clean" placeholder="Clean">
+<input id="medball" placeholder="Med Ball Toss">
+
+<h3>Speed</h3>
+<input id="tenyd" placeholder="10 yd">
+<input id="forty" placeholder="40 yd">
+
+<h3>Explosive</h3>
+<input id="vertical" placeholder="Vertical">
+<input id="broad" placeholder="Broad">
+<input id="agility" placeholder="Pro Agility">
+
+<br><br>
+
+<button id="submitBtn">Submit Performance</button>
+
 </div>
 
-<div style="max-width: 750px; margin: auto;">
-  <canvas id="radarChart"></canvas>
-</div>
-
-<div id="insights" class="insights-box"></div>
-<div id="metrics" class="grid" style="margin-top:30px;"></div>
+<p id="status" style="margin-top:15px;"></p>
 
 </main>
 
-<script>
-
-/* ================= CONFIG ================= */
-
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv&t=" + Date.now();
-
-/* ================= GLOBAL ================= */
-
-let ALL_ROWS = [];
-let CURRENT_ATHLETE = null;
-let compareMode = "team";
-let comparisonName = "Comparison";
-
-/* ================= PARAMS ================= */
-
-const params = new URLSearchParams(window.location.search);
-const selectedName = decodeURIComponent(params.get("name") || "");
-document.getElementById("name").textContent = selectedName;
-
-/* ================= HELPERS ================= */
-
-function cleanNum(val) {
-  return Number((val || "").toString().trim()) || 0;
-}
-
-function extractMetrics(row) {
-  if (!row || row.length < 34) {
-    return { speed: 0, strength: 0, power: 0, explosive: 0 };
-  }
-
-  return {
-    speed: cleanNum(row[30]),
-    strength: cleanNum(row[31]),
-    power: cleanNum(row[32]),
-    explosive: cleanNum(row[33])
-  };
-}
-
-function isValidMetrics(m) {
-  return (
-    m.speed > 0 &&
-    m.strength > 0 &&
-    m.power > 0 &&
-    m.explosive > 0
-  );
-}
-
-function getDominantTrait(metrics) {
-  return Object.entries(metrics)
-    .sort((a, b) => b[1] - a[1])[0][0];
-}
-
-/* ================= LOAD DATA ================= */
-
-Papa.parse(CSV_URL, {
-  download: true,
-  header: false,
-  complete: function(results) {
-
-    const rows = results.data || [];
-
-    ALL_ROWS = rows.filter(r => {
-      if (!Array.isArray(r)) return false;
-      if (r.length <= 34) return false;
-
-      const rowString = r.join("");
-
-      return (
-        (r[0] || "").trim() !== "" &&
-        !rowString.match(/#REF|NaN|Invalid Date/)
-      );
-    });
-
-    CURRENT_ATHLETE = getBestRow(
-      ALL_ROWS.filter(r => r[0] === selectedName)
-    );
-
-    if (!CURRENT_ATHLETE) {
-      document.getElementById("score").textContent = "No data found";
-      return;
-    }
-
-    updateComparison();
-  }
-});
-
-/* ================= BEST ROW ================= */
-
-function getBestRow(rows) {
-  let best = null;
-  let bestScore = -Infinity;
-
-  rows.forEach(r => {
-    const score = cleanNum(r[34]);
-    const m = extractMetrics(r);
-
-    if (!isValidMetrics(m)) return;
-
-    if (score > bestScore) {
-      best = r;
-      bestScore = score;
-    }
-  });
-
-  return best;
-}
-
-/* ================= GROUP HELPERS ================= */
-
-function getAllBestRows() {
-  const normalize = str => (str || "").toLowerCase().trim();
-  const map = {};
-
-  ALL_ROWS.forEach(r => {
-    const name = normalize(r[0]);
-    if (!name) return;
-
-    if (!map[name]) map[name] = [];
-    map[name].push(r);
-  });
-
-  return Object.values(map)
-    .map(rows => getBestRow(rows))
-    .filter(r => r && isValidMetrics(extractMetrics(r)));
-}
-
-/* ================= COMPARE ================= */
-
-function setCompareMode(mode) {
-  compareMode = mode;
-
-  document.querySelectorAll(".compare-toggle button")
-    .forEach(btn => btn.classList.remove("active"));
-
-  document.getElementById(`btn-${mode}`).classList.add("active");
-
-  updateComparison();
-}
-
-/* ================= MAIN ================= */
-
-function updateComparison() {
-
-  const player = extractMetrics(CURRENT_ATHLETE);
-  const dominant = getDominantTrait(player);
-  const score = cleanNum(CURRENT_ATHLETE[34]);
-
-  document.getElementById("score").innerHTML = `
-    <span style="font-size:24px;">Score: ${score}</span>
-    <div style="margin-top:8px; color:#3b82f6; font-weight:600;">
-      Dominant: ${dominant.toUpperCase()}
-    </div>
-  `;
-
-  let group = [];
-
-  if (compareMode === "last") {
-    comparisonName = "Previous Test";
-
-    const athleteRows = ALL_ROWS
-      .filter(r => r[0] === selectedName)
-      .sort((a, b) => {
-        const dA = new Date(a[1]);
-        const dB = new Date(b[1]);
-        return (isNaN(dB) ? 0 : dB) - (isNaN(dA) ? 0 : dA);
-      });
-
-    let previous = null;
-
-    for (let i = 1; i < athleteRows.length; i++) {
-      const m = extractMetrics(athleteRows[i]);
-      if (isValidMetrics(m)) {
-        previous = athleteRows[i];
-        break;
-      }
-    }
-
-    group = previous ? [previous] : [CURRENT_ATHLETE];
-  }
-
-  if (compareMode === "team") {
-    comparisonName = "Team Avg";
-    group = getAllBestRows();
-  }
-
-  if (compareMode === "top5") {
-    comparisonName = "Top 5 Avg";
-
-    group = getAllBestRows()
-      .sort((a, b) => cleanNum(b[34]) - cleanNum(a[34]))
-      .slice(0, 5);
-  }
-
-  if (compareMode === "weight") {
-    comparisonName = "Weight Group";
-    const weight = cleanNum(CURRENT_ATHLETE[5]);
-
-    group = getAllBestRows().filter(r =>
-      Math.abs(cleanNum(r[5]) - weight) <= 15
-    );
-  }
-
-  if (compareMode === "grade") {
-    comparisonName = "Grade Group";
-    const grade = CURRENT_ATHLETE[3];
-
-    group = getAllBestRows().filter(r =>
-      r[3] === grade
-    );
-  }
-
-  const avg = calculateAverage(group);
-
-  renderRadarChart(player, avg);
-  generateInsights(player, avg);
-}
-
-/* ================= AVERAGE ================= */
-
-function calculateAverage(group) {
-
-  let totals = { speed: 0, strength: 0, power: 0, explosive: 0 };
-  let count = 0;
-
-  group.forEach(r => {
-    const m = extractMetrics(r);
-    if (!isValidMetrics(m)) return;
-
-    totals.speed += m.speed;
-    totals.strength += m.strength;
-    totals.power += m.power;
-    totals.explosive += m.explosive;
-
-    count++;
-  });
-
-  if (count === 0) count = 1;
-
-  return {
-    speed: Math.round(totals.speed / count),
-    strength: Math.round(totals.strength / count),
-    power: Math.round(totals.power / count),
-    explosive: Math.round(totals.explosive / count)
-  };
-}
-
-/* ================= CHART ================= */
-
-function renderRadarChart(player, avg) {
-
-  const ctx = document.getElementById("radarChart");
-
-  if (window.radarChart && typeof window.radarChart.destroy === "function") {
-    window.radarChart.destroy();
-  }
-
-  window.radarChart = new Chart(ctx, {
-    type: "radar",
-    data: {
-      labels: ["Speed", "Strength", "Power", "Explosive"],
-      datasets: [
-        {
-          label: selectedName,
-          data: Object.values(player),
-          borderColor: "#3b82f6",
-          backgroundColor: "rgba(59,130,246,0.35)",
-          borderWidth: 5
-        },
-        {
-          label: comparisonName,
-          data: Object.values(avg),
-          borderColor: "#ec4899",
-          backgroundColor: "rgba(236,72,153,0.25)",
-          borderWidth: 3
-        }
-      ]
-    },
-    options: {
-      plugins: {
-        legend: {
-          labels: {
-            color: "#fff",
-            font: { size: 22, weight: "bold" }
-          }
-        }
-      },
-      scales: {
-        r: {
-          min: 0,
-          max: 110,
-          pointLabels: {
-            color: "#fff",
-            font: { size: 20, weight: "bold" }
-          },
-          ticks: {
-            color: "#aaa",
-            backdropColor: "transparent"
-          }
-        }
-      }
-    }
-  });
-}
-
-/* ================= INSIGHTS ================= */
-
-function generateInsights(player, avg) {
-
-  const container = document.getElementById("insights");
-  const insights = [];
-
-  function compare(label, p, a) {
-    const diff = p - a;
-
-    if (diff > 15) insights.push(`🟢 ${label} major strength (+${diff})`);
-    else if (diff > 5) insights.push(`🟢 ${label} above average (+${diff})`);
-    else if (diff < -15) insights.push(`🔴 ${label} major weakness (${diff})`);
-    else if (diff < -5) insights.push(`🟡 ${label} below average (${diff})`);
-  }
-
-  compare("Speed", player.speed, avg.speed);
-  compare("Strength", player.strength, avg.strength);
-  compare("Power", player.power, avg.power);
-  compare("Explosive", player.explosive, avg.explosive);
-
-  container.innerHTML = `
-    <div class="insights-title">Performance Insights</div>
-    <ul>${insights.map(i => `<li>${i}</li>`).join("")}</ul>
-  `;
-}
-
-</script>
-
-<!-- GLOBAL SYSTEM -->
-
+<!-- 🔥 THEME + CONFIG -->
 <script src="./js/themeLoader.js"></script>
 
-<script src="js/dataLoader.js"></script>
+<script>
+
+/* ================= WAIT FOR CONFIG ================= */
+
+async function waitForConfig() {
+  let attempts = 0;
+
+  while (!window.SCHOOL_CONFIG && attempts < 50) {
+    await new Promise(r => setTimeout(r, 50));
+    attempts++;
+  }
+
+  if (!window.SCHOOL_CONFIG) {
+    throw new Error("SCHOOL_CONFIG not ready");
+  }
+}
+
+/* ================= SUBMIT ================= */
+
+async function submitAthleteData(data) {
+
+  if (!SCHOOL_CONFIG.formURL) {
+    document.getElementById("status").textContent = "❌ No form configured";
+    return;
+  }
+
+  const formData = new FormData();
+
+  // 🔥 REPLACE THESE WITH YOUR REAL GOOGLE FORM ENTRY IDs
+  formData.append("entry.1111111111", data.name);
+  formData.append("entry.2222222222", data.bench);
+  formData.append("entry.3333333333", data.squat);
+  formData.append("entry.4444444444", data.situps);
+  formData.append("entry.5555555555", data.clean);
+  formData.append("entry.6666666666", data.medball);
+  formData.append("entry.7777777777", data.tenyd);
+  formData.append("entry.8888888888", data.forty);
+  formData.append("entry.9999999999", data.vertical);
+  formData.append("entry.1010101010", data.broad);
+  formData.append("entry.1212121212", data.agility);
+
+  try {
+    await fetch(SCHOOL_CONFIG.formURL, {
+      method: "POST",
+      mode: "no-cors",
+      body: formData
+    });
+
+    document.getElementById("status").textContent = "✅ Submitted successfully!";
+
+    // optional: clear form
+    document.querySelectorAll("input").forEach(i => i.value = "");
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("status").textContent = "❌ Submission failed";
+  }
+}
+
+/* ================= CLICK HANDLER ================= */
+
+document.getElementById("submitBtn").addEventListener("click", async () => {
+
+  try {
+    await waitForConfig();
+
+    const data = {
+      name: document.getElementById("name").value,
+      bench: document.getElementById("bench").value,
+      squat: document.getElementById("squat").value,
+      situps: document.getElementById("situps").value,
+      clean: document.getElementById("clean").value,
+      medball: document.getElementById("medball").value,
+      tenyd: document.getElementById("tenyd").value,
+      forty: document.getElementById("forty").value,
+      vertical: document.getElementById("vertical").value,
+      broad: document.getElementById("broad").value,
+      agility: document.getElementById("agility").value
+    };
+
+    submitAthleteData(data);
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("status").textContent = "❌ System not ready";
+  }
+
+});
+
+</script>
 
 </body>
 </html>
