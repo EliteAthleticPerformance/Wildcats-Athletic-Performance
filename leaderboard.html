@@ -1,114 +1,101 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- 🔖 FAVICON (handled by themeLoader.js) -->
-
-<link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
+<link id="dynamicFavicon" rel="icon" type="image/png">
 
 <title>Leaderboard | Elite Athletic Performance</title>
 
 <link rel="stylesheet" href="styles.css">
-
-<!-- Chart.js (only if used in leaderboard.js) -->
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
 <body>
 
 <!-- ===== HEADER ===== -->
-
 <div id="header-placeholder"></div>
 <script src="js/header.js"></script>
 
 <!-- ===== MAIN ===== -->
-
 <main>
 
   <!-- TITLE -->
-
   <section class="section" style="text-align:center;">
     <h1 class="leaderboard-title">🏆 Team Leaderboard</h1>
   </section>
 
   <!-- ===== PODIUM + KEY ===== -->
-
   <section class="section">
 
-
-<div class="podium-wrapper">
-  <h2 id="podiumTitle" class="podium-title">Top 3 Athletes</h2>
-  <div id="podium" class="podium-container"></div>
-</div>
-
-<div class="leaderboard-card key-card">
-  <div class="key-content">
-    <div class="key-labels">
-      <span class="elite">Elite</span>
-      <span class="above">Above Average</span>
-      <span class="average">Average</span>
-      <span class="needs">Needs Work</span>
+    <div class="podium-wrapper">
+      <h2 id="podiumTitle" class="podium-title">Top 3 Athletes</h2>
+      <div id="podium" class="podium-container"></div>
     </div>
 
-    <div class="key-description">
-      Correlation of Athletic Movement Skills Compared to Weight Lifted
+    <div class="leaderboard-card key-card">
+      <div class="key-content">
+        <div class="key-labels">
+          <span class="elite">Elite</span>
+          <span class="above">Above Average</span>
+          <span class="average">Average</span>
+          <span class="needs">Needs Work</span>
+        </div>
+
+        <div class="key-description">
+          Correlation of Athletic Movement Skills Compared to Weight Lifted
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<!-- ===== TABLE GRID ===== -->
-<div class="leaderboard-grid">
+    <!-- ===== TABLE GRID ===== -->
+    <div class="leaderboard-grid">
 
-  <!-- 3 LIFT TOTALS -->
-  <div class="leaderboard-card">
-    <h2>🏋️ 3 Lift Max Totals</h2>
+      <!-- 3 LIFT TOTALS -->
+      <div class="leaderboard-card">
+        <h2>🏋️ 3 Lift Max Totals</h2>
 
-    <div class="table-scroll">
-      <table id="liftTable" class="leaderboard-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Total</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+        <div class="table-scroll">
+          <table id="liftTable" class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Total</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PERFORMANCE SCORES -->
+      <div class="leaderboard-card">
+        <h2>⚡ Athletic Performance Scores</h2>
+
+        <div class="table-scroll">
+          <table id="scoreTable" class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Score</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
-  </div>
 
-  <!-- PERFORMANCE SCORES -->
-  <div class="leaderboard-card">
-    <h2>⚡ Athletic Performance Scores</h2>
-
-    <div class="table-scroll">
-      <table id="scoreTable" class="leaderboard-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Score</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-
-<!-- MOBILE FALLBACK -->
-<div id="mobileLift" class="mobile-cards"></div>
-<div id="mobileScore" class="mobile-cards"></div>
-
+    <!-- MOBILE FALLBACK -->
+    <div id="mobileLift" class="mobile-cards"></div>
+    <div id="mobileScore" class="mobile-cards"></div>
 
   </section>
 
@@ -116,12 +103,13 @@
 
 <!-- ===== SCRIPTS ===== -->
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<!-- 🔥 Config + school routing -->
+<script src="js/themeLoader.js"></script>
 
-<script src="./js/themeLoader.js"></script>
-
+<!-- 🔥 Data from Apps Script API -->
 <script src="js/dataLoader.js"></script>
 
+<!-- 🔥 Leaderboard logic -->
 <script src="js/leaderboard.js"></script>
 
 </body>
