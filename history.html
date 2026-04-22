@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,12 +21,11 @@
 <main class="section" style="text-align:center;">
 
 <h1 class="school-name"></h1>
-
 <h2>Enter Athlete Performance</h2>
 
 <div class="form">
 
-<input id="name" placeholder="Athlete Name">
+<input id="name" placeholder="Last, First (ex: Maxwell, Brent)">
 
 <h3>Strength</h3>
 <input id="bench" placeholder="Bench">
@@ -37,7 +37,7 @@
 <input id="medball" placeholder="Med Ball Toss">
 
 <h3>Speed</h3>
-<input id="tenyd" placeholder="10 yd">
+<input id="ten" placeholder="10 yd">
 <input id="forty" placeholder="40 yd">
 
 <h3>Explosive</h3>
@@ -55,8 +55,8 @@
 
 </main>
 
-<!-- 🔥 THEME + CONFIG -->
-<script src="./js/themeLoader.js"></script>
+<!-- 🔥 CONFIG -->
+<script src="js/themeLoader.js"></script>
 
 <script>
 
@@ -79,36 +79,25 @@ async function waitForConfig() {
 
 async function submitAthleteData(data) {
 
-  if (!SCHOOL_CONFIG.formURL) {
-    document.getElementById("status").textContent = "❌ No form configured";
+  const url = window.SCHOOL_CONFIG.submitURL;
+
+  if (!url) {
+    document.getElementById("status").textContent = "❌ No submit URL configured";
     return;
   }
 
-  const formData = new FormData();
-
-  // 🔥 REPLACE THESE WITH YOUR REAL GOOGLE FORM ENTRY IDs
-  formData.append("entry.1111111111", data.name);
-  formData.append("entry.2222222222", data.bench);
-  formData.append("entry.3333333333", data.squat);
-  formData.append("entry.4444444444", data.situps);
-  formData.append("entry.5555555555", data.clean);
-  formData.append("entry.6666666666", data.medball);
-  formData.append("entry.7777777777", data.tenyd);
-  formData.append("entry.8888888888", data.forty);
-  formData.append("entry.9999999999", data.vertical);
-  formData.append("entry.1010101010", data.broad);
-  formData.append("entry.1212121212", data.agility);
-
   try {
-    await fetch(SCHOOL_CONFIG.formURL, {
+    await fetch(url, {
       method: "POST",
       mode: "no-cors",
-      body: formData
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams(data)
     });
 
     document.getElementById("status").textContent = "✅ Submitted successfully!";
 
-    // optional: clear form
     document.querySelectorAll("input").forEach(i => i.value = "");
 
   } catch (err) {
@@ -131,7 +120,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
       situps: document.getElementById("situps").value,
       clean: document.getElementById("clean").value,
       medball: document.getElementById("medball").value,
-      tenyd: document.getElementById("tenyd").value,
+      ten: document.getElementById("ten").value,
       forty: document.getElementById("forty").value,
       vertical: document.getElementById("vertical").value,
       broad: document.getElementById("broad").value,
