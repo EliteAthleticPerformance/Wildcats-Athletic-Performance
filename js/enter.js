@@ -1,9 +1,6 @@
 /* ========================================
-   🔥 ELITE V3 ENTER ENGINE (PRODUCTION)
+   🔥 ELITE V3 ENTER ENGINE (FINAL PROD)
    ======================================== */
-
-// 🔥 REQUIRED: Add your Google Apps Script URL here
-const SCRIPT_URL = ""; // ← paste your URL here when ready
 
 /* ========================================
    INIT
@@ -30,6 +27,30 @@ function toNumber(val) {
 
 function todayISO() {
   return new Date().toISOString().split("T")[0];
+}
+
+/* ========================================
+   WAIT FOR SCHOOL CONFIG
+   ======================================== */
+
+function waitForConfig(timeout = 3000) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+
+    function check() {
+      if (window.SCHOOL_CONFIG) {
+        return resolve(window.SCHOOL_CONFIG);
+      }
+
+      if (Date.now() - start > timeout) {
+        return reject("SCHOOL_CONFIG not loaded");
+      }
+
+      requestAnimationFrame(check);
+    }
+
+    check();
+  });
 }
 
 /* ========================================
@@ -61,27 +82,36 @@ async function saveAthlete() {
   const btn = document.querySelector(".save-btn");
   if (btn) btn.disabled = true;
 
-  const entry = buildEntry();
-
-  if (!validateEntry(entry)) {
-    if (btn) btn.disabled = false;
-    return;
-  }
-
   try {
+    const config = await waitForConfig();
 
-    if (!SCRIPT_URL) throw new Error("No script URL");
+    if (!config.submitURL) {
+      alert("❌ No submit URL configured");
+      throw new Error("Missing submitURL");
+    }
 
-    const res = await sendToGoogle(entry);
+    console.log("🚀 Submitting to:", config.submitURL);
 
-    if (!res.ok) throw new Error("Network response failed");
+    const entry = buildEntry();
+
+    if (!validateEntry(entry)) {
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    const res = await sendToGoogle(entry, config.submitURL);
+
+    const text = await res.text();
+    console.log("✅ Response:", text);
 
     showMessage("✅ Saved to Google Sheets!", "success");
 
   } catch (err) {
     console.warn("⚠️ Cloud save failed, using offline:", err);
 
+    const entry = buildEntry();
     saveOffline(entry);
+
     showMessage("⚠️ Offline — saved locally", "warning");
   }
 
@@ -91,7 +121,7 @@ async function saveAthlete() {
 }
 
 /* ========================================
-   BUILD ENTRY OBJECT
+   BUILD ENTRY
    ======================================== */
 
 function buildEntry() {
@@ -101,8 +131,9 @@ function buildEntry() {
   const entry = {
     name: getValue("name"),
     date: getValue("date") || todayISO(),
+    hour: getValue("hour"),
+    grade: getValue("grade"),
     weight,
-    weightClass: getWeightClass(weight),
 
     bench: toNumber(getValue("bench")),
     squat: toNumber(getValue("squat")),
@@ -110,25 +141,15 @@ function buildEntry() {
 
     vertical: toNumber(getValue("vertical")),
     broad: toNumber(getValue("broad")),
-    med: toNumber(getValue("medball")), // 🔥 unified naming
+    medball: toNumber(getValue("medball")),
 
     agility: toNumber(getValue("agility")),
     ten: toNumber(getValue("ten")),
     forty: toNumber(getValue("forty")),
-    situps: toNumber(getValue("situps"))
+    situps: toNumber(getValue("situps")),
+
+    weightClass: getWeightClass(weight)
   };
-
-  // Derived metrics
-  entry.total = entry.bench + entry.squat + entry.clean;
-
-  // 🔥 Optional: calculate score locally (faster UI consistency)
-  entry.score =
-    entry.bench +
-    entry.squat +
-    entry.clean +
-    entry.vertical +
-    entry.broad +
-    entry.med;
 
   return entry;
 }
@@ -149,25 +170,18 @@ function validateEntry(entry) {
     return false;
   }
 
-  if (!entry.bench && !entry.squat && !entry.clean) {
-    showMessage("Enter at least one strength value", "error");
-    return false;
-  }
-
   return true;
 }
 
 /* ========================================
-   API CALL
+   🚀 API CALL (CORS FIXED)
    ======================================== */
 
-async function sendToGoogle(entry) {
-  return fetch(SCRIPT_URL, {
+async function sendToGoogle(entry, url) {
+
+  return fetch(url, {
     method: "POST",
-    body: JSON.stringify(entry),
-    headers: {
-      "Content-Type": "application/json"
-    }
+    body: JSON.stringify(entry) // ✅ NO headers (fixes CORS)
   });
 }
 
@@ -246,3 +260,9 @@ function setupEnterSubmit() {
     }
   });
 }
+
+/* ========================================
+   🔥 MAKE GLOBAL (CRITICAL)
+   ======================================== */
+
+window.saveAthlete = saveAthlete;
