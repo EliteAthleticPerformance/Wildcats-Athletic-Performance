@@ -1,6 +1,6 @@
 /* ========================================
-   🔥 ELITE TESTING ENGINE (API VERSION)
-   ======================================== */
+   🔥 ELITE TESTING ENGINE (FINAL PROD)
+======================================== */
 
 let tableData = [];
 let currentLetter = "ALL";
@@ -32,14 +32,23 @@ async function init() {
    HELPERS
 ======================================== */
 
-const format = (val) => (!val ? "-" : Math.round(val));
-const formatDecimal = (val) => (!val ? "-" : Number(val).toFixed(2));
+const format = (val) =>
+  val === 0 || val ? Math.round(val) : "-";
+
+const formatDecimal = (val) =>
+  val === 0 || val ? Number(val).toFixed(2) : "-";
 
 function formatDate(date) {
   if (!date) return "-";
+
   const d = new Date(date);
-  if (isNaN(d)) return "-";
-  return `${d.toLocaleString("default", { month: "short" })} ${d.getFullYear()}`;
+  if (isNaN(d)) return date;
+
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
 }
 
 /* ========================================
@@ -101,14 +110,15 @@ function renderTable(data) {
 
   data.forEach(a => {
     const prs = prMap[a.name];
-
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
       <td>${a.name}</td>
       <td>${formatDate(a.date)}</td>
+      <td>${a.hour || "-"}</td>
       <td>${a.grade || "-"}</td>
       <td>${format(a.weight)}</td>
+      <td>${a.weightClass || "-"}</td>
 
       <td class="${a.bench === prs.bench ? 'pr' : ''}">${format(a.bench)}</td>
       <td class="${a.squat === prs.squat ? 'pr' : ''}">${format(a.squat)}</td>
@@ -129,7 +139,7 @@ function renderTable(data) {
 }
 
 /* ========================================
-   MOBILE
+   MOBILE CARDS
 ======================================== */
 
 function renderMobileCards(data) {
@@ -149,17 +159,22 @@ function renderMobileCards(data) {
     card.innerHTML = `
       <div class="card-header">
         <div class="name">${a.name}</div>
-        <div class="meta">${a.grade || "-"} | ${format(a.weight)}</div>
+        <div class="meta">
+          ${a.grade || "-"} | ${format(a.weight)} lbs
+        </div>
       </div>
 
       <div class="card-grid">
         <div class="${a.bench === prs.bench ? 'pr' : ''}">Bench: ${format(a.bench)}</div>
         <div class="${a.squat === prs.squat ? 'pr' : ''}">Squat: ${format(a.squat)}</div>
         <div class="${a.clean === prs.clean ? 'pr' : ''}">Clean: ${format(a.clean)}</div>
+
         <div class="${a.vertical === prs.vertical ? 'pr' : ''}">Vert: ${format(a.vertical)}</div>
         <div class="${a.broad === prs.broad ? 'pr' : ''}">Broad: ${formatDecimal(a.broad)}</div>
         <div class="${a.med === prs.med ? 'pr' : ''}">Med: ${formatDecimal(a.med)}</div>
+
         <div class="${a.agility === prs.agility ? 'pr' : ''}">Agility: ${formatDecimal(a.agility)}</div>
+        <div class="${a.situps === prs.situps ? 'pr' : ''}">Sit-ups: ${format(a.situps)}</div>
         <div class="${a.ten === prs.ten ? 'pr' : ''}">10 yd: ${formatDecimal(a.ten)}</div>
         <div class="${a.forty === prs.forty ? 'pr' : ''}">40 yd: ${formatDecimal(a.forty)}</div>
       </div>
@@ -238,7 +253,11 @@ function showAll() {
 function setActiveLetter(letter) {
   document.querySelectorAll(".letter").forEach(el => {
     el.classList.remove("active");
-    if (el.textContent.startsWith(letter)) {
+
+    if (
+      (letter === "ALL" && el.textContent.startsWith("ALL")) ||
+      el.textContent.startsWith(letter)
+    ) {
       el.classList.add("active");
     }
   });
