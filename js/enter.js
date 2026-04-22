@@ -1,6 +1,8 @@
 /* ========================================
-   🔥 ELITE ENTER ENGINE (FINAL PROD - FIXED)
+   🔥 ELITE ENTER ENGINE (PRODUCTION HARDENED)
    ======================================== */
+
+let isSubmitting = false;
 
 /* ========================================
    INIT
@@ -27,6 +29,13 @@ function toNumber(val) {
 
 function todayISO() {
   return new Date().toISOString().split("T")[0];
+}
+
+function normalizeName(name) {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/\b\w/g, c => c.toUpperCase()); // Proper case
 }
 
 /* ========================================
@@ -57,7 +66,7 @@ function buildEntry() {
   const weight = toNumber(getValue("weight"));
 
   return {
-    name: getValue("name"),
+    name: normalizeName(getValue("name")),
     date: getValue("date") || todayISO(),
     hour: getValue("hour"),
     grade: getValue("grade"),
@@ -99,7 +108,7 @@ function validateEntry(entry) {
 }
 
 /* ========================================
-   🚀 SUBMIT (FIXED - NO MORE 403)
+   🚀 SUBMIT
    ======================================== */
 
 async function submitToGoogle(entry, url) {
@@ -108,7 +117,7 @@ async function submitToGoogle(entry, url) {
 
     await fetch(url, {
       method: "POST",
-      mode: "no-cors", // 🔥 CRITICAL FIX
+      mode: "no-cors",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       },
@@ -116,7 +125,10 @@ async function submitToGoogle(entry, url) {
     });
 
     showMessage("✅ Saved to Google Sheets!", "success");
-    clearForm();
+
+    setTimeout(() => {
+      clearForm();
+    }, 500);
 
   } catch (err) {
     console.error(err);
@@ -125,8 +137,7 @@ async function submitToGoogle(entry, url) {
 }
 
 /* ========================================
-   🔧 CONFIG LOADER
-   (uses themeLoader config already on page)
+   CONFIG
    ======================================== */
 
 function getSubmitURL() {
@@ -140,19 +151,36 @@ function getSubmitURL() {
 }
 
 /* ========================================
-   🧠 MAIN SAVE FUNCTION (HOOK THIS TO BUTTON)
+   🧠 MAIN SAVE FUNCTION
    ======================================== */
 
 async function saveAthlete() {
 
+  if (isSubmitting) return; // 🔥 prevent spam
+  isSubmitting = true;
+
+  const btn = document.getElementById("submitBtn");
+  if (btn) btn.disabled = true;
+
   const entry = buildEntry();
 
-  if (!validateEntry(entry)) return;
+  if (!validateEntry(entry)) {
+    isSubmitting = false;
+    if (btn) btn.disabled = false;
+    return;
+  }
 
   const submitURL = getSubmitURL();
-  if (!submitURL) return;
+  if (!submitURL) {
+    isSubmitting = false;
+    if (btn) btn.disabled = false;
+    return;
+  }
 
   await submitToGoogle(entry, submitURL);
+
+  isSubmitting = false;
+  if (btn) btn.disabled = false;
 }
 
 /* ========================================
@@ -215,8 +243,4 @@ function setupEnterSubmit() {
    GLOBAL ACCESS
    ======================================== */
 
-window.buildEntry = buildEntry;
-window.validateEntry = validateEntry;
-window.showMessage = showMessage;
-window.clearForm = clearForm;
 window.saveAthlete = saveAthlete;
