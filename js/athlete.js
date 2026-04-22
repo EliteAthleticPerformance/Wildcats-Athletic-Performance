@@ -1,7 +1,13 @@
+/* ========================================
+   🔥 ELITE ATHLETES (API VERSION)
+======================================== */
+
 let athletes = [];
 let currentLetter = "ALL";
 
-/* ---------- INIT ---------- */
+/* ========================================
+   INIT
+======================================== */
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -9,21 +15,18 @@ async function init() {
   try {
     const data = await loadAthleteData();
 
+    console.log("👥 RAW DATA:", data);
+
     const map = {};
 
-    data.forEach(row => {
-      const name = (row["Student-Athlete"] || "").trim();
-      if (!name) return;
+    data.forEach(a => {
+      if (!a.name) return;
 
-      // 🔥 Score detection (flexible)
-      const scoreKey = Object.keys(row).find(k =>
-        k.toLowerCase().includes("athletic")
-      );
+      const score = Number(a.score) || 0;
 
-      const score = Number(row[scoreKey]) || 0;
-
-      if (!map[name] || score > map[name]) {
-        map[name] = score;
+      // keep best score per athlete
+      if (!map[a.name] || score > map[a.name]) {
+        map[a.name] = score;
       }
     });
 
@@ -34,6 +37,8 @@ async function init() {
 
     athletes.sort((a, b) => b.score - a.score);
 
+    console.log("✅ ATHLETES READY:", athletes);
+
     renderAlphabet();
     render(athletes);
 
@@ -42,7 +47,9 @@ async function init() {
   }
 }
 
-/* ---------- TAG SYSTEM ---------- */
+/* ========================================
+   TAG SYSTEM
+======================================== */
 
 function getTag(score) {
   if (score >= 800) return ["elite", "🔥 Elite"];
@@ -51,7 +58,9 @@ function getTag(score) {
   return ["needs", "📈 Needs Work"];
 }
 
-/* ---------- RENDER GRID ---------- */
+/* ========================================
+   RENDER GRID
+======================================== */
 
 function render(list) {
   const grid = document.getElementById("athleteGrid");
@@ -81,7 +90,9 @@ function render(list) {
   grid.appendChild(fragment);
 }
 
-/* ---------- A-Z BAR ---------- */
+/* ========================================
+   A-Z FILTER
+======================================== */
 
 function renderAlphabet() {
   const bar = document.getElementById("alphabetBar");
@@ -112,8 +123,6 @@ function renderAlphabet() {
   });
 }
 
-/* ---------- FILTER ---------- */
-
 function filterByLetter(letter) {
   currentLetter = letter;
   setActiveLetter(letter);
@@ -132,7 +141,9 @@ function showAll() {
   render(athletes);
 }
 
-/* ---------- ACTIVE UI ---------- */
+/* ========================================
+   ACTIVE UI
+======================================== */
 
 function setActiveLetter(letter) {
   document.querySelectorAll(".letter").forEach(el => {
@@ -146,7 +157,9 @@ function setActiveLetter(letter) {
   });
 }
 
-/* ---------- SEARCH ---------- */
+/* ========================================
+   SEARCH
+======================================== */
 
 function filterAthletes() {
   const input = document.getElementById("search");
@@ -161,13 +174,18 @@ function filterAthletes() {
   render(filtered);
 }
 
-/* ---------- NAV ---------- */
+/* ========================================
+   NAV
+======================================== */
 
 function goToAthlete(name) {
-  const params = new URLSearchParams(window.location.search);
-  const school = params.get("school");
+  const school = new URLSearchParams(window.location.search).get("school");
+
+  const base = window.location.pathname.includes("/Elite-Athletic-Performance/")
+    ? "/Elite-Athletic-Performance/"
+    : "/";
 
   window.location.href = school
-    ? `athlete.html?name=${encodeURIComponent(name)}&school=${school}`
-    : `athlete.html?name=${encodeURIComponent(name)}`;
+    ? `${base}history.html?name=${encodeURIComponent(name)}&school=${school}`
+    : `${base}history.html?name=${encodeURIComponent(name)}`;
 }
