@@ -1,36 +1,26 @@
 let athletes = [];
 let currentLetter = "ALL";
 
-/* ---------- LOAD DATA ---------- */
+/* ---------- INIT ---------- */
 
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS81ri1sMtpBVl605PVV_Te2WdA3hVohdXIb1Lc22CrUJSdzXUzGa-0Z0THGtlSa9WVaa77owi-_BAR/pub?output=csv";
+document.addEventListener("DOMContentLoaded", init);
 
-Papa.parse(CSV_URL + "&t=" + Date.now(), {
-  download: true,
-  header: true,
-  skipEmptyLines: true,
-  dynamicTyping: true,
+async function init() {
+  try {
+    const data = await loadAthleteData();
 
-  complete: function(results) {
-
-    const data = results.data;
     const map = {};
-
-    console.log("🧪 RAW SAMPLE:", data[0]);
 
     data.forEach(row => {
       const name = (row["Student-Athlete"] || "").trim();
       if (!name) return;
 
-      // 🔥 FIX: dynamic score detection (handles broken headers)
+      // 🔥 Score detection (flexible)
       const scoreKey = Object.keys(row).find(k =>
         k.toLowerCase().includes("athletic")
       );
 
       const score = Number(row[scoreKey]) || 0;
-
-      // DEBUG (remove later if you want)
-      // console.log("SCORE KEY:", scoreKey, "VALUE:", row[scoreKey]);
 
       if (!map[name] || score > map[name]) {
         map[name] = score;
@@ -44,12 +34,13 @@ Papa.parse(CSV_URL + "&t=" + Date.now(), {
 
     athletes.sort((a, b) => b.score - a.score);
 
-    console.log("✅ CLEAN ATHLETES:", athletes.slice(0, 5));
-
     renderAlphabet();
     render(athletes);
+
+  } catch (err) {
+    console.error("❌ Athlete load failed:", err);
   }
-});
+}
 
 /* ---------- TAG SYSTEM ---------- */
 
@@ -173,5 +164,10 @@ function filterAthletes() {
 /* ---------- NAV ---------- */
 
 function goToAthlete(name) {
-  window.location.href = `history.html?name=${encodeURIComponent(name)}`;
+  const params = new URLSearchParams(window.location.search);
+  const school = params.get("school");
+
+  window.location.href = school
+    ? `athlete.html?name=${encodeURIComponent(name)}&school=${school}`
+    : `athlete.html?name=${encodeURIComponent(name)}`;
 }
