@@ -1,9 +1,12 @@
 // ===============================
-// 🔥 ELITE V5 THEME + DATA ENGINE (PRODUCTION)
+// 🔥 ELITE V6 THEME + CONFIG ENGINE
 // ===============================
 
+window.SCHOOL_CONFIG = null;
+let loaded = false;
+
 /* ========================================
-   GET SCHOOL (URL → SESSION → DEFAULT)
+   GET SCHOOL
 ======================================== */
 
 function getSchool() {
@@ -33,73 +36,13 @@ function normalize(str) {
 }
 
 /* ========================================
-   CLEAN OBJECT KEYS (🔥 FIXES CSV ISSUES)
+   SIMPLE CSV LOADER (kept for config)
 ======================================== */
 
-function cleanRow(row) {
-  const cleaned = {};
-  for (let key in row) {
-    cleaned[key.trim()] = (row[key] || "").trim();
-  }
-  return cleaned;
-}
+async function loadCSV(url) {
+  const res = await fetch(url);
+  const text = await res.text();
 
-/* ========================================
-   APPLY CACHED THEME (INSTANT LOAD)
-======================================== */
-
-(function applyCachedTheme() {
-  const school = normalize(getSchool());
-  const cached = sessionStorage.getItem("theme-" + school);
-
-  if (!cached) return;
-
-  const theme = JSON.parse(cached);
-  const root = document.documentElement;
-
-  root.style.setProperty("--primary", theme.primary || "#000");
-  root.style.setProperty("--primaryLight", theme.primaryLight || "#333");
-  root.style.setProperty("--primaryDark", theme.primaryDark || "#000");
-  root.style.setProperty("--secondary", theme.secondary || "#666");
-  root.style.setProperty("--secondaryLight", theme.secondaryLight || "#999");
-  root.style.setProperty("--background", theme.background || "#111");
-})();
-
-/* ========================================
-   APPLY CACHED LOGO (INSTANT)
-======================================== */
-
-(function applyCachedLogo() {
-  const school = normalize(getSchool());
-  const logo = sessionStorage.getItem("logo-" + school);
-
-  if (!logo) return;
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const el = document.getElementById("schoolLogo");
-    if (el) {
-      el.src = logo;
-      el.onload = () => el.classList.add("loaded");
-    }
-
-    let favicon = document.getElementById("dynamicFavicon");
-
-    if (!favicon) {
-      favicon = document.createElement("link");
-      favicon.id = "dynamicFavicon";
-      favicon.rel = "icon";
-      document.head.appendChild(favicon);
-    }
-
-    favicon.href = logo;
-  });
-})();
-
-/* ========================================
-   SIMPLE CSV PARSER
-======================================== */
-
-function parseCSV(text) {
   const rows = text.split("\n").map(r => r.split(","));
   const headers = rows.shift().map(h => h.trim());
 
@@ -108,31 +51,13 @@ function parseCSV(text) {
     headers.forEach((h, i) => {
       obj[h] = (row[i] || "").trim();
     });
-    return cleanRow(obj); // 🔥 CLEAN HEADERS
+    return obj;
   });
 }
 
 /* ========================================
-   LOAD CSV
+   LOAD THEME + CONFIG
 ======================================== */
-
-async function loadCSV(url) {
-  const res = await fetch(url);
-  const text = await res.text();
-  return parseCSV(text);
-}
-
-/* ========================================
-   GLOBAL CONFIG (🔥 FIXED SCOPE)
-======================================== */
-
-window.SCHOOL_CONFIG = null;
-
-/* ========================================
-   LOAD THEME + SCHOOL CONFIG
-======================================== */
-
-let loaded = false;
 
 async function loadTheme() {
   if (loaded) return;
@@ -156,11 +81,9 @@ async function loadTheme() {
     const themeRow = themes.find(t => normalize(t.school) === schoolKey);
 
     if (!schoolRow) {
-      console.warn("❌ School not found:", schoolKey);
-      return;
+      throw new Error("School not found: " + schoolKey);
     }
 
-    // 🔥 GLOBAL CONFIG (FIXED)
     window.SCHOOL_CONFIG = {
       key: schoolKey,
       name: schoolRow.name || "",
@@ -170,12 +93,20 @@ async function loadTheme() {
       theme: themeRow || {}
     };
 
-    console.log("🏫 SCHOOL CONFIG LOADED:", window.SCHOOL_CONFIG);
+    console.log("🏫 CONFIG LOADED:", window.SCHOOL_CONFIG);
 
     applyBranding(window.SCHOOL_CONFIG);
 
   } catch (err) {
     console.error("❌ Theme load error:", err);
+
+    // 🔥 HARD FAIL UI
+    document.body.innerHTML = `
+      <div style="padding:40px;text-align:center;">
+        <h2>⚠️ Configuration Error</h2>
+        <p>${err.message}</p>
+      </div>
+    `;
   }
 }
 
@@ -197,12 +128,13 @@ function applyBranding(config) {
   sessionStorage.setItem("theme-" + config.key, JSON.stringify(theme));
 
   if (config.logo) {
-    const versionedLogo = config.logo + "?v=" + Date.now();
-    sessionStorage.setItem("logo-" + config.key, versionedLogo);
+    const logo = config.logo + "?v=" + Date.now();
+
+    sessionStorage.setItem("logo-" + config.key, logo);
 
     const logoEl = document.getElementById("schoolLogo");
     if (logoEl) {
-      logoEl.src = versionedLogo;
+      logoEl.src = logo;
       logoEl.onload = () => logoEl.classList.add("loaded");
     }
 
@@ -214,7 +146,7 @@ function applyBranding(config) {
       document.head.appendChild(favicon);
     }
 
-    favicon.href = versionedLogo;
+    favicon.href = logo;
   }
 
   document.querySelectorAll(".school-name").forEach(el => {
@@ -223,27 +155,26 @@ function applyBranding(config) {
 }
 
 /* ========================================
-   WAIT FOR CONFIG (USED BY PAGES)
+   WAIT FOR CONFIG (FIXED)
 ======================================== */
 
 async function waitForConfig() {
   let tries = 0;
 
-  while (
-    (!window.SCHOOL_CONFIG || !window.SCHOOL_CONFIG.submitURL) &&
-    tries < 100
-  ) {
+  while (!window.SCHOOL_CONFIG && tries < 100) {
     await new Promise(r => setTimeout(r, 50));
     tries++;
   }
 
-  console.log("✅ CONFIG READY:", window.SCHOOL_CONFIG);
+  if (!window.SCHOOL_CONFIG) {
+    throw new Error("Config failed to load");
+  }
+
+  return window.SCHOOL_CONFIG;
 }
 
 /* ========================================
-   INIT
+   INIT (CLEAN)
 ======================================== */
 
-document.addEventListener("headerLoaded", loadTheme);
-window.addEventListener("DOMContentLoaded", loadTheme);
-setTimeout(loadTheme, 100);
+document.addEventListener("DOMContentLoaded", loadTheme);
