@@ -35,10 +35,6 @@
 
 <body>
 
-<!-- 🔥 HIDDEN FORM (CORS FIX) -->
-<form id="hiddenForm" method="POST" target="hiddenFrame" style="display:none;"></form>
-<iframe name="hiddenFrame" style="display:none;"></iframe>
-
 <div id="header-placeholder"></div>
 <script src="js/header.js"></script>
 
@@ -148,8 +144,9 @@
   </div>
 </div>
 
+<!-- SUBMIT -->
 <div style="text-align:center; margin-top:20px;">
-  <button class="save-btn" id="submitBtn">💾 Save Test</button>
+  <button class="save-btn" id="submitBtn" onclick="saveAthlete()">💾 Save Test</button>
 </div>
 
 </div>
@@ -157,76 +154,9 @@
 
 </main>
 
+<!-- LOAD CONFIG + LOGIC -->
 <script src="js/themeLoader.js"></script>
-
-<script>
-
-/* WAIT FOR CONFIG */
-async function waitForConfig() {
-  let tries = 0;
-  while (!window.SCHOOL_CONFIG && tries < 50) {
-    await new Promise(r => setTimeout(r, 50));
-    tries++;
-  }
-}
-
-/* SUBMIT VIA FORM (NO CORS) */
-async function submitForm() {
-
-  await waitForConfig();
-
-  if (!window.SCHOOL_CONFIG || !window.SCHOOL_CONFIG.submitURL) {
-    alert("❌ No submit URL configured");
-    return;
-  }
-
-  const payload = {
-    name: document.getElementById("name").value,
-    date: document.getElementById("date").value,
-    hour: document.getElementById("hour").value,
-    grade: document.getElementById("grade").value,
-    weight: document.getElementById("weight").value,
-    bench: document.getElementById("bench").value,
-    squat: document.getElementById("squat").value,
-    situps: document.getElementById("situps").value,
-    vertical: document.getElementById("vertical").value,
-    broad: document.getElementById("broad").value,
-    agility: document.getElementById("agility").value,
-    clean: document.getElementById("clean").value,
-    medball: document.getElementById("medball").value,
-    ten: document.getElementById("ten").value,
-    forty: document.getElementById("forty").value
-  };
-
-  console.log("🚀 Submitting via form to:", SCHOOL_CONFIG.submitURL);
-
-  const form = document.getElementById("hiddenForm");
-
-  form.innerHTML = "";
-  form.action = SCHOOL_CONFIG.submitURL;
-
-  Object.keys(payload).forEach(key => {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = key;
-    input.value = payload[key];
-    form.appendChild(input);
-  });
-
-  form.submit();
-
-  document.getElementById("formMessage").innerHTML =
-    "<span style='color:lime;'>✅ Saved</span>";
-
-  document.querySelectorAll("input, select").forEach(el => el.value = "");
-}
-
-/* BUTTON HANDLER */
-document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("submitBtn").addEventListener("click", submitForm);
-});
-
-</script>
+<script src="enter.js"></script>
 
 </body>
 </html>
