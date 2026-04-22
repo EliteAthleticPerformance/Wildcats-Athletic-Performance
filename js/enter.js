@@ -179,9 +179,16 @@ function validateEntry(entry) {
 
 async function sendToGoogle(entry, url) {
 
+  const formData = new FormData();
+
+  Object.keys(entry).forEach(key => {
+    formData.append(key, entry[key]);
+  });
+
   return fetch(url, {
     method: "POST",
-    body: JSON.stringify(entry) // ✅ NO headers (fixes CORS)
+    body: formData,
+    mode: "no-cors" // 🔥 critical
   });
 }
 
