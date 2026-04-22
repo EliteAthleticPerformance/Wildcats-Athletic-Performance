@@ -1,5 +1,5 @@
 /* ========================================
-   🔥 ELITE V4 HEADER ENGINE (PRODUCTION HARDENED)
+   🔥 ELITE V5 HEADER ENGINE (GITHUB SAFE)
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", loadHeader);
@@ -13,7 +13,7 @@ async function loadHeader() {
   if (!container) return;
 
   try {
-    const res = await fetch("components/header.html");
+    const res = await fetch(getBasePath() + "components/header.html");
     if (!res.ok) throw new Error("Header fetch failed");
 
     const html = await res.text();
@@ -40,7 +40,23 @@ function initHeaderUI() {
 }
 
 /* ========================================
-   🏫 SCHOOL HANDLING (FIXED)
+   🌐 BASE PATH (🔥 CRITICAL FIX)
+======================================== */
+
+function getBasePath() {
+  const path = window.location.pathname;
+
+  // Detect GitHub repo path
+  if (path.includes("/Elite-Athletic-Performance/")) {
+    return "/Elite-Athletic-Performance/";
+  }
+
+  // Local or root fallback
+  return "/";
+}
+
+/* ========================================
+   🏫 SCHOOL HANDLING
 ======================================== */
 
 function getSchoolParam() {
@@ -58,20 +74,28 @@ function getSchoolParam() {
 }
 
 /* ========================================
-   🔗 LINK INJECTION (SAFE)
+   🔗 LINK INJECTION (SAFE + BASE PATH)
 ======================================== */
 
 function injectSchoolIntoLinks() {
   const school = getSchoolParam();
-  if (!school) return;
+  const base = getBasePath();
 
   document.querySelectorAll("#dropdownMenu a").forEach(link => {
-    const href = link.getAttribute("href");
-    if (!href || href.startsWith("http")) return; // skip external
+    let href = link.getAttribute("href");
+    if (!href || href.startsWith("http")) return;
 
-    const url = new URL(href, window.location.origin);
+    // remove existing params
+    href = href.split("?")[0];
 
-    url.searchParams.set("school", school);
+    // rebuild full path with base
+    const fullPath = base + href;
+
+    const url = new URL(fullPath, window.location.origin);
+
+    if (school) {
+      url.searchParams.set("school", school);
+    }
 
     link.setAttribute("href", url.pathname + url.search);
   });
@@ -98,7 +122,7 @@ function highlightActiveLink() {
     const href = link.getAttribute("href");
     if (!href) return;
 
-    const clean = href.split("?")[0];
+    const clean = href.split("?")[0].split("/").pop();
 
     if (clean === current) {
       link.style.color = "var(--primary)";
@@ -135,15 +159,18 @@ function setupMenu() {
 }
 
 /* ========================================
-   🚀 NAVIGATION HELPERS
+   🚀 NAVIGATION HELPERS (🔥 FIXED)
 ======================================== */
 
 function goToPage(page) {
   const school = getSchoolParam();
+  const base = getBasePath();
 
-  window.location.href = school
-    ? `${page}?school=${school}`
-    : page;
+  const url = school
+    ? `${base}${page}?school=${school}`
+    : `${base}${page}`;
+
+  window.location.href = url;
 }
 
 function goToEnterTest() { goToPage("enter.html"); }
