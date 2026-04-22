@@ -1,5 +1,5 @@
 // ===============================
-// 🔥 ELITE V5 DATA LOADER (API VERSION - CLEAN)
+// 🔥 ELITE V6 DATA LOADER (FINAL API VERSION)
 // ===============================
 
 let APP_DATA = [];
@@ -34,31 +34,58 @@ async function loadAthleteData() {
 
     APP_DATA = data
       .map(row => ({
+
+        // ===============================
+        // 🧍 BASIC INFO
+        // ===============================
         name: clean(row["Student-Athlete"]),
         date: clean(row["Test Date"]),
 
+        hour: clean(row["Hour"]),
+        grade: clean(row["Grade"]),
+        weight: num(row["Actual Weight"]),
+        weightClass: clean(row["Weight Group"]),
+
+        // ===============================
+        // 🏋️ STRENGTH
+        // ===============================
         bench: num(row["Bench Press"]),
         squat: num(row["Squat"]),
         clean: num(row["Hang Clean"]),
 
+        // ===============================
+        // ⚡ EXPLOSIVE / POWER
+        // ===============================
         vertical: num(row["Vertical Jump"]),
         broad: num(row["Broad Jump"]),
         med: num(row["Med Ball Toss"]),
 
+        // ===============================
+        // 🏃 SPEED / AGILITY
+        // ===============================
         agility: num(row["Pro Agility"]),
         ten: num(row["10 Yd Dash"]),
         forty: num(row["40 Yd Dash"]),
 
+        // ===============================
+        // 🔁 CORE
+        // ===============================
         situps: num(row["Sit-Ups"]),
 
+        // ===============================
+        // 📊 SCORE
+        // ===============================
         score: num(row["Total Athletic Performance Points"])
       }))
 
-      // ✅ CLEAN DATA (NOW IN RIGHT PLACE)
+      // ========================================
+      // ✅ CLEAN DATA
+      // ========================================
       .filter(a => {
+
         if (!a.name) return false;
 
-        return (
+        const hasData =
           a.bench > 0 ||
           a.squat > 0 ||
           a.clean > 0 ||
@@ -69,8 +96,9 @@ async function loadAthleteData() {
           a.ten > 0 ||
           a.forty > 0 ||
           a.situps > 0 ||
-          a.score > 0
-        );
+          a.score > 0;
+
+        return hasData;
       });
 
     console.log("✅ DATA READY:", APP_DATA.length);
