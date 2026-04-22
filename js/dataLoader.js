@@ -1,5 +1,5 @@
 // ===============================
-// 🔥 ELITE V5 DATA LOADER (API VERSION)
+// 🔥 ELITE V5 DATA LOADER (API VERSION - CLEAN)
 // ===============================
 
 let APP_DATA = [];
@@ -11,66 +11,54 @@ let APP_DATA = [];
 async function loadAthleteData() {
   try {
 
-    if (!window.SCHOOL_CONFIG || !window.SCHOOL_CONFIG.dataURL) {
+    // ✅ WAIT for config FIRST
+    const config = await waitForConfig();
+
+    if (!config || !config.dataURL) {
       throw new Error("Missing SCHOOL_CONFIG or dataURL");
     }
 
-    const url = window.SCHOOL_CONFIG.dataURL;
+    const url = config.dataURL + "?t=" + Date.now(); // cache bust
 
-    console.log("🌐 Fetching data from:", url);
+    console.log("📡 Loading data from:", url);
 
     const res = await fetch(url);
-    const raw = await res.json();
+    const data = await res.json();
 
-    if (!raw || !raw.length) {
-      console.warn("⚠️ No data returned from API");
+    if (!data || !data.length) {
+      console.warn("⚠️ No data returned");
       return [];
     }
 
-    console.log("🧪 RAW SAMPLE:", raw[0]);
+    console.log("🧪 RAW SAMPLE:", data[0]);
 
-    APP_DATA = raw
-      .map(row => {
+    APP_DATA = data
+      .map(row => ({
+        name: clean(row["Student-Athlete"]),
+        date: clean(row["Test Date"]),
 
-        const athlete = {
-          name: clean(row["Student-Athlete"]),
-          date: clean(row["Test Date"]),
+        bench: num(row["Bench Press"]),
+        squat: num(row["Squat"]),
+        clean: num(row["Hang Clean"]),
 
-          bench: num(row["Bench Press"]),
-          squat: num(row["Squat"]),
-          clean: num(row["Hang Clean"]),
+        vertical: num(row["Vertical Jump"]),
+        broad: num(row["Broad Jump"]),
+        med: num(row["Med Ball Toss"]),
 
-          vertical: num(row["Vertical Jump"]),
-          broad: num(row["Broad Jump"]),
-          med: num(row["Med Ball Toss"]),
+        agility: num(row["Pro Agility"]),
+        ten: num(row["10 Yd Dash"]),
+        forty: num(row["40 Yd Dash"]),
 
-          agility: num(row["Pro Agility"]),
-          ten: num(row["10 Yard Dash"]),
-          forty: num(row["40 Yard Dash"]),
+        situps: num(row["Sit-Ups"]),
 
-          situps: num(row["Sit-Ups"]),
+        score: num(row["Total Athletic Performance Points"])
+      }))
 
-          // 🔥 CORE SCORE
-          score: num(
-            row["Total Athletic Performance Points"] ||
-            row["Total Athletic Performance"] ||
-            row["Score"]
-          )
-        };
-
-        athlete.overall = athlete.score;
-
-        return athlete;
-      })
-
-      /* ========================================
-         CLEAN DATA
-      ======================================== */
+      // ✅ CLEAN DATA (NOW IN RIGHT PLACE)
       .filter(a => {
-
         if (!a.name) return false;
 
-        const hasData =
+        return (
           a.bench > 0 ||
           a.squat > 0 ||
           a.clean > 0 ||
@@ -81,9 +69,8 @@ async function loadAthleteData() {
           a.ten > 0 ||
           a.forty > 0 ||
           a.situps > 0 ||
-          a.score > 0;
-
-        return hasData;
+          a.score > 0
+        );
       });
 
     console.log("✅ DATA READY:", APP_DATA.length);
