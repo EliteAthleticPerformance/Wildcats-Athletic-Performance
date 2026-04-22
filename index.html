@@ -122,11 +122,13 @@
     document.getElementById("totalTests").textContent = data.length;
 
     // unique athletes (FIXED FIELD NAME)
-    const unique = new Set(
-      data.map(d => d["Student-Athlete"]).filter(Boolean)
-    );
+    const validNames = data
+  .map(d => d.name)
+  .filter(n => n && n.trim() !== "");
 
-    document.getElementById("totalAthletes").textContent = unique.size;
+const unique = new Set(validNames);
+
+document.getElementById("totalAthletes").textContent = unique.size;
 
   } catch (err) {
     console.warn("Stats load failed:", err);
