@@ -75,7 +75,14 @@ async function loadAthleteData() {
         // ===============================
         // 📊 SCORE
         // ===============================
-        score: num(row["Total Athletic Performance Points"])
+        score:
+  num(row["Total Athletic Performance Points"]) ||
+  num(row["3 Lift Projected Max Total"]) ||
+  (
+    num(row["Bench Press"]) +
+    num(row["Squat"]) +
+    num(row["Hang Clean"])
+  )
       }))
 
       // ========================================
