@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link id="dynamicFavicon" rel="icon" type="image/png" href="images/roosters-logo.png">
+<link id="dynamicFavicon" rel="icon" type="image/png">
 
 <title>Elite Athletic Performance System</title>
 
@@ -16,16 +16,13 @@
 <body>
 
 <!-- ===== HEADER ===== -->
-
 <div id="header-placeholder"></div>
 <script src="js/header.js"></script>
 
 <!-- ===== MAIN ===== -->
-
 <main>
 
   <!-- ===== HERO ===== -->
-
   <section class="section" style="text-align:center;">
     <h1 class="hero-title">Track. Compete. Improve.</h1>
     <p style="color: var(--muted); margin-top:10px;">
@@ -34,18 +31,12 @@
   </section>
 
   <!-- ===== PRIMARY ACTION ===== -->
-
   <section class="section" style="text-align:center;">
-    
-    <!-- ✅ SAFE NAV LINK (NO REFRESH ISSUE EVER) -->
     <a id="enterBtn" class="btn">➕ Enter Test</a>
-
   </section>
 
   <!-- ===== QUICK STATS ===== -->
-
   <section class="section">
-
     <div class="grid-2">
 
       <div class="card-mini">
@@ -61,13 +52,10 @@
       </div>
 
     </div>
-
   </section>
 
   <!-- ===== DASHBOARD ===== -->
-
   <section class="section">
-
     <div class="grid grid-auto">
 
       <a class="card" href="timer.html">
@@ -95,15 +83,13 @@
       </a>
 
     </div>
-
   </section>
 
 </main>
 
 <!-- ===== SCRIPTS ===== -->
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="./js/themeLoader.js"></script>
+<script src="js/themeLoader.js"></script>
 <script src="js/dataLoader.js"></script>
 
 <!-- ===== FORCE ENTER LINK WITH SCHOOL ===== -->
@@ -112,7 +98,6 @@
   const params = new URLSearchParams(window.location.search);
   let school = params.get("school");
 
-  // fallback to stored school
   if (!school) {
     school = localStorage.getItem("school");
   }
@@ -121,11 +106,9 @@
 
   if (!btn) return;
 
-  // 🔥 FORCE URL FORMAT
   btn.href = school
     ? `enter.html?school=${school}`
     : "enter.html";
-
 })();
 </script>
 
@@ -135,9 +118,14 @@
   try {
     const data = await loadAthleteData();
 
+    // total tests
     document.getElementById("totalTests").textContent = data.length;
 
-    const unique = new Set(data.map(d => d.name));
+    // unique athletes (FIXED FIELD NAME)
+    const unique = new Set(
+      data.map(d => d["Student-Athlete"]).filter(Boolean)
+    );
+
     document.getElementById("totalAthletes").textContent = unique.size;
 
   } catch (err) {
