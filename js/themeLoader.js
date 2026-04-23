@@ -108,12 +108,20 @@ function applyHeaderBranding(config) {
   const name = document.getElementById("schoolName");
 
   if (logo && config.logo) {
+
+    // 🔥 set source FIRST
     logo.src = config.logo;
 
-    // ✅ optional fallback safety
+    // 🔥 fade in when loaded
+    logo.onload = () => {
+      logo.classList.add("loaded");
+    };
+
+    // 🔥 fallback safety
     logo.onerror = () => {
       console.error("❌ LOGO FAILED:", config.logo);
-      logo.src = BASE + "images/default-logo.png";
+      logo.src = "/Elite-Athletic-Performance/images/default-logo.png";
+      logo.classList.add("loaded"); // still show fallback
     };
 
     console.log("✅ LOGO LOADED");
