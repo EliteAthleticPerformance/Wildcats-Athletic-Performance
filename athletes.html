@@ -9,7 +9,7 @@
 
 <title>Athletes | Performance System</title>
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/Elite-Athletic-Performance/styles.css">
 
 </head>
 
@@ -17,7 +17,10 @@
 
 <!-- ===== HEADER ===== -->
 <div id="header-placeholder"></div>
-<script src="js/header.js"></script>
+
+<!-- 🔥 LOAD ORDER (CORRECT) -->
+<script src="/Elite-Athletic-Performance/js/themeLoader.js"></script>
+<script src="/Elite-Athletic-Performance/js/header.js"></script>
 
 <main>
 
@@ -38,6 +41,8 @@
       id="search" 
       class="search"
       placeholder="Search athletes..."
+      oninput="filterAthletes()"
+      autocomplete="off"
     >
   </section>
 
@@ -48,20 +53,12 @@
 
 </main>
 
-<!-- ===== SCRIPTS ===== -->
+<!-- ===== DATA + PAGE LOGIC ===== -->
 
-<!-- 🔥 Loads school config (dataURL, theme, logo) -->
-<script src="js/themeLoader.js"></script>
+<script src="/Elite-Athletic-Performance/js/dataLoader.js"></script>
 
-<!-- 🔥 Loads data from Apps Script API -->
-<script src="js/dataLoader.js"></script>
-
-<!-- 🔥 Athlete list logic -->
-<script src="js/athletes.js"></script>
-<script src="js/athlete.js"></script>
-
-</body>
-</html>
+<!-- ✅ ONLY THIS FILE (NOT athlete.js) -->
+<script src="/Elite-Athletic-Performance/js/athletes.js"></script>
 
 </body>
 </html>
