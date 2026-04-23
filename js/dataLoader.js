@@ -75,29 +75,26 @@ async function loadAthleteData() {
         situps: num(get("situps", "sit-ups", "sit ups")),
 
         // 🔥 CATEGORY POINTS (FROM GOOGLE SHEET)
-        strengthPoints: num(get(
-          "strengthpoints",
-          "strength points",
-          "strength score"
-        )),
+        // 🔥 CATEGORY SCORES (MATCHES YOUR SHEET EXACTLY)
+strengthPoints: num(get(
+  "strengthscore",
+  "strength score"
+)),
 
-        speedPoints: num(get(
-          "speedpoints",
-          "speed points",
-          "speed score"
-        )),
+speedPoints: num(get(
+  "speedscore",
+  "speed score"
+)),
 
-        explosivePoints: num(get(
-          "explosivepoints",
-          "explosive points",
-          "explosive score"
-        )),
+explosivePoints: num(get(
+  "explosivescore",
+  "explosive score"
+)),
 
-        powerPoints: num(get(
-          "powerpoints",
-          "power points",
-          "power score"
-        )),
+powerPoints: num(get(
+  "powerscore",
+  "power score"
+)),
 
         // 📊 TOTAL SCORE (PRIMARY SYSTEM)
         score:
