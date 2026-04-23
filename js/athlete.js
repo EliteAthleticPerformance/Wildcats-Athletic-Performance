@@ -46,6 +46,8 @@ function renderAthlete(name) {
   }
 
   const latest = history[history.length - 1];
+   dataLoader.js:173 Uncaught ReferenceError: latest is not defined
+    at dataLoader.js:173:30
 
   // HEADER
   document.getElementById("athleteName").textContent = formatName(name);
