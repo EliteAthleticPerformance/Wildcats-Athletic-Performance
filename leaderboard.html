@@ -9,7 +9,7 @@
 
 <title>Leaderboard | Elite Athletic Performance</title>
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/Elite-Athletic-Performance/styles.css">
 
 </head>
 
@@ -17,7 +17,10 @@
 
 <!-- ===== HEADER ===== -->
 <div id="header-placeholder"></div>
-<script src="js/header.js"></script>
+
+<!-- 🔥 CORRECT LOAD ORDER -->
+<script src="/Elite-Athletic-Performance/js/themeLoader.js"></script>
+<script src="/Elite-Athletic-Performance/js/header.js"></script>
 
 <!-- ===== MAIN ===== -->
 <main>
@@ -50,10 +53,10 @@
       </div>
     </div>
 
-    <!-- ===== TABLE GRID ===== -->
+    <!-- TABLE GRID -->
     <div class="leaderboard-grid">
 
-      <!-- 3 LIFT TOTALS -->
+      <!-- LIFTS -->
       <div class="leaderboard-card">
         <h2>🏋️ 3 Lift Max Totals</h2>
 
@@ -72,7 +75,7 @@
         </div>
       </div>
 
-      <!-- PERFORMANCE SCORES -->
+      <!-- SCORES -->
       <div class="leaderboard-card">
         <h2>⚡ Athletic Performance Scores</h2>
 
@@ -93,7 +96,7 @@
 
     </div>
 
-    <!-- MOBILE FALLBACK -->
+    <!-- MOBILE -->
     <div id="mobileLift" class="mobile-cards"></div>
     <div id="mobileScore" class="mobile-cards"></div>
 
@@ -101,16 +104,25 @@
 
 </main>
 
-<!-- ===== SCRIPTS ===== -->
+<!-- ===== DATA + LOGIC ===== -->
 
-<!-- 🔥 Config + school routing -->
-<script src="js/themeLoader.js"></script>
+<script src="/Elite-Athletic-Performance/js/dataLoader.js"></script>
 
-<!-- 🔥 Data from Apps Script API -->
-<script src="js/dataLoader.js"></script>
+<script>
+document.addEventListener("headerLoaded", async () => {
+  try {
+    await window.APP_READY;
 
-<!-- 🔥 Leaderboard logic -->
-<script src="js/leaderboard.js"></script>
+    // 🔥 dynamically load leaderboard AFTER config
+    const script = document.createElement("script");
+    script.src = "/Elite-Athletic-Performance/js/leaderboard.js";
+    document.body.appendChild(script);
+
+  } catch (err) {
+    console.error("❌ Leaderboard init failed:", err);
+  }
+});
+</script>
 
 </body>
 </html>
