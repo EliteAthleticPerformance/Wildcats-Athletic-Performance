@@ -31,6 +31,7 @@ async function loadAthleteData() {
     console.log("🧪 RAW SAMPLE:", raw[0]);
 
     const keyMap = buildKeyMap(raw[0]);
+     console.log("KEY MAP:", keyMap);
 
     APP_DATA = raw.map(row => {
 
