@@ -1,5 +1,6 @@
+```javascript
 // ========================================
-// 🔥 ELITE ENTER ENGINE (FINAL PRODUCTION)
+// 🔥 ELITE ENTER ENGINE (PRODUCTION FINAL)
 // ========================================
 
 let isSubmitting = false;
@@ -31,17 +32,18 @@ function todayISO() {
   return new Date().toISOString().split("T")[0];
 }
 
-/* 🔥 FIXED NAME FORMAT */
+/* ========================================
+   NAME FORMAT
+======================================== */
+
 function normalizeName(name) {
   if (!name) return "";
 
-  // If already "Last, First" → keep it
   if (name.includes(",")) {
     const [last, first] = name.split(",");
     return `${last.trim()}, ${first.trim()}`;
   }
 
-  // Otherwise convert "First Last" → "Last, First"
   const parts = name.trim().split(" ");
   if (parts.length >= 2) {
     const first = parts.slice(0, -1).join(" ");
@@ -53,7 +55,7 @@ function normalizeName(name) {
 }
 
 /* ========================================
-   ⚖️ WEIGHT CLASS
+   WEIGHT CLASS
 ======================================== */
 
 function getWeightClass(weight) {
@@ -122,50 +124,54 @@ function validateEntry(entry) {
 }
 
 /* ========================================
-   SUBMIT
+   SUBMIT TO GOOGLE (🔥 FIXED)
 ======================================== */
 
 async function submitToGoogle(entry, url) {
   try {
-    await fetch(url, {
+    console.log("🚀 POSTING TO:", url);
+    console.log("📦 DATA:", entry);
+
+    const res = await fetch(url, {
       method: "POST",
-      mode: "no-cors",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       },
       body: new URLSearchParams(entry)
     });
 
+    console.log("✅ RESPONSE STATUS:", res.status);
+
     showMessage("✅ Saved successfully!", "success");
 
-    // 🔥 REFRESH DATA CACHE
+    // Refresh cached data
     if (typeof loadAthleteData === "function") {
       loadAthleteData(true);
     }
 
-    setTimeout(() => {
-      clearForm();
-    }, 500);
+    setTimeout(clearForm, 500);
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ SUBMIT ERROR:", err);
     showMessage("❌ Failed to save", "error");
   }
 }
 
 /* ========================================
-   CONFIG (SAFE)
+   CONFIG
 ======================================== */
 
 async function getSubmitURL() {
   await window.APP_READY;
 
-  if (window.SCHOOL_CONFIG?.submitURL) {
-    return window.SCHOOL_CONFIG.submitURL;
+  const url = window.SCHOOL_CONFIG?.submitURL;
+
+  if (!url) {
+    showMessage("Config error: missing submitURL", "error");
+    return null;
   }
 
-  showMessage("Config error", "error");
-  return null;
+  return url;
 }
 
 /* ========================================
@@ -173,8 +179,8 @@ async function getSubmitURL() {
 ======================================== */
 
 async function saveAthlete() {
-
   if (isSubmitting) return;
+
   isSubmitting = true;
 
   const btn = document.getElementById("submitBtn");
@@ -205,6 +211,7 @@ async function saveAthlete() {
 
 function resetButton(btn) {
   isSubmitting = false;
+
   if (btn) {
     btn.disabled = false;
     btn.textContent = "💾 Save Test";
@@ -212,7 +219,7 @@ function resetButton(btn) {
 }
 
 /* ========================================
-   UI HELPERS
+   UI
 ======================================== */
 
 function showMessage(msg, type) {
@@ -240,16 +247,14 @@ function showMessage(msg, type) {
 
 function clearForm() {
   document.querySelectorAll("input, select").forEach(el => {
-    if (el.id !== "date") {
-      el.value = "";
-    }
+    if (el.id !== "date") el.value = "";
   });
 
   focusFirstInput();
 }
 
 /* ========================================
-   UX BOOSTS
+   UX
 ======================================== */
 
 function focusFirstInput() {
@@ -274,3 +279,4 @@ function setupEnterSubmit() {
 ======================================== */
 
 window.saveAthlete = saveAthlete;
+```
