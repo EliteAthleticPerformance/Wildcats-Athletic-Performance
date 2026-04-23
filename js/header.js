@@ -1,5 +1,5 @@
 // ========================================
-// 🔥 ELITE V6 HEADER ENGINE (STABLE + CLEAN)
+// 🔥 ELITE V7 HEADER ENGINE (LOCKED + SYNCED)
 // ========================================
 
 document.addEventListener("DOMContentLoaded", loadHeader);
@@ -21,10 +21,27 @@ async function loadHeader() {
     const html = await res.text();
     container.innerHTML = html;
 
+    // 🔥 WAIT FOR CONFIG BEFORE INIT (CRITICAL)
+    await waitForConfig();
+
     initHeaderUI();
 
   } catch (err) {
     console.error("❌ HEADER LOAD ERROR:", err);
+  }
+}
+
+/* ========================================
+   🧠 WAIT FOR CONFIG
+======================================== */
+
+async function waitForConfig() {
+  try {
+    if (window.APP_READY) {
+      await window.APP_READY;
+    }
+  } catch (err) {
+    console.warn("⚠️ Config not ready before header init");
   }
 }
 
@@ -34,16 +51,16 @@ async function loadHeader() {
 
 function initHeaderUI() {
   setupMenu();
-  highlightActiveLink();
   injectSchoolIntoLinks();
+  highlightActiveLink();
   setPageTitle();
 
-  // 🔥 SIGNAL THAT HEADER IS READY
+  // 🔥 SIGNAL READY AFTER EVERYTHING
   document.dispatchEvent(new Event("headerLoaded"));
 }
 
 /* ========================================
-   🌐 BASE PATH (CRITICAL FOR GITHUB)
+   🌐 BASE PATH
 ======================================== */
 
 function getBasePath() {
@@ -74,7 +91,7 @@ function getSchoolParam() {
 }
 
 /* ========================================
-   🔗 LINK INJECTION (FIXED)
+   🔗 LINK INJECTION (ROBUST)
 ======================================== */
 
 function injectSchoolIntoLinks() {
@@ -83,13 +100,12 @@ function injectSchoolIntoLinks() {
 
   document.querySelectorAll("#dropdownMenu a").forEach(link => {
     let href = link.getAttribute("href");
+
     if (!href || href.startsWith("http")) return;
 
-    // remove query params
     href = href.split("?")[0];
 
-    const fullPath = base + href;
-    const url = new URL(fullPath, window.location.origin);
+    const url = new URL(base + href, window.location.origin);
 
     if (school) {
       url.searchParams.set("school", school);
@@ -109,12 +125,16 @@ function setPageTitle() {
 }
 
 /* ========================================
-   🔗 ACTIVE LINK
+   🔗 ACTIVE LINK (FIXED)
 ======================================== */
 
 function highlightActiveLink() {
   const links = document.querySelectorAll("#dropdownMenu a");
-  const current = window.location.pathname.split("/").pop();
+
+  const current = window.location.pathname
+    .split("/")
+    .pop()
+    .split("?")[0];
 
   links.forEach(link => {
     const href = link.getAttribute("href");
@@ -123,8 +143,7 @@ function highlightActiveLink() {
     const clean = href.split("?")[0].split("/").pop();
 
     if (clean === current) {
-      link.style.color = "var(--primary)";
-      link.style.fontWeight = "700";
+      link.classList.add("active-link");
     }
   });
 }
@@ -157,7 +176,7 @@ function setupMenu() {
 }
 
 /* ========================================
-   🚀 NAVIGATION HELPERS (FIXED)
+   🚀 NAV HELPERS
 ======================================== */
 
 function goToPage(page) {
