@@ -12,6 +12,10 @@ let isSubmitting = false;
 document.addEventListener("DOMContentLoaded", () => {
   focusFirstInput();
   setupEnterSubmit();
+const btn = document.getElementById("submitBtn");
+  if (btn) {
+    btn.addEventListener("click", saveAthlete);
+  }
 });
 
 /* ========================================
