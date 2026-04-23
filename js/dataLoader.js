@@ -1,5 +1,5 @@
 // ========================================
-// 🔥 ELITE V10 DATA LOADER (PRODUCTION SAFE)
+// 🔥 ELITE V11 DATA LOADER (WITH CATEGORY POINTS)
 // ========================================
 
 let APP_DATA = [];
@@ -33,6 +33,7 @@ async function loadAthleteData() {
     const keyMap = buildKeyMap(raw[0]);
 
     APP_DATA = raw.map(row => {
+
       // 🔑 SAFE ACCESSOR
       const get = (...keys) => {
         for (let k of keys) {
@@ -45,6 +46,7 @@ async function loadAthleteData() {
       };
 
       return {
+
         // 🧍 BASIC
         name: clean(get("studentathlete", "student athlete", "name")),
         date: clean(get("testdate", "test date", "date")),
@@ -72,7 +74,32 @@ async function loadAthleteData() {
         // 🔁 CORE
         situps: num(get("situps", "sit-ups", "sit ups")),
 
-        // 📊 SCORE (robust fallback)
+        // 🔥 CATEGORY POINTS (FROM GOOGLE SHEET)
+        strengthPoints: num(get(
+          "strengthpoints",
+          "strength points",
+          "strength score"
+        )),
+
+        speedPoints: num(get(
+          "speedpoints",
+          "speed points",
+          "speed score"
+        )),
+
+        explosivePoints: num(get(
+          "explosivepoints",
+          "explosive points",
+          "explosive score"
+        )),
+
+        powerPoints: num(get(
+          "powerpoints",
+          "power points",
+          "power score"
+        )),
+
+        // 📊 TOTAL SCORE (PRIMARY SYSTEM)
         score:
           num(get("totalathleticperformancepoints", "score")) ||
           num(get("3liftprojectedmaxtotal")) ||
@@ -85,20 +112,20 @@ async function loadAthleteData() {
     })
 
     // ========================================
-    // ✅ FINAL CLEAN FILTER (SAFE + FLEXIBLE)
+    // ✅ FINAL CLEAN FILTER
     // ========================================
     .filter(a =>
       a.name &&
       (
         a.score > 0 ||
-        a.bench > 0 ||
-        a.squat > 0 ||
-        a.clean > 0
+        a.strengthPoints > 0 ||
+        a.speedPoints > 0 ||
+        a.explosivePoints > 0 ||
+        a.powerPoints > 0
       )
     );
 
     console.log("✅ DATA READY:", APP_DATA.length);
-
     return APP_DATA;
 
   } catch (err) {
@@ -142,3 +169,5 @@ function clean(val) {
   if (!val) return "";
   return String(val).trim();
 }
+
+console.log("ATHLETE DATA:", latest);
