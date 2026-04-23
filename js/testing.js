@@ -17,6 +17,7 @@ async function init() {
     await window.APP_READY;
 
     const data = await loadAthleteData();
+     console.log("🚨 TESTING DATA:", data);
 
     tableData = data;
 
