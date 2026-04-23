@@ -1,18 +1,18 @@
 // ========================================
-// 🔥 ATHLETES LIST PAGE (PRODUCTION)
+// 🔥 ATHLETES LIST (FINAL - BACKUP UI + NEW ENGINE)
 // ========================================
 
 let athletes = [];
 let currentLetter = "ALL";
 
 /* ========================================
-   INIT
+   INIT (LOCKED TO APP_READY)
 ======================================== */
 
-document.addEventListener("headerLoaded", init);
-
-async function init() {
+document.addEventListener("headerLoaded", async () => {
   try {
+    await window.APP_READY;
+
     const data = await loadAthleteData();
 
     const map = {};
@@ -40,6 +40,17 @@ async function init() {
   } catch (err) {
     console.error("❌ Athlete load failed:", err);
   }
+});
+
+/* ========================================
+   🔥 TAG SYSTEM (RESTORED)
+======================================== */
+
+function getTag(score) {
+  if (score >= 800) return ["elite", "🔥 Elite"];
+  if (score >= 650) return ["strong", "💪 Strong"];
+  if (score >= 500) return ["developing", "⚡ Developing"];
+  return ["needs", "📈 Needs Work"];
 }
 
 /* ========================================
@@ -52,6 +63,7 @@ function applyFilters() {
 
   let filtered = athletes;
 
+  // LETTER FILTER
   if (currentLetter !== "ALL") {
     filtered = filtered.filter(a => {
       const last = a.name.split(",")[0].trim().toUpperCase();
@@ -59,6 +71,7 @@ function applyFilters() {
     });
   }
 
+  // SEARCH FILTER
   if (term) {
     filtered = filtered.filter(a =>
       a.name.toLowerCase().includes(term)
@@ -69,7 +82,7 @@ function applyFilters() {
 }
 
 /* ========================================
-   RENDER
+   RENDER (BACKUP STYLE)
 ======================================== */
 
 function render(list) {
@@ -90,8 +103,8 @@ function render(list) {
 
     card.innerHTML = `
       <div class="athlete-card-inner">
-        <h2 class="athlete-name">${a.name}</h2>
-        <div class="athlete-score">Score: ${a.score}</div>
+        <h2 class="athlete-name">${formatName(a.name)}</h2>
+        <div class="athlete-score">${a.score}</div>
         <div class="athlete-tag ${tagClass}">
           ${tagText}
         </div>
@@ -105,7 +118,7 @@ function render(list) {
 }
 
 /* ========================================
-   A-Z
+   🔤 A-Z WITH COUNTS (RESTORED)
 ======================================== */
 
 function renderAlphabet() {
@@ -113,15 +126,25 @@ function renderAlphabet() {
   if (!bar) return;
 
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const counts = {};
+
+  athletes.forEach(a => {
+    const last = (a.name.split(",")[0] || "").trim().toUpperCase()[0];
+    counts[last] = (counts[last] || 0) + 1;
+  });
 
   bar.innerHTML = `
-    <span class="letter active" onclick="showAll()">ALL</span>
+    <span class="letter active" onclick="showAll()">
+      ALL (${athletes.length})
+    </span>
   `;
 
   letters.forEach(letter => {
+    const count = counts[letter] || 0;
+
     bar.innerHTML += `
       <span class="letter" onclick="filterByLetter('${letter}')">
-        ${letter}
+        ${letter}${count ? ` (${count})` : ""}
       </span>
     `;
   });
@@ -144,8 +167,8 @@ function setActive(letter) {
     el.classList.remove("active");
 
     if (
-      (letter === "ALL" && el.textContent === "ALL") ||
-      el.textContent === letter
+      (letter === "ALL" && el.textContent.startsWith("ALL")) ||
+      el.textContent.startsWith(letter)
     ) {
       el.classList.add("active");
     }
@@ -158,6 +181,17 @@ function setActive(letter) {
 
 function filterAthletes() {
   applyFilters();
+}
+
+/* ========================================
+   NAME FORMAT (CLEANER UI)
+======================================== */
+
+function formatName(name) {
+  if (!name.includes(",")) return name;
+
+  const [last, first] = name.split(",");
+  return `${first.trim()} ${last.trim()}`;
 }
 
 /* ========================================
