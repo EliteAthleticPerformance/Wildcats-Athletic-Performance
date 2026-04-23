@@ -10,20 +10,19 @@ let currentSearch = "";
    INIT (SYNCED)
 ======================================== */
 
-document.addEventListener("headerLoaded", async () => {
+(async function initTestingPage() {
   try {
-    // ✅ GUARANTEE config is ready
-    const config = await window.APP_READY;
+    // ✅ ALWAYS wait for config
+    await window.APP_READY;
 
-    console.log("✅ CONFIG READY:", config);
+    console.log("✅ TESTING INIT START");
 
-    // ✅ LOAD DATA
     const data = await loadAthleteData();
 
     console.log("🔥 TESTING PAGE DATA:", data);
 
     if (!data || !data.length) {
-      console.warn("⚠️ No data returned to testing page");
+      console.warn("⚠️ No data available");
       return;
     }
 
@@ -33,9 +32,9 @@ document.addEventListener("headerLoaded", async () => {
     renderTable(tableData);
 
   } catch (err) {
-    console.error("❌ Testing page failed:", err);
+    console.error("❌ Testing init failed:", err);
   }
-});
+})();
 
 /* ========================================
    HELPERS
