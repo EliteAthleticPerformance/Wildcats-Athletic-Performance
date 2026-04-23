@@ -5,7 +5,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link id="dynamicFavicon" rel="icon" type="image/png">
+<!-- ✅ SAFE FALLBACK FAVICON -->
+<link id="dynamicFavicon" rel="icon" type="image/png" href="images/default-logo.png">
 
 <title>Athletes | Performance System</title>
 
@@ -34,12 +35,13 @@
   <!-- SEARCH -->
   <section class="section">
     <input 
-  type="text" 
-  id="search" 
-  class="search"
-  placeholder="Search athletes..."
-  oninput="filterAthletes()"
-/>
+      type="text" 
+      id="search" 
+      class="search"
+      placeholder="Search athletes..."
+      oninput="filterAthletes()"
+      autocomplete="off"
+    >
   </section>
 
   <!-- GRID -->
@@ -49,15 +51,15 @@
 
 </main>
 
-<!-- ===== SCRIPTS ===== -->
+<!-- ===== SCRIPTS (LOCKED ORDER) ===== -->
 
-<!-- 🔥 Loads school config (dataURL, theme, logo) -->
+<!-- 1️⃣ CONFIG + THEME (must load FIRST) -->
 <script src="js/themeLoader.js"></script>
 
-<!-- 🔥 Loads data from Apps Script API -->
+<!-- 2️⃣ DATA (depends on config) -->
 <script src="js/dataLoader.js"></script>
 
-<!-- 🔥 Athlete list logic -->
+<!-- 3️⃣ PAGE LOGIC (depends on both) -->
 <script src="js/athlete.js"></script>
 
 </body>
