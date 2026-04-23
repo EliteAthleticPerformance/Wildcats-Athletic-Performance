@@ -404,10 +404,12 @@ box-shadow: 0 10px 25px var(--primaryLight)
 
 .grid-auto {
     display: grid;
-    grid-template-columns: repeat(4, max-content);
-    justify-content: center;
+
+    /* 🔥 FIX: responsive card grid */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
     gap: 20px;
-    margin: 0 auto;
+    width: 100%;
 }
 
 /* ===== 6. CARDS ===== */
@@ -527,6 +529,60 @@ box-shadow: 0 10px 25px var(--primaryLight)
 #totalTests {
     font-size: 3.0rem;
     font-weight: 900;
+}
+
+/* ========================================
+   ATHLETE CARDS (FIXED)
+======================================== */
+
+.athlete-card {
+  width: 100%;
+  max-width: 260px;
+
+  background: linear-gradient(145deg, #1a1a1a, #111);
+  border-radius: 16px;
+
+  padding: 20px;
+  text-align: center;
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,0.6),
+    0 0 12px var(--primaryLight);
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  display: block;
+}
+
+.athlete-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow:
+    0 15px 35px rgba(0,0,0,0.8),
+    0 0 20px var(--primaryLight);
+}
+
+.athlete-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.athlete-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.athlete-score {
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.athlete-tag {
+  font-size: 14px;
+  opacity: 0.85;
 }
 
 /* ===== 7. TABLE ===== */
