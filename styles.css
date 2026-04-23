@@ -590,19 +590,23 @@ box-shadow: 0 10px 25px var(--primaryLight)
 .athlete-stats {
   display: grid;
 
-  /* 🔥 THIS is the key */
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  /* 🔥 better layout */
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
 
   gap: 12px;
-  max-width: 900px;
+
+  /* 🔥 REMOVE the narrow constraint */
+  width: 100%;
+  max-width: 1300px;   /* optional cap */
   margin: 0 auto;
 }
 
 .stat-box {
   background: linear-gradient(145deg, #1a1a1a, #111);
-  border-radius: 12px;
-
-  padding: 10px;
+ .stat-box {
+  padding: 8px;
+  border-radius: 10px;
+}
   text-align: center;
 
   box-shadow:
