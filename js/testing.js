@@ -284,3 +284,57 @@ function setActiveLetter(letter) {
     }
   });
 }
+
+/* ========================================
+   🔽 SORTING (TABLE HEADERS)
+======================================== */
+
+let currentSortCol = null;
+let sortAsc = true;
+
+function sortTable(colIndex) {
+
+  if (!tableData.length) return;
+
+  // toggle direction if same column
+  if (currentSortCol === colIndex) {
+    sortAsc = !sortAsc;
+  } else {
+    currentSortCol = colIndex;
+    sortAsc = true;
+  }
+
+  const keys = [
+    "name", "date", "hour", "grade", "weight", "weightClass",
+    "bench", "squat", "clean",
+    "vertical", "broad", "med",
+    "agility", "situps", "ten", "forty"
+  ];
+
+  const key = keys[colIndex];
+  if (!key) return;
+
+  const sorted = [...tableData].sort((a, b) => {
+
+    let valA = a[key];
+    let valB = b[key];
+
+    // normalize
+    if (key === "name") {
+      valA = (valA || "").toLowerCase();
+      valB = (valB || "").toLowerCase();
+    } else if (key === "date") {
+      valA = new Date(valA);
+      valB = new Date(valB);
+    } else {
+      valA = Number(valA) || 0;
+      valB = Number(valB) || 0;
+    }
+
+    if (valA < valB) return sortAsc ? -1 : 1;
+    if (valA > valB) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  renderTable(sorted);
+}
