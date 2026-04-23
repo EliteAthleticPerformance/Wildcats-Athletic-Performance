@@ -27,7 +27,11 @@ window.APP_READY = new Promise(async (resolve, reject) => {
       pleasanthill: {
         key: "pleasanthill",
         name: "Pleasant Hill Roosters",
-        logo: "https://eliteathleticperformance.github.io/Elite-Athletic-Performance/images/roosters-logo.png",
+       const BASE = window.location.pathname.includes("/Elite-Athletic-Performance/")
+  ? "/Elite-Athletic-Performance/"
+  : "/";
+
+logo: BASE + "images/roosters-logo.png"
 
         dataURL: "https://script.google.com/macros/s/AKfycbxyBta6YQTkJsfd1uInNAsv1DJofq22D365FgGSUa6ZTLXCaYu29KAuJp1_vgH56zfk/exec",
         submitURL: "https://script.google.com/macros/s/AKfycbxyBta6YQTkJsfd1uInNAsv1DJofq22D365FgGSUa6ZTLXCaYu29KAuJp1_vgH56zfk/exec"
