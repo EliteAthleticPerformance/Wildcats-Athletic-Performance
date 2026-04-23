@@ -9,20 +9,23 @@
 
 <title>Elite Athletic Performance System</title>
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/Elite-Athletic-Performance/styles.css">
 
 </head>
 
 <body>
 
-<!-- ===== HEADER ===== -->
+<!-- HEADER -->
 <div id="header-placeholder"></div>
-<script src="js/header.js"></script>
 
-<!-- ===== MAIN ===== -->
+<!-- 🔥 CORRECT LOAD ORDER -->
+<script src="/Elite-Athletic-Performance/js/themeLoader.js"></script>
+<script src="/Elite-Athletic-Performance/js/header.js"></script>
+
+<!-- MAIN -->
 <main>
 
-  <!-- ===== HERO ===== -->
+  <!-- HERO -->
   <section class="section" style="text-align:center;">
     <h1 class="hero-title">Track. Compete. Improve.</h1>
     <p style="color: var(--muted); margin-top:10px;">
@@ -30,12 +33,12 @@
     </p>
   </section>
 
-  <!-- ===== PRIMARY ACTION ===== -->
+  <!-- PRIMARY ACTION -->
   <section class="section" style="text-align:center;">
     <a id="enterBtn" class="btn">➕ Enter Test</a>
   </section>
 
-  <!-- ===== QUICK STATS ===== -->
+  <!-- QUICK STATS -->
   <section class="section">
     <div class="grid-2">
 
@@ -54,29 +57,29 @@
     </div>
   </section>
 
-  <!-- ===== DASHBOARD ===== -->
+  <!-- DASHBOARD -->
   <section class="section">
     <div class="grid grid-auto">
 
-      <a class="card" href="timer.html">
+      <a class="card" id="timerLink">
         <div class="card-icon">⏱️</div>
         <h2>Training Timer</h2>
         <p>4 Quadrant Weight Room Timer</p>
       </a>
 
-      <a class="card" href="testing.html">
+      <a class="card" id="testingLink">
         <div class="card-icon">📋</div>
         <h2>Combine Testing</h2>
         <p>Record and Analyze Results</p>
       </a>
 
-      <a class="card" href="athletes.html">
+      <a class="card" id="athletesLink">
         <div class="card-icon">🧑</div>
         <h2>Athlete Profiles</h2>
         <p>View Performance Ratings</p>
       </a>
 
-      <a class="card" href="leaderboard.html">
+      <a class="card" id="leaderboardLink">
         <div class="card-icon">🏆</div>
         <h2>Leaderboard</h2>
         <p>Athlete Rankings</p>
@@ -87,60 +90,55 @@
 
 </main>
 
-<!-- ===== SCRIPTS ===== -->
+<!-- DATA -->
+<script src="/Elite-Athletic-Performance/js/dataLoader.js"></script>
 
-<script src="js/themeLoader.js"></script>
-<script src="js/dataLoader.js"></script>
-
-<!-- ===== ENTER BUTTON LINK (SAFE + CONSISTENT) ===== -->
+<!-- 🔗 LINK HANDLING (KEEP SCHOOL PARAM) -->
 <script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  let school = params.get("school");
+(async function () {
+  await window.APP_READY;
 
-  // ✅ consistent with themeLoader/header
-  if (!school) {
-    school = sessionStorage.getItem("school");
+  const school = sessionStorage.getItem("school");
+
+  const base = window.location.pathname.includes("/Elite-Athletic-Performance/")
+    ? "/Elite-Athletic-Performance/"
+    : "/";
+
+  function build(path) {
+    return school ? `${base}${path}?school=${school}` : `${base}${path}`;
   }
 
-  const btn = document.getElementById("enterBtn");
+  document.getElementById("enterBtn").href = build("enter.html");
 
-  if (!btn) return;
-
-  btn.href = school
-    ? `enter.html?school=${school}`
-    : "enter.html";
+  document.getElementById("timerLink").href = build("timer.html");
+  document.getElementById("testingLink").href = build("testing.html");
+  document.getElementById("athletesLink").href = build("athletes.html");
+  document.getElementById("leaderboardLink").href = build("leaderboard.html");
 })();
 </script>
 
-<!-- ===== LIVE STATS (SAFE + BULLETPROOF) ===== -->
+<!-- 📊 LIVE STATS (FIXED) -->
 <script>
 (async function () {
   try {
-
-    if (typeof loadAthleteData !== "function") {
-      throw new Error("dataLoader not ready");
-    }
+    await window.APP_READY;
 
     const data = await loadAthleteData();
 
-    // ✅ total tests
     document.getElementById("totalTests").textContent =
       Array.isArray(data) ? data.length : 0;
 
-    // ✅ unique athletes (clean + safe)
-    const validNames = (data || [])
-      .map(d => d.name)
-      .filter(n => n && n.trim() !== "");
-
-    const unique = new Set(validNames);
+    const unique = new Set(
+      (data || [])
+        .map(d => d.name)
+        .filter(n => n && n.trim() !== "")
+    );
 
     document.getElementById("totalAthletes").textContent = unique.size;
 
   } catch (err) {
     console.warn("Stats load failed:", err);
 
-    // fallback UI
     document.getElementById("totalTests").textContent = "0";
     document.getElementById("totalAthletes").textContent = "0";
   }
