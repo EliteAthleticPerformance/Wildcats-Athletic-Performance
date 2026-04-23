@@ -7,135 +7,151 @@
 
 <link id="dynamicFavicon" rel="icon" type="image/png">
 
-<title>Enter Performance</title>
+<title>Athlete History</title>
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/Elite-Athletic-Performance/styles.css">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
 
 <!-- HEADER -->
 <div id="header-placeholder"></div>
-<script src="js/header.js"></script>
 
-<main class="section" style="text-align:center;">
+<!-- 🔥 LOAD ORDER -->
+<script src="/Elite-Athletic-Performance/js/themeLoader.js"></script>
+<script src="/Elite-Athletic-Performance/js/header.js"></script>
 
-<h1 class="school-name"></h1>
-<h2>Enter Athlete Performance</h2>
+<main>
 
-<div class="form">
+<section class="section" style="text-align:center;">
+  <h1 id="historyTitle">Athlete History</h1>
+</section>
 
-<input id="name" placeholder="Last, First (ex: Maxwell, Brent)">
-
-<h3>Strength</h3>
-<input id="bench" placeholder="Bench">
-<input id="squat" placeholder="Squat">
-<input id="situps" placeholder="Sit-ups">
-
-<h3>Power</h3>
-<input id="clean" placeholder="Clean">
-<input id="medball" placeholder="Med Ball Toss">
-
-<h3>Speed</h3>
-<input id="ten" placeholder="10 yd">
-<input id="forty" placeholder="40 yd">
-
-<h3>Explosive</h3>
-<input id="vertical" placeholder="Vertical">
-<input id="broad" placeholder="Broad">
-<input id="agility" placeholder="Pro Agility">
-
-<br><br>
-
-<button id="submitBtn">Submit Performance</button>
-
-</div>
-
-<p id="status" style="margin-top:15px;"></p>
+<section class="section">
+  <div id="historyContainer"></div>
+</section>
 
 </main>
 
-<!-- 🔥 CONFIG -->
-<script src="js/themeLoader.js"></script>
+<!-- DATA + LOGIC -->
+<script src="/Elite-Athletic-Performance/js/dataLoader.js"></script>
 
 <script>
+/* ========================================
+   INIT
+======================================== */
 
-/* ================= WAIT FOR CONFIG ================= */
+document.addEventListener("headerLoaded", init);
 
-async function waitForConfig() {
-  let attempts = 0;
+async function init() {
+  try {
+    await window.APP_READY;
 
-  while (!window.SCHOOL_CONFIG && attempts < 50) {
-    await new Promise(r => setTimeout(r, 50));
-    attempts++;
-  }
+    const data = await loadAthleteData();
 
-  if (!window.SCHOOL_CONFIG) {
-    throw new Error("SCHOOL_CONFIG not ready");
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get("name");
+
+    if (name) {
+      renderSingle(name, data);
+    } else {
+      renderAll(data);
+    }
+
+  } catch (err) {
+    console.error(err);
+    showError("Failed to load history");
   }
 }
 
-/* ================= SUBMIT ================= */
+/* ========================================
+   SINGLE ATHLETE
+======================================== */
 
-async function submitAthleteData(data) {
+function renderSingle(name, data) {
+  const container = document.getElementById("historyContainer");
 
-  const url = window.SCHOOL_CONFIG.submitURL;
+  const history = data
+    .filter(a => a.name === name)
+    .sort((a,b)=>new Date(a.date)-new Date(b.date));
 
-  if (!url) {
-    document.getElementById("status").textContent = "❌ No submit URL configured";
+  if (!history.length) {
+    container.innerHTML = `<p>No data found</p>`;
     return;
   }
 
-  try {
-    await fetch(url, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams(data)
-    });
+  document.getElementById("historyTitle").textContent = name;
 
-    document.getElementById("status").textContent = "✅ Submitted successfully!";
+  container.innerHTML = `
+    <div class="card">
+      <canvas id="chart" height="120"></canvas>
+    </div>
+  `;
 
-    document.querySelectorAll("input").forEach(i => i.value = "");
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById("status").textContent = "❌ Submission failed";
-  }
+  renderChart(history);
 }
 
-/* ================= CLICK HANDLER ================= */
+/* ========================================
+   ALL ATHLETES
+======================================== */
 
-document.getElementById("submitBtn").addEventListener("click", async () => {
+function renderAll(data) {
+  const container = document.getElementById("historyContainer");
 
-  try {
-    await waitForConfig();
+  const names = [...new Set(data.map(a => a.name))];
 
-    const data = {
-      name: document.getElementById("name").value,
-      bench: document.getElementById("bench").value,
-      squat: document.getElementById("squat").value,
-      situps: document.getElementById("situps").value,
-      clean: document.getElementById("clean").value,
-      medball: document.getElementById("medball").value,
-      ten: document.getElementById("ten").value,
-      forty: document.getElementById("forty").value,
-      vertical: document.getElementById("vertical").value,
-      broad: document.getElementById("broad").value,
-      agility: document.getElementById("agility").value
-    };
+  container.innerHTML = names.map(n => `
+    <div class="card" onclick="goTo('${n}')">
+      ${n}
+    </div>
+  `).join("");
+}
 
-    submitAthleteData(data);
+/* ========================================
+   CHART
+======================================== */
 
-  } catch (err) {
-    console.error(err);
-    document.getElementById("status").textContent = "❌ System not ready";
-  }
+function renderChart(history) {
+  const ctx = document.getElementById("chart");
 
-});
+  if (!ctx || typeof Chart === "undefined") return;
 
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: history.map(a => a.date),
+      datasets: [{
+        label: "Score",
+        data: history.map(a => a.score),
+        tension: 0.3
+      }]
+    }
+  });
+}
+
+/* ========================================
+   NAV
+======================================== */
+
+function goTo(name) {
+  const school = new URLSearchParams(window.location.search).get("school");
+
+  window.location.href = school
+    ? `history.html?name=${encodeURIComponent(name)}&school=${school}`
+    : `history.html?name=${encodeURIComponent(name)}`;
+}
+
+/* ========================================
+   ERROR
+======================================== */
+
+function showError(msg) {
+  document.getElementById("historyContainer").innerHTML = `<p>${msg}</p>`;
+}
 </script>
 
 </body>
