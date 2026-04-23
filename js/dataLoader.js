@@ -1,16 +1,20 @@
 // ========================================
-// 🔥 ELITE V8 DATA LOADER (CLEAN + STABLE)
+// 🔥 ELITE V9 DATA LOADER (CACHED + BULLETPROOF)
 // ========================================
 
-let APP_DATA = [];
+let APP_DATA = null;
 
 /* ========================================
    MAIN LOAD FUNCTION
 ======================================== */
 
-async function loadAthleteData() {
+async function loadAthleteData(forceRefresh = false) {
   try {
-    // ✅ Wait for config (NEW SYSTEM)
+    // ✅ RETURN CACHE (BIG PERFORMANCE WIN)
+    if (APP_DATA && !forceRefresh) {
+      return APP_DATA;
+    }
+
     const config = await window.APP_READY;
 
     if (!config || !config.dataURL) {
@@ -22,20 +26,31 @@ async function loadAthleteData() {
     console.log("📡 Loading data from:", url);
 
     const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error("Network response failed");
+    }
+
     const data = await res.json();
 
-    if (!data || !data.length) {
+    if (!Array.isArray(data) || !data.length) {
       console.warn("⚠️ No data returned");
-      return [];
+      APP_DATA = [];
+      return APP_DATA;
     }
 
     console.log("🧪 RAW SAMPLE:", data[0]);
 
     // ========================================
-    // 🔥 NORMALIZE HEADERS (SAFE)
+    // 🔥 HEADER MAP (SAFE + DEBUG)
     // ========================================
 
-    const keyMap = buildKeyMap(data[0]);
+    const firstValidRow = data.find(r => Object.keys(r).length > 0) || {};
+    const keyMap = buildKeyMap(firstValidRow);
+
+    // 🔍 DEBUG MISSING KEYS
+    checkKey(keyMap, "studentathlete");
+    checkKey(keyMap, "testdate");
 
     APP_DATA = data
       .map(row => ({
@@ -67,7 +82,7 @@ async function loadAthleteData() {
         // 🔁 CORE
         situps: num(row[keyMap.situps]),
 
-        // 📊 SCORE (SMART FALLBACK)
+        // 📊 SCORE
         score:
           num(row[keyMap.totalathleticperformancepoints]) ||
           num(row[keyMap["3liftprojectedmaxtotal"]]) ||
@@ -104,7 +119,8 @@ async function loadAthleteData() {
 
   } catch (err) {
     console.error("❌ Data load failed:", err);
-    return [];
+    APP_DATA = [];
+    return APP_DATA;
   }
 }
 
@@ -126,6 +142,16 @@ function buildKeyMap(sampleRow) {
   });
 
   return map;
+}
+
+/* ========================================
+   🔍 DEBUG KEY CHECK (NEW)
+======================================== */
+
+function checkKey(map, key) {
+  if (!map[key]) {
+    console.warn(`⚠️ Missing column: ${key}`);
+  }
 }
 
 /* ========================================
