@@ -5,25 +5,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- 🔖 FAVICON (handled by themeLoader.js) -->
 <link id="dynamicFavicon" rel="icon" type="image/png">
 
 <title>Combine Testing</title>
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/Elite-Athletic-Performance/styles.css">
 
 </head>
 
 <body>
 
-<!-- ===== HEADER ===== -->
+<!-- HEADER -->
 <div id="header-placeholder"></div>
-<script src="js/header.js"></script>
 
-<!-- ===== MAIN ===== -->
+<!-- 🔥 CORRECT LOAD ORDER -->
+<script src="/Elite-Athletic-Performance/js/themeLoader.js"></script>
+<script src="/Elite-Athletic-Performance/js/header.js"></script>
+
 <main>
 
-  <!-- PAGE TITLE -->
+  <!-- TITLE -->
   <section class="section">
     <h1 class="leaderboard-title">📋 Combine Testing Results</h1>
   </section>
@@ -40,9 +41,9 @@
       id="searchInput" 
       class="search"
       placeholder="Search athlete name..."
-      onkeyup="filterTable()"
+      oninput="filterTable()"
+      autocomplete="off"
     >
-          >
   </section>
 
   <!-- TABLE -->
@@ -77,40 +78,51 @@
             </tr>
           </thead>
 
-          <tbody>
-            <!-- JS injects rows -->
-          </tbody>
+          <tbody></tbody>
 
         </table>
 
       </div>
     </div>
 
-    <!-- MOBILE CARDS -->
+    <!-- MOBILE -->
     <div id="mobileCards" class="mobile-cards"></div>
 
   </section>
 
 </main>
 
-<!-- ===== SCRIPTS ===== -->
+<!-- DATA -->
+<script src="/Elite-Athletic-Performance/js/dataLoader.js"></script>
 
-<script src="./js/themeLoader.js"></script>
-<script src="js/dataLoader.js"></script>
-<script src="js/testing.js"></script>
+<!-- 🔥 SAFE LOAD OF PAGE LOGIC -->
+<script>
+document.addEventListener("headerLoaded", async () => {
+  try {
+    await window.APP_READY;
 
-<!-- ===== SCHOOL PARAM SAFETY ===== -->
+    const script = document.createElement("script");
+    script.src = "/Elite-Athletic-Performance/js/testing.js";
+    document.body.appendChild(script);
+
+  } catch (err) {
+    console.error("❌ Testing page failed to init:", err);
+  }
+});
+</script>
+
+<!-- SCHOOL PARAM (CONSISTENT) -->
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
   let school = params.get("school");
 
   if (!school) {
-    school = localStorage.getItem("school");
+    school = sessionStorage.getItem("school");
   }
 
   if (school) {
-    localStorage.setItem("school", school);
+    sessionStorage.setItem("school", school);
   }
 })();
 </script>
