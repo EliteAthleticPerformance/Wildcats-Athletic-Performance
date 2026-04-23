@@ -1,12 +1,12 @@
 // ========================================
-// 🔥 ATHLETES LIST (FINAL - BACKUP UI + NEW ENGINE)
+// 🔥 ATHLETES LIST (POLISHED PRODUCTION)
 // ========================================
 
 let athletes = [];
 let currentLetter = "ALL";
 
 /* ========================================
-   INIT (LOCKED TO APP_READY)
+   INIT
 ======================================== */
 
 document.addEventListener("headerLoaded", async () => {
@@ -43,7 +43,7 @@ document.addEventListener("headerLoaded", async () => {
 });
 
 /* ========================================
-   🔥 TAG SYSTEM (RESTORED)
+   TAG SYSTEM
 ======================================== */
 
 function getTag(score) {
@@ -63,10 +63,10 @@ function applyFilters() {
 
   let filtered = athletes;
 
-  // LETTER FILTER
+  // LETTER FILTER (SAFE NAME HANDLING)
   if (currentLetter !== "ALL") {
     filtered = filtered.filter(a => {
-      const last = a.name.split(",")[0].trim().toUpperCase();
+      const last = getLastName(a.name);
       return last.startsWith(currentLetter);
     });
   }
@@ -82,7 +82,7 @@ function applyFilters() {
 }
 
 /* ========================================
-   RENDER (BACKUP STYLE)
+   RENDER
 ======================================== */
 
 function render(list) {
@@ -90,6 +90,16 @@ function render(list) {
   if (!grid) return;
 
   grid.innerHTML = "";
+
+  // ✅ EMPTY STATE
+  if (!list.length) {
+    grid.innerHTML = `
+      <div style="text-align:center; opacity:0.7;">
+        No athletes found
+      </div>
+    `;
+    return;
+  }
 
   const fragment = document.createDocumentFragment();
 
@@ -118,7 +128,7 @@ function render(list) {
 }
 
 /* ========================================
-   🔤 A-Z WITH COUNTS (RESTORED)
+   A-Z WITH COUNTS
 ======================================== */
 
 function renderAlphabet() {
@@ -129,7 +139,7 @@ function renderAlphabet() {
   const counts = {};
 
   athletes.forEach(a => {
-    const last = (a.name.split(",")[0] || "").trim().toUpperCase()[0];
+    const last = getLastName(a.name)[0];
     counts[last] = (counts[last] || 0) + 1;
   });
 
@@ -184,8 +194,15 @@ function filterAthletes() {
 }
 
 /* ========================================
-   NAME FORMAT (CLEANER UI)
+   NAME HELPERS (🔥 FIX)
 ======================================== */
+
+function getLastName(name) {
+  if (name.includes(",")) {
+    return name.split(",")[0].trim().toUpperCase();
+  }
+  return name.split(" ").slice(-1)[0].toUpperCase();
+}
 
 function formatName(name) {
   if (!name.includes(",")) return name;
