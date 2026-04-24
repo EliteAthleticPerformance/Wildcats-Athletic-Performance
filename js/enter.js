@@ -150,6 +150,8 @@ async function submitToGoogle(entry, url) {
   try {
     console.log("🚀 POSTING TO URL:", url);
     console.log("📦 DATA BEING SENT:", entry);
+     // 👇 ADD THIS LINE RIGHT HERE
+    console.log("🚨 FINAL URL USED IN FETCH:", url);
 
     const res = await fetch(url, {
       method: "POST",
