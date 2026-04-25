@@ -753,9 +753,45 @@ text-shadow:
 
 #radarChart {
   width: 100% !important;
-  max-width: 1000px;   /* ⬆️ was ~700 */
+  max-width: 1200px;   /* ⬆️ was ~700 */
   height: 400px !important; /* ⬆️ increase height */
   margin: 0 auto;
+}
+
+/* 🔥 PROGRESS CHART FIX */
+#progressChart {
+  width: 100% !important;
+  height: 400px !important; /* ⬅️ smaller, stable */
+  max-height: 400px;
+   margin: 0 auto;
+}
+
+.progress-toggles {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.progress-toggles button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.progress-toggles button.active {
+  box-shadow: 0 0 8px var(--accent);
+  border-color: var(--accent);
+}
+
+.progress-toggles button:not(.active) {
+  opacity: 0.4;
 }
 
 /* ========================================
@@ -1207,69 +1243,6 @@ KEY (IDENTIFIER)
   margin-top: 5px;
 }
 
-.progress-toggles {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-}
-
-.progress-toggles button {
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  color: #fff;
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.2s ease;
-}
-
-.progress-toggles button.active {
-  box-shadow: 0 0 8px var(--accent);
-  border-color: var(--accent);
-}
-
-.progress-toggles button:not(.active) {
-  opacity: 0.4;
-}
-
-/* 🔥 PROGRESS CHART FIX */
-#progressChart {
-  width: 100% !important;
-  height: 220px !important; /* ⬅️ smaller, stable */
-  max-height: 220px;
-}
-
-
-
-:root {
-  --chart-height: 350px; /* 🔥 single source of truth */
-}
-
-/* 🔥 MATCH CARD WIDTH */
-.chart-card {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-/* 🔥 SAME HEIGHT FOR BOTH */
-.chart-wrapper {
-  position: relative;
-  height: var(--chart-height);
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 🔥 FORCE CANVAS TO FILL WRAPPER */
-#radarChart,
-#progressChart {
-  width: 100% !important;
-  height: 100% !important;
-}
 
 
 /* ========================================
