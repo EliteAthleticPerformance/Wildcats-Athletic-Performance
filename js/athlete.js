@@ -70,6 +70,7 @@ function renderAthlete(name) {
   set("forty", fmt2(latest.forty));
 
   renderRadar(latest, null);
+  renderInsights(latest); // ✅ ADD THIS LINE
   initProgressToggles(history);
   renderProgress(history);
 
@@ -300,14 +301,6 @@ function renderTable(history) {
 
 /* ========================================
    🧠 AI INSIGHTS
-======================================== */
-
-/* ========================================
-   🧠 AI INSIGHTS (WITH AUTO ICONS)
-======================================== */
-
-/* ========================================
-   🧠 AI INSIGHTS (WITH TAGS + ICONS)
 ======================================== */
 
 function renderInsights(a) {
