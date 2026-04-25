@@ -127,16 +127,39 @@ function renderRadar(a) {
           a.powerPoints || 0,
           a.explosivePoints || 0,
           a.speedPoints || 0
-        ]
+        ],
+        borderWidth: 2
       }]
     },
     options: {
+      plugins: {
+        legend: {
+          labels: {
+            font: {
+              size: 16 // 🔥 bigger legend text
+            }
+          }
+        }
+      },
       scales: {
         r: {
-          suggestedMin: 0,
-          suggestedMax: 100,
+          min: 0,
+          max: 100, // ✅ reduced from 120 → 100
           ticks: {
-            stepSize: 20
+            stepSize: 10,
+            backdropColor: "transparent",
+            font: {
+              size: 14 // 🔥 bigger numbers
+            }
+          },
+          pointLabels: {
+            font: {
+              size: 16, // 🔥 bigger axis labels
+              weight: "bold"
+            }
+          },
+          grid: {
+            circular: true
           }
         }
       }
