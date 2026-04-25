@@ -55,45 +55,52 @@
     </div>
   </section>
 
-  <!-- ===== RADAR CHART + COMPARISON ===== -->
+  <!-- ===== PERFORMANCE PROFILE ===== -->
   <section class="section">
-    <div class="card" style="text-align:center;">
+    <div class="card chart-card" style="text-align:center;">
       
       <h2 style="margin-bottom:10px;">Performance Profile</h2>
 
-      <!-- 🔥 BUTTON-BASED COMPARISON -->
       <div style="margin-bottom: 10px; font-size: 14px; color: #aaa;">
-  Compare To:
-</div>
+        Compare To:
+      </div>
 
-<div id="comparisonButtons" class="comparison-buttons">
-  <button data-type="none" class="active" onclick="setComparison('none')">None</button>
-  <button data-type="top5" onclick="setComparison('top5')">Top 5</button>
-  <button data-type="team" onclick="setComparison('team')">Team</button>
-  <button data-type="weight" onclick="setComparison('weight')">Weight</button>
-  <button data-type="grade" onclick="setComparison('grade')">Grade</button>
-</div>
+      <div id="comparisonButtons" class="comparison-buttons">
+        <button data-type="none" class="active" onclick="setComparison('none')">None</button>
+        <button data-type="top5" onclick="setComparison('top5')">Top 5</button>
+        <button data-type="team" onclick="setComparison('team')">Team</button>
+        <button data-type="weight" onclick="setComparison('weight')">Weight</button>
+        <button data-type="grade" onclick="setComparison('grade')">Grade</button>
+      </div>
 
-      <canvas id="radarChart" height="250"></canvas>
+      <div class="chart-wrapper">
+        <canvas id="radarChart"></canvas>
+      </div>
 
     </div>
   </section>
 
-
-  <div id="progressToggles" class="progress-toggles">
-  <button data-key="strengthPoints" class="active">Strength</button>
-  <button data-key="speedPoints" class="active">Speed</button>
-  <button data-key="explosivePoints" class="active">Explosive</button>
-  <button data-key="powerPoints" class="active">Power</button>
-  <button data-key="score" class="active">Overall</button>
-</div>
-
-  
   <!-- ===== PROGRESS CHART ===== -->
   <section class="section">
-    <div class="card">
-      <h2 style="text-align:center; margin-bottom:15px;">Progress Over Time</h2>
-      <canvas id="progressChart" height="120"></canvas>
+    <div class="card chart-card">
+      
+      <h2 style="text-align:center; margin-bottom:10px;">
+        Progress Over Time
+      </h2>
+
+      <!-- 🔥 TOGGLES (NOW INSIDE CARD) -->
+      <div id="progressToggles" class="progress-toggles">
+        <button data-key="strengthPoints" class="active">Strength</button>
+        <button data-key="speedPoints" class="active">Speed</button>
+        <button data-key="explosivePoints" class="active">Explosive</button>
+        <button data-key="powerPoints" class="active">Power</button>
+        <button data-key="score" class="active">Overall</button>
+      </div>
+
+      <div class="chart-wrapper">
+        <canvas id="progressChart"></canvas>
+      </div>
+
     </div>
   </section>
 
@@ -101,7 +108,9 @@
   <section class="section">
     <div class="card">
 
-      <h2 style="text-align:center; margin-bottom:15px;">Testing History</h2>
+      <h2 style="text-align:center; margin-bottom:15px;">
+        Testing History
+      </h2>
 
       <div class="table-wrapper">
         <table id="historyTable" class="table">
