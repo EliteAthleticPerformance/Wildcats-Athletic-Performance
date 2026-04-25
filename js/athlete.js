@@ -302,15 +302,19 @@ function renderTable(history) {
    🧠 AI INSIGHTS
 ======================================== */
 
+/* ========================================
+   🧠 AI INSIGHTS (WITH AUTO ICONS)
+======================================== */
+
 function renderInsights(a) {
   const container = document.getElementById("insightsGrid");
   if (!container) return;
 
   const categories = [
-    { key: "strengthPoints", label: "Strength" },
-    { key: "powerPoints", label: "Power" },
-    { key: "explosivePoints", label: "Explosive" },
-    { key: "speedPoints", label: "Speed" }
+    { key: "strengthPoints", label: "Strength", icon: "💪" },
+    { key: "powerPoints", label: "Power", icon: "🏋️" },
+    { key: "explosivePoints", label: "Explosive", icon: "💥" },
+    { key: "speedPoints", label: "Speed", icon: "⚡" }
   ];
 
   // Sort high → low
@@ -321,19 +325,19 @@ function renderInsights(a) {
   const strengths = sorted.slice(0, 2);
   const weaknesses = sorted.slice(-2);
 
-  // Athlete type
-  let type = "Balanced Athlete";
-  if (sorted[0].key === "speedPoints") type = "Speed-Dominant Athlete";
-  if (sorted[0].key === "strengthPoints") type = "Strength-Dominant Athlete";
-  if (sorted[0].key === "powerPoints") type = "Power Athlete";
-  if (sorted[0].key === "explosivePoints") type = "Explosive Athlete";
+  // 🧬 Athlete Type
+  let type = "Balanced Athlete 🧠";
+  if (sorted[0].key === "speedPoints") type = "Speed-Dominant Athlete ⚡";
+  if (sorted[0].key === "strengthPoints") type = "Strength-Dominant Athlete 💪";
+  if (sorted[0].key === "powerPoints") type = "Power Athlete 🏋️";
+  if (sorted[0].key === "explosivePoints") type = "Explosive Athlete 💥";
 
-  // Recommendations
+  // 📈 Recommendations
   const recommendations = weaknesses.map(w => {
-    if (w.key === "strengthPoints") return "Increase max strength (bench/squat focus)";
-    if (w.key === "speedPoints") return "Improve sprint mechanics and acceleration";
-    if (w.key === "explosivePoints") return "Focus on plyometrics and jumping";
-    if (w.key === "powerPoints") return "Develop Olympic lifts and med ball work";
+    if (w.key === "strengthPoints") return "💪 Increase max strength (bench/squat focus)";
+    if (w.key === "speedPoints") return "⚡ Improve sprint mechanics and acceleration";
+    if (w.key === "explosivePoints") return "💥 Focus on plyometrics and jumping";
+    if (w.key === "powerPoints") return "🏋️ Develop Olympic lifts and med ball work";
     return "";
   });
 
@@ -341,14 +345,22 @@ function renderInsights(a) {
     <div class="insight-box">
       <h3>🔥 Strengths</h3>
       <ul>
-        ${strengths.map(s => `<li class="positive">✔ ${s.label}</li>`).join("")}
+        ${strengths.map(s => `
+          <li class="positive">
+            ${s.icon} ${s.label}
+          </li>
+        `).join("")}
       </ul>
     </div>
 
     <div class="insight-box">
       <h3>⚠️ Needs Work</h3>
       <ul>
-        ${weaknesses.map(w => `<li class="negative">✖ ${w.label}</li>`).join("")}
+        ${weaknesses.map(w => `
+          <li class="negative">
+            ${w.icon} ${w.label}
+          </li>
+        `).join("")}
       </ul>
     </div>
 
@@ -360,7 +372,9 @@ function renderInsights(a) {
     <div class="insight-box">
       <h3>📈 Recommendations</h3>
       <ul>
-        ${recommendations.map(r => `<li class="neutral">→ ${r}</li>`).join("")}
+        ${recommendations.map(r => `
+          <li class="neutral">${r}</li>
+        `).join("")}
       </ul>
     </div>
   `;
