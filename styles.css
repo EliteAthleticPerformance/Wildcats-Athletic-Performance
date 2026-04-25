@@ -40,7 +40,7 @@ h1, h2, h3 {
 /* ===== LAYOUT ===== */
 main {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1500px; /* ⬆️ slightly wider */
   margin: 0 auto;
   padding: 20px;
 }
@@ -51,25 +51,25 @@ main {
 }
 
 /* ========================================
-🔥 COMPARISON BUTTONS (NEW)
+🔥 COMPARISON BUTTONS
 ======================================== */
 
 #comparisonButtons {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 25px;
 }
 
 #comparisonButtons button {
-  padding: 8px 14px;
+  padding: 10px 16px; /* ⬆️ bigger */
   border-radius: 8px;
   border: 1px solid var(--border);
   background: #111;
   color: white;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   transition: all 0.2s ease;
 }
 
@@ -80,24 +80,24 @@ main {
 
 #comparisonButtons button.active {
   background: var(--primary);
-  box-shadow: 0 0 12px var(--primaryLight);
+  box-shadow: 0 0 14px var(--primaryLight);
 }
 
 /* ========================================
-🔥 CARD
+🔥 CARD (SCALED FOR CHART)
 ======================================== */
 
 .card {
   background: linear-gradient(145deg, #141414, #2a2a2a);
   border-radius: 16px;
-  padding: 20px 40px 40px;
+  padding: 30px 60px 60px; /* ⬆️ more space */
   box-shadow:
     0 10px 30px rgba(0,0,0,0.6),
-    0 0 15px var(--primaryLight);
+    0 0 18px var(--primaryLight);
 }
 
 /* ========================================
-🔥 ATHLETE STATS GRID (FIXED)
+🔥 ATHLETE STATS GRID
 ======================================== */
 
 .athlete-stats {
@@ -210,8 +210,8 @@ input {
 
 #radarChart {
   width: 100% !important;
-  max-width: 1200px;   /* ⬆️ increased */
-  height: 520px !important; /* ⬆️ increased */
+  max-width: 1000px;   /* ⬆️ 1.5x bigger */
+  height: 420px !important; /* ⬆️ bigger */
   margin: 0 auto;
 }
 
@@ -270,4 +270,5 @@ input {
     font-size: 12px;
     padding: 6px 10px;
   }
-}
+
+ 
