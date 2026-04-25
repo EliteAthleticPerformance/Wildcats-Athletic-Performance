@@ -1,5 +1,5 @@
 // ========================================
-// 🔥 ATHLETE PROFILE (FINAL + INSIGHTS)
+// 🔥 ATHLETE PROFILE (STABLE FINAL)
 // ========================================
 
 let DATA = [];
@@ -7,6 +7,7 @@ let radarChart = null;
 let progressChart = null;
 let CURRENT_ATHLETE = null;
 let CURRENT_COMPARISON = "none";
+
 let ACTIVE_PROGRESS_KEYS = new Set([
   "strengthPoints",
   "speedPoints",
@@ -14,10 +15,6 @@ let ACTIVE_PROGRESS_KEYS = new Set([
   "powerPoints",
   "score"
 ]);
-
-/* ========================================
-   INIT
-======================================== */
 
 document.addEventListener("headerLoaded", init);
 
@@ -50,20 +47,15 @@ function renderAthlete(name) {
     .filter(a => a.name === name)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  if (!history.length) {
-    return showError("No data found for " + name);
-  }
+  if (!history.length) return showError("No data found");
 
   const latest = history[history.length - 1];
   CURRENT_ATHLETE = latest;
 
-  // HEADER
   document.getElementById("athleteName").textContent = formatName(name);
 
-  // RANKING
   applyRanking(name, latest.score);
 
-  // STATS
   set("bench", latest.bench);
   set("squat", latest.squat);
   set("clean", latest.clean);
@@ -77,17 +69,15 @@ function renderAthlete(name) {
   set("tenyard", fmt2(latest.ten));
   set("forty", fmt2(latest.forty));
 
-  // CHARTS
   renderRadar(latest, null);
-initProgressToggles(history);   // 🔥 ADD THIS
-renderProgress(history);
+  initProgressToggles(history);
+  renderProgress(history);
 
-  // TABLE
   renderTable(history);
 }
 
 /* ========================================
-   🏆 RANK + PERCENTILE
+   RANKING
 ======================================== */
 
 function applyRanking(name, score) {
@@ -100,11 +90,8 @@ function applyRanking(name, score) {
     })
     .sort((a, b) => b.score - a.score);
 
-  const index = scores.findIndex(a => a.name === name);
-
-  const rank = index + 1;
+  const rank = scores.findIndex(a => a.name === name) + 1;
   const total = scores.length;
-
   const percentile = Math.round((1 - rank / total) * 100);
 
   set("rank", `Rank: #${rank} of ${total}`);
@@ -112,7 +99,27 @@ function applyRanking(name, score) {
 }
 
 /* ========================================
-   🧠 COMPARISON ENGINE
+   COMPARISON BUTTONS
+======================================== */
+
+function setComparison(type) {
+  if (CURRENT_COMPARISON === type) return;
+
+  CURRENT_COMPARISON = type;
+
+  document.querySelectorAll("#comparisonButtons button")
+    .forEach(btn => btn.classList.remove("active"));
+
+  document.querySelector(
+    `#comparisonButtons button[data-type="${type}"]`
+  )?.classList.add("active");
+
+  const comparison = getComparisonData(type, CURRENT_ATHLETE);
+  renderRadar(CURRENT_ATHLETE, comparison);
+}
+
+/* ========================================
+   COMPARISON DATA
 ======================================== */
 
 function getComparisonData(type, athlete) {
@@ -120,25 +127,14 @@ function getComparisonData(type, athlete) {
 
   let group = [];
 
-  switch (type) {
-    case "top5":
-      group = [...DATA].sort((a, b) => b.score - a.score).slice(0, 5);
-      break;
-    case "team":
-      group = DATA;
-      break;
-    case "weight":
-      group = DATA.filter(a => a.weightClass === athlete.weightClass);
-      break;
-    case "grade":
-      group = DATA.filter(a => a.grade === athlete.grade);
-      break;
-  }
+  if (type === "top5") group = [...DATA].sort((a,b)=>b.score-a.score).slice(0,5);
+  if (type === "team") group = DATA;
+  if (type === "weight") group = DATA.filter(a => a.weightClass === athlete.weightClass);
+  if (type === "grade") group = DATA.filter(a => a.grade === athlete.grade);
 
   if (!group.length) return null;
 
-  const avg = (key) =>
-    group.reduce((sum, a) => sum + (a[key] || 0), 0) / group.length;
+  const avg = k => group.reduce((s,a)=>s+(a[k]||0),0)/group.length;
 
   return {
     strengthPoints: avg("strengthPoints"),
@@ -149,89 +145,26 @@ function getComparisonData(type, athlete) {
 }
 
 /* ========================================
-🔥 BUTTON HANDLER (STABLE + EXACT MATCH)
-======================================== */
-
-function setComparison(type) {
-  // ✅ Prevent unnecessary re-renders
-  if (CURRENT_COMPARISON === type) return;
-
-  CURRENT_COMPARISON = type;
-
-  const buttons = document.querySelectorAll("#comparisonButtons button");
-
-  // 🔥 Clear all active states
-  buttons.forEach(btn => btn.classList.remove("active"));
-
-  // 🔥 Activate correct button (NO text matching)
-  const activeBtn = document.querySelector(
-    `#comparisonButtons button[data-type="${type}"]`
-  );
-
-  if (activeBtn) {
-    activeBtn.classList.add("active");
-  }
-
-  // 🔥 Get comparison + update chart
-  const comparison = getComparisonData(type, CURRENT_ATHLETE);
-
-  renderRadar(CURRENT_ATHLETE, comparison);
-}
-
-/* ========================================
-   📊 INSIGHTS
-======================================== */
-
-function renderInsights(a, c) {
-  const container = document.getElementById("comparisonSummary");
-  if (!container || !c) {
-    if (container) container.innerHTML = "";
-    return;
-  }
-
-  const diff = (k) => Math.round((a[k] || 0) - (c[k] || 0));
-
-  container.innerHTML = `
-    <div style="margin-top:15px; font-size:16px;">
-      Strength: ${formatDiff(diff("strengthPoints"))} |
-      Power: ${formatDiff(diff("powerPoints"))} |
-      Explosive: ${formatDiff(diff("explosivePoints"))} |
-      Speed: ${formatDiff(diff("speedPoints"))}
-    </div>
-  `;
-}
-
-function formatDiff(val) {
-  if (val > 0) return `<span style="color:#22c55e">+${val}</span>`;
-  if (val < 0) return `<span style="color:#ef4444">${val}</span>`;
-  return `<span style="color:#aaa">0</span>`;
-}
-
-/* ========================================
    RADAR
 ======================================== */
 
-function renderRadar(a, comparison = null) {
+function renderRadar(a, comparison=null) {
   const ctx = document.getElementById("radarChart");
-  if (!ctx || typeof Chart === "undefined") return;
+  if (!ctx) return;
 
   if (radarChart) radarChart.destroy();
 
-  const labels = ["Strength", "Power", "Explosive", "Speed"];
-
-  const datasets = [
-    {
-      label: "Athlete",
-      data: [
-        a.strengthPoints || 0,
-        a.powerPoints || 0,
-        a.explosivePoints || 0,
-        a.speedPoints || 0
-      ],
-      borderWidth: 2,
-      backgroundColor: "rgba(54,162,235,0.3)"
-    }
-  ];
+  const datasets = [{
+    label: "Athlete",
+    data: [
+      a.strengthPoints,
+      a.powerPoints,
+      a.explosivePoints,
+      a.speedPoints
+    ],
+    borderWidth: 2,
+    backgroundColor: "rgba(54,162,235,0.3)"
+  }];
 
   if (comparison) {
     datasets.push({
@@ -242,160 +175,98 @@ function renderRadar(a, comparison = null) {
         comparison.explosivePoints,
         comparison.speedPoints
       ],
-      borderWidth: 2,
       borderDash: [6,6],
-      backgroundColor: "rgba(255,99,132,0.2)",
-      borderColor: "#ff4d6d"
+      borderColor: "#ff4d6d",
+      backgroundColor: "rgba(255,99,132,0.2)"
     });
   }
 
   radarChart = new Chart(ctx, {
     type: "radar",
-    data: { labels, datasets },
+    data: {
+      labels: ["Strength","Power","Explosive","Speed"],
+      datasets
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: { color: "#fff", font: { size: 16 } }
-        }
-      },
       scales: {
-        r: {
-          min: 0,
-          max: 100,
-          grid: { color: "rgba(255,255,255,0.15)" },
-          angleLines: { color: "rgba(255,255,255,0.2)" },
-          ticks: {
-            backdropColor: "transparent",
-            color: "#aaa"
-          },
-          pointLabels: {
-            color: "#fff",
-            font: { size: 16, weight: "bold" }
-          }
-        }
+        r: { min: 0, max: 100 }
       }
     }
   });
-
-  renderInsights(a, comparison);
 }
 
 /* ========================================
-   PROGRESS CHART
+   PROGRESS CHART (FIXED)
 ======================================== */
 
 function renderProgress(history) {
   const ctx = document.getElementById("progressChart");
-  if (!ctx || typeof Chart === "undefined") return;
+  if (!ctx) return;
 
-  if (progressChart) {
-  progressChart.data = {
-    labels,
-    datasets
-  };
-  progressChart.update();
-  return;
-}
+  const sorted = [...history].sort((a,b)=>new Date(a.date)-new Date(b.date));
 
-  // ✅ Sort by date
-  const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const labels = sorted.map(a => a.date);
 
-  // 🔥 CONFIG MAP (clean + scalable)
-  const DATASETS = {
-    strengthPoints: {
-      label: "Strength",
-      color: "#ff4d4d"
-    },
-    speedPoints: {
-      label: "Speed",
-      color: "#4da6ff"
-    },
-    explosivePoints: {
-      label: "Explosive",
-      color: "#4dff88"
-    },
-    powerPoints: {
-      label: "Power",
-      color: "#b366ff"
-    },
-    score: {
-      label: "Overall",
-      color: "#ffffff"
-    }
+  const CONFIG = {
+    strengthPoints: ["Strength", "#ff4d4d"],
+    speedPoints: ["Speed", "#4da6ff"],
+    explosivePoints: ["Explosive", "#4dff88"],
+    powerPoints: ["Power", "#b366ff"],
+    score: ["Overall", "#ffffff"]
   };
 
-  // 🔥 BUILD DATASETS BASED ON ACTIVE TOGGLES
-  const datasets = Object.keys(DATASETS)
-    .filter(key => ACTIVE_PROGRESS_KEYS.has(key))
-    .map(key => ({
-      label: DATASETS[key].label,
-      data: sorted.map(a => a[key]),
-      borderColor: DATASETS[key].color,
-      backgroundColor: DATASETS[key].color + "22",
+  const datasets = Object.keys(CONFIG)
+    .filter(k => ACTIVE_PROGRESS_KEYS.has(k))
+    .map(k => ({
+      label: CONFIG[k][0],
+      data: sorted.map(a => a[k]),
+      borderColor: CONFIG[k][1],
       tension: 0.3,
-      borderWidth: key === "score" ? 3 : 2,
       pointRadius: 3
     }));
 
+  // ✅ UPDATE (no flicker)
+  if (progressChart) {
+    progressChart.data.labels = labels;
+    progressChart.data.datasets = datasets;
+    progressChart.update();
+    return;
+  }
+
   progressChart = new Chart(ctx, {
     type: "line",
-    data: {
-      labels: sorted.map(a => a.date),
-      datasets
-    },
-
+    data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: false,
-
-      plugins: {
-        legend: {
-          labels: {
-            color: "#fff",
-            font: { size: 12 }
-          }
-        }
-      },
-
-      scales: {
-        x: {
-          ticks: { color: "#aaa" },
-          grid: { color: "rgba(255,255,255,0.05)" }
-        },
-        y: {
-          ticks: { color: "#aaa" },
-          grid: { color: "rgba(255,255,255,0.05)" }
-        }
-      }
+      animation: false
     }
   });
 }
 
+/* ========================================
+   TOGGLES
+======================================== */
+
 function initProgressToggles(history) {
-  const buttons = document.querySelectorAll("#progressToggles button");
+  document.querySelectorAll("#progressToggles button")
+    .forEach(btn => {
+      btn.onclick = () => {
+        const key = btn.dataset.key;
 
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const key = btn.dataset.key;
+        if (ACTIVE_PROGRESS_KEYS.has(key)) {
+          ACTIVE_PROGRESS_KEYS.delete(key);
+          btn.classList.remove("active");
+        } else {
+          ACTIVE_PROGRESS_KEYS.add(key);
+          btn.classList.add("active");
+        }
 
-      if (ACTIVE_PROGRESS_KEYS.has(key)) {
-        ACTIVE_PROGRESS_KEYS.delete(key);
-        btn.classList.remove("active");
-      } else {
-        ACTIVE_PROGRESS_KEYS.add(key);
-        btn.classList.add("active");
-      }
-
-      clearTimeout(window.__chartTimeout);
-
-window.__chartTimeout = setTimeout(() => {
-  renderProgress(history);
-}, 50);
+        renderProgress(history);
+      };
     });
-  });
 }
 
 /* ========================================
@@ -406,8 +277,7 @@ function renderTable(history) {
   const tbody = document.querySelector("#historyTable tbody");
   if (!tbody) return;
 
-  // ✅ SAFE SORT (LOCAL — DOES NOT MUTATE ORIGINAL)
-  const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const sorted = [...history].sort((a,b)=>new Date(a.date)-new Date(b.date));
 
   tbody.innerHTML = sorted.map(h => `
     <tr>
@@ -415,7 +285,7 @@ function renderTable(history) {
       <td>${h.bench}</td>
       <td>${h.squat}</td>
       <td>${h.clean}</td>
-      <td>${avg(h.bench, h.squat, h.clean)}</td>
+      <td>${avg(h.bench,h.squat,h.clean)}</td>
       <td>${h.vertical}</td>
       <td>${fmt2(h.broad)}</td>
       <td>${fmt2(h.med)}</td>
@@ -432,28 +302,16 @@ function renderTable(history) {
    HELPERS
 ======================================== */
 
-function fmt2(val) {
-  if (!val && val !== 0) return "-";
-  return Number(val).toFixed(2);
-}
+function fmt2(v){ return v || v===0 ? Number(v).toFixed(2) : "-"; }
+function set(id,v){ document.getElementById(id).textContent = v || "-"; }
+function avg(a,b,c){ const v=[a,b,c].filter(x=>x>0); return v.length?Math.round(v.reduce((x,y)=>x+y)/v.length):"-"; }
 
-function set(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val || "-";
-}
-
-function avg(a,b,c){
-  const vals=[a,b,c].filter(v=>v>0);
-  if(!vals.length) return "-";
-  return Math.round(vals.reduce((x,y)=>x+y,0)/vals.length);
-}
-
-function formatName(name) {
+function formatName(name){
   if (!name.includes(",")) return name;
-  const [last, first] = name.split(",");
-  return `${first.trim()} ${last.trim()}`;
+  const [l,f]=name.split(",");
+  return f.trim()+" "+l.trim();
 }
 
-function showError(msg) {
+function showError(msg){
   document.body.innerHTML = `<p style="text-align:center;">${msg}</p>`;
 }
