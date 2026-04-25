@@ -1242,13 +1242,10 @@ KEY (IDENTIFIER)
   max-height: 220px;
 }
 
-.chart-card {
-  max-width: 900px;
-  margin: 0 auto;
-}
+
 
 :root {
-  --chart-height: 260px; /* 🔥 single source of truth */
+  --chart-height: 350px; /* 🔥 single source of truth */
 }
 
 /* 🔥 MATCH CARD WIDTH */
