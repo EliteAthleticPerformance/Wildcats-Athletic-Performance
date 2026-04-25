@@ -67,11 +67,11 @@
 </div>
 
 <div id="comparisonButtons" class="comparison-buttons">
-  <button onclick="setComparison('none')" class="active">None</button>
-  <button onclick="setComparison('top5')">Top 5</button>
-  <button onclick="setComparison('team')">Team</button>
-  <button onclick="setComparison('weight')">Weight</button>
-  <button onclick="setComparison('grade')">Grade</button>
+  <button data-type="none" class="active" onclick="setComparison('none')">None</button>
+  <button data-type="top5" onclick="setComparison('top5')">Top 5</button>
+  <button data-type="team" onclick="setComparison('team')">Team</button>
+  <button data-type="weight" onclick="setComparison('weight')">Weight</button>
+  <button data-type="grade" onclick="setComparison('grade')">Grade</button>
 </div>
 
       <canvas id="radarChart" height="250"></canvas>
