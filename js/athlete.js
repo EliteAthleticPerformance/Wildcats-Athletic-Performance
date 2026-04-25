@@ -236,30 +236,44 @@ function renderRadar(a, comparison = null) {
     type: "radar",
     data: { labels, datasets },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: { color: "#fff", font: { size: 16 } }
-        }
-      },
-      scales: {
-        r: {
-          min: 0,
-          max: 100,
-          grid: { color: "rgba(255,255,255,0.15)" },
-          angleLines: { color: "rgba(255,255,255,0.2)" },
-          ticks: {
-            backdropColor: "transparent",
-            color: "#aaa"
-          },
-          pointLabels: {
-            color: "#fff",
-            font: { size: 16, weight: "bold" }
-          }
-        }
+  responsive: true,
+  maintainAspectRatio: false, // 🔥 REQUIRED
+
+  plugins: {
+    legend: {
+      labels: {
+        color: "#fff",
+        font: { size: 18 } // ⬆️ bigger legend
       }
     }
+  },
+
+  scales: {
+    r: {
+      min: 0,
+      max: 100,
+
+      grid: {
+        color: "rgba(255,255,255,0.2)" // ⬆️ stronger lines
+      },
+
+      angleLines: {
+        color: "rgba(255,255,255,0.25)"
+      },
+
+      ticks: {
+        backdropColor: "transparent",
+        color: "#bbb",
+        font: { size: 14 } // ⬆️ bigger tick labels
+      },
+
+      pointLabels: {
+        color: "#fff",
+        font: { size: 18, weight: "bold" } // ⬆️ bigger axis labels
+      }
+    }
+  }
+}
   });
 
   renderInsights(a, comparison);
