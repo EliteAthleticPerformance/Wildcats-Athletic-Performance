@@ -62,13 +62,17 @@
       <h2 style="margin-bottom:10px;">Performance Profile</h2>
 
       <!-- 🔥 BUTTON-BASED COMPARISON -->
-      <div id="comparisonButtons" class="comparison-buttons">
-        <button onclick="setComparison('none')" class="active">None</button>
-        <button onclick="setComparison('top5')">Top 5</button>
-        <button onclick="setComparison('team')">Team</button>
-        <button onclick="setComparison('weight')">Weight</button>
-        <button onclick="setComparison('grade')">Grade</button>
-      </div>
+      <div style="margin-bottom: 10px; font-size: 14px; color: #aaa;">
+  Compare To:
+</div>
+
+<div id="comparisonButtons" class="comparison-buttons">
+  <button onclick="setComparison('none')" class="active">None</button>
+  <button onclick="setComparison('top5')">Top 5</button>
+  <button onclick="setComparison('team')">Team</button>
+  <button onclick="setComparison('weight')">Weight</button>
+  <button onclick="setComparison('grade')">Grade</button>
+</div>
 
       <canvas id="radarChart" height="250"></canvas>
 
