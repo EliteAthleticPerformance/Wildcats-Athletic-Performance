@@ -1,5 +1,5 @@
 // ========================================
-// 🔥 ATHLETE PROFILE (FINAL + BUTTON COMPARISON)
+// 🔥 ATHLETE PROFILE (FINAL + INSIGHTS)
 // ========================================
 
 let DATA = [];
@@ -49,8 +49,6 @@ function renderAthlete(name) {
 
   const latest = history[history.length - 1];
   CURRENT_ATHLETE = latest;
-
-  console.log("ATHLETE DATA:", latest);
 
   // HEADER
   document.getElementById("athleteName").textContent = formatName(name);
@@ -118,15 +116,12 @@ function getComparisonData(type, athlete) {
     case "top5":
       group = [...DATA].sort((a, b) => b.score - a.score).slice(0, 5);
       break;
-
     case "team":
       group = DATA;
       break;
-
     case "weight":
       group = DATA.filter(a => a.weightClass === athlete.weightClass);
       break;
-
     case "grade":
       group = DATA.filter(a => a.grade === athlete.grade);
       break;
@@ -152,20 +147,11 @@ function getComparisonData(type, athlete) {
 function setComparison(type) {
   CURRENT_COMPARISON = type;
 
-  // Update active button UI
   const buttons = document.querySelectorAll("#comparisonButtons button");
   buttons.forEach(btn => btn.classList.remove("active"));
 
-  const labelMap = {
-    none: "none",
-    top5: "top 5",
-    team: "team",
-    weight: "weight",
-    grade: "grade"
-  };
-
   buttons.forEach(btn => {
-    if (btn.textContent.toLowerCase().includes(labelMap[type])) {
+    if (btn.textContent.toLowerCase().includes(type === "none" ? "none" : type)) {
       btn.classList.add("active");
     }
   });
@@ -176,7 +162,36 @@ function setComparison(type) {
 }
 
 /* ========================================
-   RADAR (WITH COMPARISON)
+   📊 INSIGHTS
+======================================== */
+
+function renderInsights(a, c) {
+  const container = document.getElementById("comparisonSummary");
+  if (!container || !c) {
+    if (container) container.innerHTML = "";
+    return;
+  }
+
+  const diff = (k) => Math.round((a[k] || 0) - (c[k] || 0));
+
+  container.innerHTML = `
+    <div style="margin-top:15px; font-size:16px;">
+      Strength: ${formatDiff(diff("strengthPoints"))} |
+      Power: ${formatDiff(diff("powerPoints"))} |
+      Explosive: ${formatDiff(diff("explosivePoints"))} |
+      Speed: ${formatDiff(diff("speedPoints"))}
+    </div>
+  `;
+}
+
+function formatDiff(val) {
+  if (val > 0) return `<span style="color:#22c55e">+${val}</span>`;
+  if (val < 0) return `<span style="color:#ef4444">${val}</span>`;
+  return `<span style="color:#aaa">0</span>`;
+}
+
+/* ========================================
+   RADAR
 ======================================== */
 
 function renderRadar(a, comparison = null) {
@@ -196,7 +211,8 @@ function renderRadar(a, comparison = null) {
         a.explosivePoints || 0,
         a.speedPoints || 0
       ],
-      borderWidth: 2
+      borderWidth: 2,
+      backgroundColor: "rgba(54,162,235,0.3)"
     }
   ];
 
@@ -210,7 +226,9 @@ function renderRadar(a, comparison = null) {
         comparison.speedPoints
       ],
       borderWidth: 2,
-      borderDash: [6, 6]
+      borderDash: [6,6],
+      backgroundColor: "rgba(255,99,132,0.2)",
+      borderColor: "#ff4d6d"
     });
   }
 
@@ -218,27 +236,33 @@ function renderRadar(a, comparison = null) {
     type: "radar",
     data: { labels, datasets },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
-          labels: { font: { size: 16 } }
+          labels: { color: "#fff", font: { size: 16 } }
         }
       },
       scales: {
         r: {
           min: 0,
           max: 100,
+          grid: { color: "rgba(255,255,255,0.15)" },
+          angleLines: { color: "rgba(255,255,255,0.2)" },
           ticks: {
-            stepSize: 10,
             backdropColor: "transparent",
-            font: { size: 14 }
+            color: "#aaa"
           },
           pointLabels: {
+            color: "#fff",
             font: { size: 16, weight: "bold" }
           }
         }
       }
     }
   });
+
+  renderInsights(a, comparison);
 }
 
 /* ========================================
@@ -296,10 +320,8 @@ function renderTable(history) {
 ======================================== */
 
 function fmt2(val) {
-  if (val === null || val === undefined || val === "") return "-";
-  const num = Number(val);
-  if (isNaN(num)) return val;
-  return num.toFixed(2);
+  if (!val && val !== 0) return "-";
+  return Number(val).toFixed(2);
 }
 
 function set(id, val) {
