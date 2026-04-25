@@ -290,10 +290,17 @@ function renderProgress(history) {
   const ctx = document.getElementById("progressChart");
   if (!ctx || typeof Chart === "undefined") return;
 
-  if (progressChart) progressChart.destroy();
+  if (progressChart) {
+  progressChart.data = {
+    labels,
+    datasets
+  };
+  progressChart.update();
+  return;
+}
 
   // ✅ Sort by date
-  history.sort((a, b) => new Date(a.date) - new Date(b.date));
+  const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
 
   // 🔥 CONFIG MAP (clean + scalable)
   const DATASETS = {
@@ -324,7 +331,7 @@ function renderProgress(history) {
     .filter(key => ACTIVE_PROGRESS_KEYS.has(key))
     .map(key => ({
       label: DATASETS[key].label,
-      data: history.map(a => a[key]),
+      data: sorted.map(a => a[key]),
       borderColor: DATASETS[key].color,
       backgroundColor: DATASETS[key].color + "22",
       tension: 0.3,
@@ -335,7 +342,7 @@ function renderProgress(history) {
   progressChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: history.map(a => a.date),
+      labels: sorted.map(a => a.date),
       datasets
     },
 
@@ -382,7 +389,11 @@ function initProgressToggles(history) {
         btn.classList.add("active");
       }
 
-      renderProgress(history);
+      clearTimeout(window.__chartTimeout);
+
+window.__chartTimeout = setTimeout(() => {
+  renderProgress(history);
+}, 50);
     });
   });
 }
@@ -395,7 +406,7 @@ function renderTable(history) {
   const tbody = document.querySelector("#historyTable tbody");
   if (!tbody) return;
 
-  tbody.innerHTML = history.map(h => `
+  tbody.innerHTML = sorted.map(h => `
     <tr>
       <td>${h.date}</td>
       <td>${h.bench}</td>
