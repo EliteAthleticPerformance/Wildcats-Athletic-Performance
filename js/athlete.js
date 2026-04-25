@@ -141,21 +141,30 @@ function getComparisonData(type, athlete) {
 }
 
 /* ========================================
-   🔥 BUTTON HANDLER
+🔥 BUTTON HANDLER (STABLE + EXACT MATCH)
 ======================================== */
 
 function setComparison(type) {
+  // ✅ Prevent unnecessary re-renders
+  if (CURRENT_COMPARISON === type) return;
+
   CURRENT_COMPARISON = type;
 
   const buttons = document.querySelectorAll("#comparisonButtons button");
+
+  // 🔥 Clear all active states
   buttons.forEach(btn => btn.classList.remove("active"));
 
-  buttons.forEach(btn => {
-    if (btn.textContent.toLowerCase().includes(type === "none" ? "none" : type)) {
-      btn.classList.add("active");
-    }
-  });
+  // 🔥 Activate correct button (NO text matching)
+  const activeBtn = document.querySelector(
+    `#comparisonButtons button[data-type="${type}"]`
+  );
 
+  if (activeBtn) {
+    activeBtn.classList.add("active");
+  }
+
+  // 🔥 Get comparison + update chart
   const comparison = getComparisonData(type, CURRENT_ATHLETE);
 
   renderRadar(CURRENT_ATHLETE, comparison);
