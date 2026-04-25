@@ -43,7 +43,6 @@ async function loadAthleteData() {
         for (let k of keys) {
           const normalized = normalizeKey(k);
 
-          // ✅ Exact normalized match
           if (keyMap[normalized]) {
             const realKey = keyMap[normalized];
             if (row[realKey] !== undefined && row[realKey] !== "") {
@@ -65,7 +64,7 @@ async function loadAthleteData() {
         weight: num(get("Actual Weight")),
         weightClass: clean(get("Weight Group")),
 
-        // 🏋️ STRENGTH (LOCKED HEADERS)
+        // 🏋️ STRENGTH
         bench: num(get("Bench Press")),
         squat: num(get("Squat")),
         clean: num(get("Hang Clean")),
@@ -114,6 +113,9 @@ async function loadAthleteData() {
         a.powerPoints > 0
       )
     );
+
+    // ✅ CORRECT PLACE FOR DEBUG
+    console.log("🔥 FINAL TRANSFORMED DATA SAMPLE:", APP_DATA[0]);
 
     console.log("✅ DATA READY:", APP_DATA.length);
     return APP_DATA;
