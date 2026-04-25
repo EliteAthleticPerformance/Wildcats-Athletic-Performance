@@ -1,12 +1,10 @@
 // ========================================
-// 🔥 ATHLETE PROFILE (FINAL + INSIGHTS)
+// 🔥 ATHLETE PROFILE (ELITE VERSION - FINAL)
 // ========================================
 
 let DATA = [];
 let radarChart = null;
 let progressChart = null;
-let CURRENT_ATHLETE = null;
-let CURRENT_COMPARISON = "none";
 
 /* ========================================
    INIT
@@ -48,7 +46,7 @@ function renderAthlete(name) {
   }
 
   const latest = history[history.length - 1];
-  CURRENT_ATHLETE = latest;
+  console.log("ATHLETE DATA:", latest);
 
   // HEADER
   document.getElementById("athleteName").textContent = formatName(name);
@@ -71,7 +69,7 @@ function renderAthlete(name) {
   set("forty", fmt2(latest.forty));
 
   // CHARTS
-  renderRadar(latest, null);
+  renderRadar(latest);
   renderProgress(history);
 
   // TABLE
@@ -104,179 +102,60 @@ function applyRanking(name, score) {
 }
 
 /* ========================================
-   🧠 COMPARISON ENGINE
+   RADAR (CATEGORY SCORES ONLY)
 ======================================== */
 
-function getComparisonData(type, athlete) {
-  if (!type || type === "none") return null;
-
-  let group = [];
-
-  switch (type) {
-    case "top5":
-      group = [...DATA].sort((a, b) => b.score - a.score).slice(0, 5);
-      break;
-    case "team":
-      group = DATA;
-      break;
-    case "weight":
-      group = DATA.filter(a => a.weightClass === athlete.weightClass);
-      break;
-    case "grade":
-      group = DATA.filter(a => a.grade === athlete.grade);
-      break;
-  }
-
-  if (!group.length) return null;
-
-  const avg = (key) =>
-    group.reduce((sum, a) => sum + (a[key] || 0), 0) / group.length;
-
-  return {
-    strengthPoints: avg("strengthPoints"),
-    powerPoints: avg("powerPoints"),
-    explosivePoints: avg("explosivePoints"),
-    speedPoints: avg("speedPoints")
-  };
-}
-
-/* ========================================
-   🔥 BUTTON HANDLER
-======================================== */
-
-function setComparison(type) {
-  CURRENT_COMPARISON = type;
-
-  const buttons = document.querySelectorAll("#comparisonButtons button");
-  buttons.forEach(btn => btn.classList.remove("active"));
-
-  buttons.forEach(btn => {
-    if (btn.textContent.toLowerCase().includes(type === "none" ? "none" : type)) {
-      btn.classList.add("active");
-    }
-  });
-
-  const comparison = getComparisonData(type, CURRENT_ATHLETE);
-
-  renderRadar(CURRENT_ATHLETE, comparison);
-}
-
-/* ========================================
-   📊 INSIGHTS
-======================================== */
-
-function renderInsights(a, c) {
-  const container = document.getElementById("comparisonSummary");
-  if (!container || !c) {
-    if (container) container.innerHTML = "";
-    return;
-  }
-
-  const diff = (k) => Math.round((a[k] || 0) - (c[k] || 0));
-
-  container.innerHTML = `
-    <div style="margin-top:15px; font-size:16px;">
-      Strength: ${formatDiff(diff("strengthPoints"))} |
-      Power: ${formatDiff(diff("powerPoints"))} |
-      Explosive: ${formatDiff(diff("explosivePoints"))} |
-      Speed: ${formatDiff(diff("speedPoints"))}
-    </div>
-  `;
-}
-
-function formatDiff(val) {
-  if (val > 0) return `<span style="color:#22c55e">+${val}</span>`;
-  if (val < 0) return `<span style="color:#ef4444">${val}</span>`;
-  return `<span style="color:#aaa">0</span>`;
-}
-
-/* ========================================
-   RADAR
-======================================== */
-
-function renderRadar(a, comparison = null) {
+function renderRadar(a) {
   const ctx = document.getElementById("radarChart");
   if (!ctx || typeof Chart === "undefined") return;
 
   if (radarChart) radarChart.destroy();
 
-  const labels = ["Strength", "Power", "Explosive", "Speed"];
-
-  const datasets = [
-    {
-      label: "Athlete",
-      data: [
-        a.strengthPoints || 0,
-        a.powerPoints || 0,
-        a.explosivePoints || 0,
-        a.speedPoints || 0
-      ],
-      borderWidth: 2,
-      backgroundColor: "rgba(54,162,235,0.3)"
-    }
-  ];
-
-  if (comparison) {
-    datasets.push({
-      label: "Comparison",
-      data: [
-        comparison.strengthPoints,
-        comparison.powerPoints,
-        comparison.explosivePoints,
-        comparison.speedPoints
-      ],
-      borderWidth: 2,
-      borderDash: [6,6],
-      backgroundColor: "rgba(255,99,132,0.2)",
-      borderColor: "#ff4d6d"
-    });
-  }
-
   radarChart = new Chart(ctx, {
     type: "radar",
-    data: { labels, datasets },
+    data: {
+      labels: ["Strength", "Power", "Explosive", "Speed"],
+      datasets: [{
+        label: "Category Scores",
+        data: [
+          a.strengthPoints || 0,
+          a.powerPoints || 0,
+          a.explosivePoints || 0,
+          a.speedPoints || 0
+        ],
+        borderWidth: 2
+      }]
+    },
     options: {
-  responsive: true,
-  maintainAspectRatio: false, // 🔥 REQUIRED
-
-  plugins: {
-    legend: {
-      labels: {
-        color: "#fff",
-        font: { size: 18 } // ⬆️ bigger legend
+      plugins: {
+        legend: {
+          labels: {
+            font: { size: 16 }
+          }
+        }
+      },
+      scales: {
+        r: {
+          min: 0,
+          max: 100,
+          ticks: {
+            stepSize: 10,
+            backdropColor: "transparent",
+            font: { size: 14 }
+          },
+          pointLabels: {
+            font: {
+              size: 16,
+              weight: "bold"
+            }
+          },
+          grid: {
+            circular: true
+          }
+        }
       }
     }
-  },
-
-  scales: {
-    r: {
-      min: 0,
-      max: 100,
-
-      grid: {
-        color: "rgba(255,255,255,0.2)" // ⬆️ stronger lines
-      },
-
-      angleLines: {
-        color: "rgba(255,255,255,0.25)"
-      },
-
-      ticks: {
-        backdropColor: "transparent",
-        color: "#bbb",
-        font: { size: 14 } // ⬆️ bigger tick labels
-      },
-
-      pointLabels: {
-        color: "#fff",
-        font: { size: 18, weight: "bold" } // ⬆️ bigger axis labels
-      }
-    }
-  }
-}
   });
-
-  renderInsights(a, comparison);
 }
 
 /* ========================================
@@ -334,8 +213,10 @@ function renderTable(history) {
 ======================================== */
 
 function fmt2(val) {
-  if (!val && val !== 0) return "-";
-  return Number(val).toFixed(2);
+  if (val === null || val === undefined || val === "") return "-";
+  const num = Number(val);
+  if (isNaN(num)) return val;
+  return num.toFixed(2);
 }
 
 function set(id, val) {
