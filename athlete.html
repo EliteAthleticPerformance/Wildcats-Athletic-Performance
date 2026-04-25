@@ -55,11 +55,36 @@
     </div>
   </section>
 
-  <!-- ===== RADAR CHART ===== -->
+  <!-- ===== RADAR CHART + COMPARISON ===== -->
   <section class="section">
     <div class="card" style="text-align:center;">
-      <h2 style="margin-bottom:15px;">Performance Profile</h2>
+      
+      <h2 style="margin-bottom:10px;">Performance Profile</h2>
+
+      <!-- 🔥 NEW COMPARISON SELECTOR -->
+      <div style="margin-bottom:15px;">
+        <select 
+          id="comparisonSelect" 
+          onchange="updateComparison()" 
+          style="
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: white;
+            border: 1px solid var(--border);
+            font-size: 14px;
+          "
+        >
+          <option value="none">No Comparison</option>
+          <option value="top5">Top 5</option>
+          <option value="team">Team Average</option>
+          <option value="weight">Weight Group</option>
+          <option value="grade">Grade</option>
+        </select>
+      </div>
+
       <canvas id="radarChart" height="250"></canvas>
+
     </div>
   </section>
 
