@@ -759,6 +759,50 @@ text-shadow:
 }
 
 /* ========================================
+🔥 COMPARISON BUTTONS (GLOW ACTIVE)
+======================================== */
+
+.comparison-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.comparison-buttons button {
+  background: #111;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* hover effect */
+.comparison-buttons button:hover {
+  border-color: #8B63B5;
+  box-shadow: 0 0 6px rgba(139, 99, 181, 0.6);
+}
+
+/* 🔥 ACTIVE BUTTON (GLOW) */
+.comparison-buttons button.active {
+  background: #8B63B5;
+  border-color: #8B63B5;
+  color: white;
+
+  box-shadow:
+    0 0 8px rgba(139, 99, 181, 0.8),
+    0 0 16px rgba(139, 99, 181, 0.6),
+    inset 0 0 4px rgba(255,255,255,0.2);
+}
+
+.comparison-buttons {
+  margin-top: 5px;
+}
+
+/* ========================================
 HISTORY / COMPARISON
 ======================================== */
 body {
