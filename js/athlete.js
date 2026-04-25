@@ -1,16 +1,41 @@
-document.addEventListener("headerLoaded", init);
+// ========================================
+// 🔥 ATHLETE PROFILE (FINAL + BUTTON COMPARISON)
+// ========================================
 
 let DATA = [];
+let radarChart = null;
+let progressChart = null;
+let CURRENT_ATHLETE = null;
+let CURRENT_COMPARISON = "none";
+
+/* ========================================
+   INIT
+======================================== */
+
+document.addEventListener("headerLoaded", init);
 
 async function init() {
-  await window.APP_READY;
-  DATA = await loadAthleteData();
+  try {
+    await window.APP_READY;
 
-  const params = new URLSearchParams(window.location.search);
-  const name = params.get("name");
+    DATA = await loadAthleteData();
 
-  renderAthlete(name);
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get("name");
+
+    if (!name) return showError("No athlete selected");
+
+    renderAthlete(name);
+
+  } catch (err) {
+    console.error("❌ Load error:", err);
+    showError("Failed to load athlete");
+  }
 }
+
+/* ========================================
+   MAIN RENDER
+======================================== */
 
 function renderAthlete(name) {
 
@@ -18,67 +43,234 @@ function renderAthlete(name) {
     .filter(a => a.name === name)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  if (!history.length) return;
+  if (!history.length) {
+    return showError("No data found for " + name);
+  }
 
   const latest = history[history.length - 1];
+  CURRENT_ATHLETE = latest;
 
-  document.getElementById("athleteName").textContent = name;
+  console.log("ATHLETE DATA:", latest);
 
+  // HEADER
+  document.getElementById("athleteName").textContent = formatName(name);
+
+  // RANKING
+  applyRanking(name, latest.score);
+
+  // STATS
   set("bench", latest.bench);
   set("squat", latest.squat);
   set("clean", latest.clean);
 
   set("verticalScore", latest.vertical);
-  set("broadScore", latest.broad);
-  set("medballScore", latest.med);
+  set("broadScore", fmt2(latest.broad));
+  set("medballScore", fmt2(latest.med));
 
-  set("proagility", latest.agility);
+  set("proagility", fmt2(latest.agility));
   set("situps", latest.situps);
-  set("tenyard", latest.ten);
-  set("forty", latest.forty);
+  set("tenyard", fmt2(latest.ten));
+  set("forty", fmt2(latest.forty));
 
-  renderRadar(latest);
+  // CHARTS
+  renderRadar(latest, null);
   renderProgress(history);
+
+  // TABLE
   renderTable(history);
 }
 
-function renderRadar(a) {
-  const ctx = document.getElementById("radarChart");
+/* ========================================
+   🏆 RANK + PERCENTILE
+======================================== */
 
-  new Chart(ctx, {
+function applyRanking(name, score) {
+  const scores = [...new Set(DATA.map(a => a.name))]
+    .map(n => {
+      const best = DATA
+        .filter(a => a.name === n)
+        .reduce((max, a) => Math.max(max, a.score || 0), 0);
+      return { name: n, score: best };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  const index = scores.findIndex(a => a.name === name);
+
+  const rank = index + 1;
+  const total = scores.length;
+
+  const percentile = Math.round((1 - rank / total) * 100);
+
+  set("rank", `Rank: #${rank} of ${total}`);
+  set("percentile", `Top ${percentile}%`);
+}
+
+/* ========================================
+   🧠 COMPARISON ENGINE
+======================================== */
+
+function getComparisonData(type, athlete) {
+  if (!type || type === "none") return null;
+
+  let group = [];
+
+  switch (type) {
+    case "top5":
+      group = [...DATA].sort((a, b) => b.score - a.score).slice(0, 5);
+      break;
+
+    case "team":
+      group = DATA;
+      break;
+
+    case "weight":
+      group = DATA.filter(a => a.weightClass === athlete.weightClass);
+      break;
+
+    case "grade":
+      group = DATA.filter(a => a.grade === athlete.grade);
+      break;
+  }
+
+  if (!group.length) return null;
+
+  const avg = (key) =>
+    group.reduce((sum, a) => sum + (a[key] || 0), 0) / group.length;
+
+  return {
+    strengthPoints: avg("strengthPoints"),
+    powerPoints: avg("powerPoints"),
+    explosivePoints: avg("explosivePoints"),
+    speedPoints: avg("speedPoints")
+  };
+}
+
+/* ========================================
+   🔥 BUTTON HANDLER
+======================================== */
+
+function setComparison(type) {
+  CURRENT_COMPARISON = type;
+
+  // Update active button UI
+  const buttons = document.querySelectorAll("#comparisonButtons button");
+  buttons.forEach(btn => btn.classList.remove("active"));
+
+  const labelMap = {
+    none: "none",
+    top5: "top 5",
+    team: "team",
+    weight: "weight",
+    grade: "grade"
+  };
+
+  buttons.forEach(btn => {
+    if (btn.textContent.toLowerCase().includes(labelMap[type])) {
+      btn.classList.add("active");
+    }
+  });
+
+  const comparison = getComparisonData(type, CURRENT_ATHLETE);
+
+  renderRadar(CURRENT_ATHLETE, comparison);
+}
+
+/* ========================================
+   RADAR (WITH COMPARISON)
+======================================== */
+
+function renderRadar(a, comparison = null) {
+  const ctx = document.getElementById("radarChart");
+  if (!ctx || typeof Chart === "undefined") return;
+
+  if (radarChart) radarChart.destroy();
+
+  const labels = ["Strength", "Power", "Explosive", "Speed"];
+
+  const datasets = [
+    {
+      label: "Athlete",
+      data: [
+        a.strengthPoints || 0,
+        a.powerPoints || 0,
+        a.explosivePoints || 0,
+        a.speedPoints || 0
+      ],
+      borderWidth: 2
+    }
+  ];
+
+  if (comparison) {
+    datasets.push({
+      label: "Comparison",
+      data: [
+        comparison.strengthPoints,
+        comparison.powerPoints,
+        comparison.explosivePoints,
+        comparison.speedPoints
+      ],
+      borderWidth: 2,
+      borderDash: [6, 6]
+    });
+  }
+
+  radarChart = new Chart(ctx, {
     type: "radar",
-    data: {
-      labels: ["Strength", "Power", "Explosive", "Speed"],
-      datasets: [{
-        label: "Athlete",
-        data: [
-          a.strengthPoints,
-          a.powerPoints,
-          a.explosivePoints,
-          a.speedPoints
-        ]
-      }]
+    data: { labels, datasets },
+    options: {
+      plugins: {
+        legend: {
+          labels: { font: { size: 16 } }
+        }
+      },
+      scales: {
+        r: {
+          min: 0,
+          max: 100,
+          ticks: {
+            stepSize: 10,
+            backdropColor: "transparent",
+            font: { size: 14 }
+          },
+          pointLabels: {
+            font: { size: 16, weight: "bold" }
+          }
+        }
+      }
     }
   });
 }
 
+/* ========================================
+   PROGRESS CHART
+======================================== */
+
 function renderProgress(history) {
   const ctx = document.getElementById("progressChart");
+  if (!ctx || typeof Chart === "undefined") return;
 
-  new Chart(ctx, {
+  if (progressChart) progressChart.destroy();
+
+  progressChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: history.map(a => a.date),
       datasets: [{
         label: "Score",
-        data: history.map(a => a.score)
+        data: history.map(a => a.score),
+        tension: 0.3
       }]
     }
   });
 }
 
+/* ========================================
+   TABLE
+======================================== */
+
 function renderTable(history) {
   const tbody = document.querySelector("#historyTable tbody");
+  if (!tbody) return;
 
   tbody.innerHTML = history.map(h => `
     <tr>
@@ -86,11 +278,47 @@ function renderTable(history) {
       <td>${h.bench}</td>
       <td>${h.squat}</td>
       <td>${h.clean}</td>
+      <td>${avg(h.bench, h.squat, h.clean)}</td>
+      <td>${h.vertical}</td>
+      <td>${fmt2(h.broad)}</td>
+      <td>${fmt2(h.med)}</td>
+      <td>${fmt2(h.agility)}</td>
+      <td>${h.situps}</td>
+      <td>${fmt2(h.ten)}</td>
+      <td>${fmt2(h.forty)}</td>
       <td>${h.score}</td>
     </tr>
   `).join("");
 }
 
+/* ========================================
+   HELPERS
+======================================== */
+
+function fmt2(val) {
+  if (val === null || val === undefined || val === "") return "-";
+  const num = Number(val);
+  if (isNaN(num)) return val;
+  return num.toFixed(2);
+}
+
 function set(id, val) {
-  document.getElementById(id).textContent = val ?? "-";
+  const el = document.getElementById(id);
+  if (el) el.textContent = val || "-";
+}
+
+function avg(a,b,c){
+  const vals=[a,b,c].filter(v=>v>0);
+  if(!vals.length) return "-";
+  return Math.round(vals.reduce((x,y)=>x+y,0)/vals.length);
+}
+
+function formatName(name) {
+  if (!name.includes(",")) return name;
+  const [last, first] = name.split(",");
+  return `${first.trim()} ${last.trim()}`;
+}
+
+function showError(msg) {
+  document.body.innerHTML = `<p style="text-align:center;">${msg}</p>`;
 }
