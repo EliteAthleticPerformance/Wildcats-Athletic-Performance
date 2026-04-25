@@ -18,14 +18,11 @@
 
 <body>
 
-<!-- ===== HEADER ===== -->
 <div id="header-placeholder"></div>
 
-<!-- 🔥 LOAD ORDER FIXED -->
 <script src="/Elite-Athletic-Performance/js/themeLoader.js"></script>
 <script src="/Elite-Athletic-Performance/js/header.js"></script>
 
-<!-- ===== MAIN ===== -->
 <main>
 
   <!-- TITLE -->
@@ -35,7 +32,7 @@
     <p id="percentile" style="color: var(--muted);"></p>
   </section>
 
-  <!-- ===== STATS ===== -->
+  <!-- STATS -->
   <section class="section">
     <div class="athlete-stats">
 
@@ -55,13 +52,13 @@
     </div>
   </section>
 
-  <!-- ===== PERFORMANCE PROFILE ===== -->
+  <!-- PERFORMANCE PROFILE -->
   <section class="section">
     <div class="card" style="text-align:center;">
       
       <h2 style="margin-bottom:10px;">Performance Profile</h2>
 
-      <div style="margin-bottom: 10px; font-size: 14px; color: #aaa;">
+      <div style="margin-bottom:10px; font-size:14px; color:#aaa;">
         Compare To:
       </div>
 
@@ -75,12 +72,12 @@
 
       <div class="chart-wrapper">
         <canvas id="radarChart" height="250"></canvas>
-      </div> 
+      </div>
 
     </div>
   </section>
 
-  <!-- ===== AI INSIGHTS ===== -->
+  <!-- 🔥 NEW DYNAMIC AI INSIGHTS -->
   <section class="section">
     <div class="card">
 
@@ -88,34 +85,13 @@
         🧠 AI Performance Insights
       </h2>
 
-      <div class="insights-grid">
-
-        <div class="insight-box">
-          <h3>🔥 Strengths</h3>
-          <ul id="insightStrengths"></ul>
-        </div>
-
-        <div class="insight-box">
-          <h3>⚠️ Areas to Improve</h3>
-          <ul id="insightWeaknesses"></ul>
-        </div>
-
-        <div class="insight-box">
-          <h3>🎯 Focus</h3>
-          <p id="insightFocus"></p>
-        </div>
-
-        <div class="insight-box">
-          <h3>📊 Summary</h3>
-          <p id="insightSummary"></p>
-        </div>
-
-      </div>
+      <!-- 🔥 THIS IS THE KEY CHANGE -->
+      <div id="insightsGrid" class="insights-grid"></div>
 
     </div>
   </section>
 
-  <!-- ===== PROGRESS CHART ===== -->
+  <!-- PROGRESS -->
   <section class="section">
     <div class="card">
       
@@ -138,7 +114,7 @@
     </div>
   </section>
 
-  <!-- ===== HISTORY TABLE ===== -->
+  <!-- HISTORY -->
   <section class="section">
     <div class="card">
 
@@ -173,8 +149,6 @@
   </section>
 
 </main>
-
-<!-- ===== DATA + PAGE LOGIC ===== -->
 
 <script src="/Elite-Athletic-Performance/js/dataLoader.js"></script>
 <script src="/Elite-Athletic-Performance/js/athlete.js"></script>
