@@ -306,6 +306,10 @@ function renderTable(history) {
    🧠 AI INSIGHTS (WITH AUTO ICONS)
 ======================================== */
 
+/* ========================================
+   🧠 AI INSIGHTS (WITH TAGS + ICONS)
+======================================== */
+
 function renderInsights(a) {
   const container = document.getElementById("insightsGrid");
   if (!container) return;
@@ -316,6 +320,14 @@ function renderInsights(a) {
     { key: "explosivePoints", label: "Explosive", icon: "💥" },
     { key: "speedPoints", label: "Speed", icon: "⚡" }
   ];
+
+  // 🎯 TAG LOGIC
+  function getTag(score) {
+    if (score >= 85) return { label: "Elite", class: "tag-elite" };
+    if (score >= 70) return { label: "Above Avg", class: "tag-good" };
+    if (score >= 55) return { label: "Average", class: "tag-mid" };
+    return { label: "Needs Work", class: "tag-low" };
+  }
 
   // Sort high → low
   const sorted = [...categories].sort(
@@ -345,22 +357,32 @@ function renderInsights(a) {
     <div class="insight-box">
       <h3>🔥 Strengths</h3>
       <ul>
-        ${strengths.map(s => `
-          <li class="positive">
-            ${s.icon} ${s.label}
-          </li>
-        `).join("")}
+        ${strengths.map(s => {
+          const score = a[s.key] || 0;
+          const tag = getTag(score);
+          return `
+            <li class="positive">
+              ${s.icon} ${s.label}
+              <span class="tag ${tag.class}">${tag.label}</span>
+            </li>
+          `;
+        }).join("")}
       </ul>
     </div>
 
     <div class="insight-box">
       <h3>⚠️ Needs Work</h3>
       <ul>
-        ${weaknesses.map(w => `
-          <li class="negative">
-            ${w.icon} ${w.label}
-          </li>
-        `).join("")}
+        ${weaknesses.map(w => {
+          const score = a[w.key] || 0;
+          const tag = getTag(score);
+          return `
+            <li class="negative">
+              ${w.icon} ${w.label}
+              <span class="tag ${tag.class}">${tag.label}</span>
+            </li>
+          `;
+        }).join("")}
       </ul>
     </div>
 
@@ -372,9 +394,7 @@ function renderInsights(a) {
     <div class="insight-box">
       <h3>📈 Recommendations</h3>
       <ul>
-        ${recommendations.map(r => `
-          <li class="neutral">${r}</li>
-        `).join("")}
+        ${recommendations.map(r => `<li class="neutral">${r}</li>`).join("")}
       </ul>
     </div>
   `;
