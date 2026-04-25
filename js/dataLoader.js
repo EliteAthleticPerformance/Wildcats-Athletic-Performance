@@ -40,18 +40,27 @@ async function loadAthleteData() {
       // 🔒 STRICT + SAFE ACCESSOR
       // ========================================
       const get = (...keys) => {
-        for (let k of keys) {
-          const normalized = normalizeKey(k);
 
-          if (keyMap[normalized]) {
-            const realKey = keyMap[normalized];
-            if (row[realKey] !== undefined && row[realKey] !== "") {
-              return row[realKey];
-            }
-          }
-        }
-        return "";
-      };
+  // ✅ FIRST: try EXACT match (case-sensitive)
+  for (let k of keys) {
+    if (row[k] !== undefined && row[k] !== "") {
+      return row[k];
+    }
+  }
+
+  // ✅ SECOND: fallback to normalized match
+  for (let k of keys) {
+    const normalized = normalizeKey(k);
+    if (keyMap[normalized]) {
+      const realKey = keyMap[normalized];
+      if (row[realKey] !== undefined && row[realKey] !== "") {
+        return row[realKey];
+      }
+    }
+  }
+
+  return "";
+};
 
       return {
 
