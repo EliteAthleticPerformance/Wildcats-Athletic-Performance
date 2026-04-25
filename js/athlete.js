@@ -284,15 +284,89 @@ function renderProgress(history) {
 
   if (progressChart) progressChart.destroy();
 
+  // ✅ Sort by date
+  history.sort((a, b) => new Date(a.date) - new Date(b.date));
+
   progressChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: history.map(a => a.date),
-      datasets: [{
-        label: "Score",
-        data: history.map(a => a.score),
-        tension: 0.3
-      }]
+
+      datasets: [
+
+        // 🔴 Strength
+        {
+          label: "Strength",
+          data: history.map(a => a.strengthPoints),
+          borderColor: "#ff4d4d",
+          backgroundColor: "rgba(255,77,77,0.15)",
+          tension: 0.3
+        },
+
+        // 🔵 Speed
+        {
+          label: "Speed",
+          data: history.map(a => a.speedPoints),
+          borderColor: "#4da6ff",
+          backgroundColor: "rgba(77,166,255,0.15)",
+          tension: 0.3
+        },
+
+        // 🟢 Explosive
+        {
+          label: "Explosive",
+          data: history.map(a => a.explosivePoints),
+          borderColor: "#4dff88",
+          backgroundColor: "rgba(77,255,136,0.15)",
+          tension: 0.3
+        },
+
+        // 🟣 Power
+        {
+          label: "Power",
+          data: history.map(a => a.powerPoints),
+          borderColor: "#b366ff",
+          backgroundColor: "rgba(179,102,255,0.15)",
+          tension: 0.3
+        },
+
+        // ⚪ Overall
+        {
+          label: "Overall",
+          data: history.map(a => a.score),
+          borderColor: "#ffffff",
+          backgroundColor: "rgba(255,255,255,0.15)",
+          borderWidth: 2,
+          tension: 0.3
+        }
+
+      ]
+    },
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+
+      plugins: {
+        legend: {
+          labels: {
+            color: "#fff",
+            font: { size: 12 }
+          }
+        }
+      },
+
+      scales: {
+        x: {
+          ticks: { color: "#aaa" },
+          grid: { color: "rgba(255,255,255,0.05)" }
+        },
+        y: {
+          ticks: { color: "#aaa" },
+          grid: { color: "rgba(255,255,255,0.05)" }
+        }
+      }
     }
   });
 }
