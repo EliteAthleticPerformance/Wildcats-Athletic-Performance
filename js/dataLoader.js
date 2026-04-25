@@ -1,5 +1,5 @@
 // ========================================
-// 🔥 ELITE V11 DATA LOADER (WITH CATEGORY POINTS)
+// 🔥 ELITE V12 DATA LOADER (LOCKED + SAFE)
 // ========================================
 
 let APP_DATA = [];
@@ -31,16 +31,24 @@ async function loadAthleteData() {
     console.log("🧪 RAW SAMPLE:", raw[0]);
 
     const keyMap = buildKeyMap(raw[0]);
-     console.log("KEY MAP:", keyMap);
+    console.log("🔑 KEY MAP:", keyMap);
+    console.log("📋 AVAILABLE HEADERS:", Object.keys(raw[0]));
 
     APP_DATA = raw.map(row => {
 
-      // 🔑 SAFE ACCESSOR
+      // ========================================
+      // 🔒 STRICT + SAFE ACCESSOR
+      // ========================================
       const get = (...keys) => {
         for (let k of keys) {
-          const mapped = keyMap[normalizeKey(k)];
-          if (mapped && row[mapped] !== undefined) {
-            return row[mapped];
+          const normalized = normalizeKey(k);
+
+          // ✅ Exact normalized match
+          if (keyMap[normalized]) {
+            const realKey = keyMap[normalized];
+            if (row[realKey] !== undefined && row[realKey] !== "") {
+              return row[realKey];
+            }
           }
         }
         return "";
@@ -49,62 +57,46 @@ async function loadAthleteData() {
       return {
 
         // 🧍 BASIC
-        name: clean(get("studentathlete", "student athlete", "name")),
-        date: clean(get("testdate", "test date", "date")),
+        name: clean(get("Student-Athlete")),
+        date: clean(get("Test Date")),
 
-        hour: clean(get("hour")),
-        grade: clean(get("grade")),
-        weight: num(get("actualweight", "weight")),
-        weightClass: clean(get("weightgroup", "group")),
+        hour: clean(get("Hour")),
+        grade: clean(get("Grade")),
+        weight: num(get("Actual Weight")),
+        weightClass: clean(get("Weight Group")),
 
-        // 🏋️ STRENGTH
-        bench: num(get("benchpress", "bench")),
-        squat: num(get("squat")),
-        clean: num(get("hangclean", "clean")),
+        // 🏋️ STRENGTH (LOCKED HEADERS)
+        bench: num(get("Bench Press")),
+        squat: num(get("Squat")),
+        clean: num(get("Hang Clean")),
 
         // ⚡ EXPLOSIVE / POWER
-        vertical: num(get("verticaljump", "vertical")),
-        broad: num(get("broadjump", "broad")),
-        med: num(get("medballtoss", "medball", "med")),
+        vertical: num(get("Vertical Jump")),
+        broad: num(get("Broad Jump")),
+        med: num(get("Med Ball Toss")),
 
         // 🏃 SPEED
-        agility: num(get("proagility", "agility")),
-        ten: num(get("10yddash", "10yd", "10")),
-        forty: num(get("40yddash", "40yd", "40")),
+        agility: num(get("Pro Agility")),
+        ten: num(get("10 yd Dash")),
+        forty: num(get("40 yd Dash")),
 
         // 🔁 CORE
-        situps: num(get("situps", "sit-ups", "sit ups")),
+        situps: num(get("Sit-Ups")),
 
-        // 🔥 CATEGORY POINTS (FROM GOOGLE SHEET)
-        // 🔥 CATEGORY SCORES (MATCHES YOUR SHEET EXACTLY)
-strengthPoints: num(get(
-  "strengthscore",
-  "strength score"
-)),
+        // 🔥 CATEGORY SCORES
+        strengthPoints: num(get("Strength Score")),
+        speedPoints: num(get("Speed Score")),
+        explosivePoints: num(get("Explosive Score")),
+        powerPoints: num(get("Power Score")),
 
-speedPoints: num(get(
-  "speedscore",
-  "speed score"
-)),
-
-explosivePoints: num(get(
-  "explosivescore",
-  "explosive score"
-)),
-
-powerPoints: num(get(
-  "powerscore",
-  "power score"
-)),
-
-        // 📊 TOTAL SCORE (PRIMARY SYSTEM)
+        // 📊 TOTAL SCORE
         score:
-          num(get("totalathleticperformancepoints", "score")) ||
-          num(get("3liftprojectedmaxtotal")) ||
+          num(get("Total Athletic Performance Points")) ||
+          num(get("3 Lift Projected Max Total")) ||
           (
-            num(get("benchpress", "bench")) +
-            num(get("squat")) +
-            num(get("hangclean", "clean"))
+            num(get("Bench Press")) +
+            num(get("Squat")) +
+            num(get("Hang Clean"))
           )
       };
     })
@@ -133,7 +125,7 @@ powerPoints: num(get(
 }
 
 /* ========================================
-   🔥 KEY NORMALIZATION
+   🔑 KEY NORMALIZATION
 ======================================== */
 
 function normalizeKey(str) {
@@ -167,4 +159,3 @@ function clean(val) {
   if (!val) return "";
   return String(val).trim();
 }
-
