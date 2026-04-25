@@ -135,23 +135,26 @@ main {
 
 .table {
   width: 100%;
-  max-width: 1600px; /* ⬆️ wider */
+  max-width: 1500px;
   margin: 0 auto;
   border-collapse: collapse;
   background: #111;
-  border-radius: 14px;
+  border-radius: var(--radius);
   overflow: hidden;
-  font-size: 24px; /* ⬆️ bigger text */
+  font-size: 20px;
 }
 
-.table th, 
-.table td {
-  padding: 22px; /* ⬆️ more spacing */
+.table th, .table td {
+  padding: 18px;
   text-align: center;
 }
 
 .table th {
-  font-size: 26px; /* ⬆️ bigger headers */
+  font-size: 22px;
+}
+
+.table tr:nth-child(even) {
+  background: #1a1a1a;
 }
 
 .table tbody tr:hover {
@@ -207,8 +210,8 @@ input {
 
 #radarChart {
   width: 100% !important;
-  max-width: 1200px;   /* ⬆️ increased */
-  height: 520px !important; /* ⬆️ increased */
+  max-width: 1000px;   /* ⬆️ 1.5x bigger */
+  height: 420px !important; /* ⬆️ bigger */
   margin: 0 auto;
 }
 
@@ -268,4 +271,7 @@ input {
     padding: 6px 10px;
   }
 
+  #radarChart {
+    height: 320px !important; /* responsive shrink */
   }
+}
