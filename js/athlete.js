@@ -406,6 +406,9 @@ function renderTable(history) {
   const tbody = document.querySelector("#historyTable tbody");
   if (!tbody) return;
 
+  // ✅ SAFE SORT (LOCAL — DOES NOT MUTATE ORIGINAL)
+  const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+
   tbody.innerHTML = sorted.map(h => `
     <tr>
       <td>${h.date}</td>
