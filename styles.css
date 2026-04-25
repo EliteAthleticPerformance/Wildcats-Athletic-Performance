@@ -839,6 +839,42 @@ text-shadow:
 }
 
 /* ========================================
+🏷️ PERFORMANCE TAGS
+======================================== */
+
+.tag {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* 🟢 Elite */
+.tag-elite {
+  background: rgba(34,197,94,0.2);
+  color: #22c55e;
+}
+
+/* 🔵 Above Avg */
+.tag-good {
+  background: rgba(59,130,246,0.2);
+  color: #3b82f6;
+}
+
+/* 🟡 Average */
+.tag-mid {
+  background: rgba(250,204,21,0.2);
+  color: #facc15;
+}
+
+/* 🔴 Needs Work */
+.tag-low {
+  background: rgba(239,68,68,0.2);
+  color: #ef4444;
+}
+
+/* ========================================
 HISTORY / COMPARISON
 ======================================== */
 body {
