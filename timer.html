@@ -437,18 +437,20 @@ body {
 }
 
 #clock {
-    font-size:clamp(48px, 8vmin, 140px);
+    font-size:clamp(80px, 14vmin, 220px);
     font-weight:900;
-    letter-spacing:2px;
-    font-variant-numeric:tabular-nums;
+    letter-spacing:3px;
+
+    text-shadow:
+        0 0 10px #fff,
+        0 0 25px var(--primaryLight),
+        0 0 50px var(--primaryLight);
 }
 
 #phase {
-    font-size:clamp(14px, 2.2vmin, 36px);
-    font-weight:900;
-    text-align:center;
-    margin-top:0.5vh;
-    white-space:pre-line;
+    font-size:clamp(16px, 2.5vmin, 40px);
+    opacity:0.85;
+    letter-spacing:2px;
 }
 
 .smallPhase { font-size:1.4vh !important; }
