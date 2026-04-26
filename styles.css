@@ -422,7 +422,7 @@ box-shadow: 0 10px 25px var(--primaryLight)
         rgba(40,40,40,0.9)
     );
 
-    min-height: 350px;
+      min-height: 350px;
     border-radius: 16px;
     padding: 20px 40px 40px 40px;
 
@@ -434,6 +434,23 @@ box-shadow: 0 10px 25px var(--primaryLight)
         0 0 15px var(--primaryLight);
 
     transition: all 0.25s ease;
+}
+
+.card:active {
+  transform: scale(0.96);
+}
+
+.card {
+  backdrop-filter: blur(6px);
+}
+
+@keyframes glowPulse {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.2); }
+}
+
+h1 {
+  animation: glowPulse 2s ease-in-out infinite alternate;
 }
 
 .card h2 {
