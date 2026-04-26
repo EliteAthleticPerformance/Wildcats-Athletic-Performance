@@ -26,7 +26,7 @@ async function loadSchoolConfig(school) {
   const base = getBasePath();
 
   // 🔥 YOUR CONFIG ENDPOINT (already deployed)
-  const CONFIG_URL = "https://script.google.com/macros/s/AKfycbykPU_wyN-7WPp4RVvCTY_KCjmg5xp7-lJUttlaxyWG8-CDh4-STDezASiqiRE8oIkm/exec";
+  const CONFIG_URL = "https://script.google.com/macros/s/AKfycbyZPnii9Qf3VdDiTRn1tPt_BOnIv22m2r5n5afnEQ6pNGO2sWO-jQa6MBtJBNfYGyA/exec";
 
   const res = await fetch(CONFIG_URL + "?t=" + Date.now());
   const list = await res.json();
