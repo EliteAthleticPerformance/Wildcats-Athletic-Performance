@@ -1,128 +1,192 @@
-<!DOCTYPE html>
-<html lang="en">
+// ========================================
+// 🔥 ELITE LEADERBOARD (STABLE V1)
+// ========================================
 
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+document.addEventListener("DOMContentLoaded", init);
 
-<link id="dynamicFavicon" rel="icon" type="image/png">
-
-<title>Leaderboard | Elite Athletic Performance</title>
-
-<link rel="stylesheet" href="/Elite-Athletic-Performance/styles.css">
-
-</head>
-
-<body>
-
-<!-- ===== HEADER ===== -->
-<div id="header-placeholder"></div>
-
-<!-- 🔥 CORRECT LOAD ORDER -->
-<script src="/Elite-Athletic-Performance/js/themeLoader.js"></script>
-<script src="/Elite-Athletic-Performance/js/header.js"></script>
-
-<!-- ===== MAIN ===== -->
-<main>
-
-  <!-- TITLE -->
-  <section class="section" style="text-align:center;">
-    <h1 class="leaderboard-title">🏆 Team Leaderboard</h1>
-  </section>
-
-  <!-- ===== PODIUM + KEY ===== -->
-  <section class="section">
-
-    <div class="podium-wrapper">
-      <h2 id="podiumTitle" class="podium-title">Top 3 Athletes</h2>
-      <div id="podium" class="podium-container"></div>
-    </div>
-
-    <div class="leaderboard-card key-card">
-      <div class="key-content">
-        <div class="key-labels">
-          <span class="elite">Elite</span>
-          <span class="above">Above Average</span>
-          <span class="average">Average</span>
-          <span class="needs">Needs Work</span>
-        </div>
-
-        <div class="key-description">
-          Correlation of Athletic Movement Skills Compared to Weight Lifted
-        </div>
-      </div>
-    </div>
-
-    <!-- TABLE GRID -->
-    <div class="leaderboard-grid">
-
-      <!-- LIFTS -->
-      <div class="leaderboard-card">
-        <h2>🏋️ 3 Lift Max Totals</h2>
-
-        <div class="table-scroll">
-          <table id="liftTable" class="leaderboard-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Total</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- SCORES -->
-      <div class="leaderboard-card">
-        <h2>⚡ Athletic Performance Scores</h2>
-
-        <div class="table-scroll">
-          <table id="scoreTable" class="leaderboard-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Score</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- MOBILE -->
-    <div id="mobileLift" class="mobile-cards"></div>
-    <div id="mobileScore" class="mobile-cards"></div>
-
-  </section>
-
-</main>
-
-<!-- ===== DATA + LOGIC ===== -->
-
-<script src="/Elite-Athletic-Performance/js/dataLoader.js"></script>
-
-<script>
-document.addEventListener("headerLoaded", async () => {
+async function init() {
   try {
     await window.APP_READY;
 
-    // 🔥 dynamically load leaderboard AFTER config
-    const script = document.createElement("script");
-    script.src = "/Elite-Athletic-Performance/js/leaderboard.js";
-    document.body.appendChild(script);
+    const data = await loadAthleteData();
+
+    console.log("📊 Leaderboard Data:", data);
+
+    if (!data || !data.length) {
+      renderEmpty();
+      return;
+    }
+
+    const latest = getLatestPerAthlete(data);
+
+    renderLeaderboard(latest);
 
   } catch (err) {
-    console.error("❌ Leaderboard init failed:", err);
+    console.error("❌ Leaderboard init error:", err);
+    renderEmpty();
   }
-});
-</script>
+}
 
-</body>
-</html>
+/* ========================================
+   🧠 GET LATEST TEST PER ATHLETE
+======================================== */
+
+function getLatestPerAthlete(data) {
+  const map = {};
+
+  data.forEach(row => {
+    if (!row.name) return;
+
+    const existing = map[row.name];
+
+    if (!existing || new Date(row.date) > new Date(existing.date)) {
+      map[row.name] = row;
+    }
+  });
+
+  return Object.values(map);
+}
+
+/* ========================================
+   🏆 MAIN RENDER
+======================================== */
+
+function renderLeaderboard(data) {
+  renderPodium(data);
+  renderLiftTable(data);
+  renderScoreTable(data);
+  renderMobile(data);
+}
+
+/* ========================================
+   🥇 PODIUM
+======================================== */
+
+function renderPodium(data) {
+  const container = document.getElementById("podium");
+  if (!container) return;
+
+  const sorted = [...data].sort((a, b) => b.score - a.score).slice(0, 3);
+
+  container.innerHTML = sorted.map((a, i) => `
+    <div class="podium-item place-${i + 1}">
+      <div class="podium-rank">#${i + 1}</div>
+      <div class="podium-name">${a.name}</div>
+      <div class="podium-score">${a.score}</div>
+    </div>
+  `).join("");
+}
+
+/* ========================================
+   🏋️ LIFT TABLE
+======================================== */
+
+function renderLiftTable(data) {
+  const tbody = document.querySelector("#liftTable tbody");
+  if (!tbody) return;
+
+  const sorted = [...data]
+    .map(a => ({
+      ...a,
+      total: (a.bench || 0) + (a.squat || 0) + (a.clean || 0)
+    }))
+    .sort((a, b) => b.total - a.total);
+
+  tbody.innerHTML = sorted.map((a, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${a.name}</td>
+      <td>${a.total}</td>
+      <td>${formatDate(a.date)}</td>
+    </tr>
+  `).join("");
+}
+
+/* ========================================
+   ⚡ SCORE TABLE
+======================================== */
+
+function renderScoreTable(data) {
+  const tbody = document.querySelector("#scoreTable tbody");
+  if (!tbody) return;
+
+  const sorted = [...data]
+    .sort((a, b) => b.score - a.score);
+
+  tbody.innerHTML = sorted.map((a, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${a.name}</td>
+      <td>${a.score}</td>
+      <td>${formatDate(a.date)}</td>
+    </tr>
+  `).join("");
+}
+
+/* ========================================
+   📱 MOBILE CARDS
+======================================== */
+
+function renderMobile(data) {
+  const lift = document.getElementById("mobileLift");
+  const score = document.getElementById("mobileScore");
+
+  if (!lift || !score) return;
+
+  const liftSorted = [...data]
+    .map(a => ({
+      ...a,
+      total: (a.bench || 0) + (a.squat || 0) + (a.clean || 0)
+    }))
+    .sort((a, b) => b.total - a.total);
+
+  const scoreSorted = [...data]
+    .sort((a, b) => b.score - a.score);
+
+  lift.innerHTML = liftSorted.map((a, i) => `
+    <div class="mobile-card">
+      <div>#${i + 1} ${a.name}</div>
+      <div>Total: ${a.total}</div>
+    </div>
+  `).join("");
+
+  score.innerHTML = scoreSorted.map((a, i) => `
+    <div class="mobile-card">
+      <div>#${i + 1} ${a.name}</div>
+      <div>Score: ${a.score}</div>
+    </div>
+  `).join("");
+}
+
+/* ========================================
+   🧹 EMPTY STATE
+======================================== */
+
+function renderEmpty() {
+  const tables = document.querySelectorAll("tbody");
+  tables.forEach(t => t.innerHTML = `
+    <tr><td colspan="4" style="text-align:center; padding:20px;">
+      No data available
+    </td></tr>
+  `);
+
+  const podium = document.getElementById("podium");
+  if (podium) podium.innerHTML = "<p>No data</p>";
+}
+
+/* ========================================
+   📅 DATE FORMAT
+======================================== */
+
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
