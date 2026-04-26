@@ -323,19 +323,19 @@ function renderTable(history) {
 
   tbody.innerHTML = sorted.map(h => `
     <tr>
-      <td>${h.date}</td>
-      <td>${h.bench}</td>
-      <td>${h.squat}</td>
-      <td>${h.clean}</td>
-      <td>${avg(h.bench,h.squat,h.clean)}</td>
-      <td>${h.vertical}</td>
+      <td>${formatDate(h.date)}</td>
+      <td>${formatNumber(h.bench)}</td>
+      <td>${formatNumber(h.squat)}</td>
+      <td>${formatNumber(h.clean)}</td>
+      <td>${formatNumber(avg(h.bench,h.squat,h.clean))}</td>
+      <td>${formatNumber(h.vertical)}</td>
       <td>${fmt2(h.broad)}</td>
       <td>${fmt2(h.med)}</td>
       <td>${fmt2(h.agility)}</td>
-      <td>${h.situps}</td>
+      <td>${formatNumber(h.situps)}</td>
       <td>${fmt2(h.ten)}</td>
       <td>${fmt2(h.forty)}</td>
-      <td>${h.score}</td>
+      <td><strong>${formatNumber(h.score)}</strong></td>
     </tr>
   `).join("");
 }
@@ -450,4 +450,19 @@ function formatName(name){
 
 function showError(msg){
   document.body.innerHTML = `<p style="text-align:center;">${msg}</p>`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+
+  const d = new Date(dateStr);
+
+  if (isNaN(d)) return dateStr;
+
+  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+}
+
+function formatNumber(val) {
+  if (val === null || val === undefined) return "-";
+  return Number(val).toLocaleString();
 }
