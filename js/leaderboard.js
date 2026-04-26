@@ -66,15 +66,45 @@ function renderPodium(data) {
   const container = document.getElementById("podium");
   if (!container) return;
 
-  const sorted = [...data].sort((a, b) => b.score - a.score).slice(0, 3);
+  // 🔥 Sort by performance score
+  const sorted = [...data].sort((a, b) => b.score - a.score);
 
-  container.innerHTML = sorted.map((a, i) => `
-    <div class="podium-item place-${i + 1}">
-      <div class="podium-rank">#${i + 1}</div>
-      <div class="podium-name">${a.name}</div>
-      <div class="podium-score">${a.score}</div>
-    </div>
-  `).join("");
+  const top3 = sorted.slice(0, 3);
+
+  if (!top3.length) {
+    container.innerHTML = "<p style='opacity:0.6;'>No data available</p>";
+    return;
+  }
+
+  // 🔥 Assign ranks
+  const first = top3[0];
+  const second = top3[1];
+  const third = top3[2];
+
+  // 🔥 VISUAL ORDER: 2 - 1 - 3
+  const order = [
+    { athlete: second, className: "second", rank: 2 },
+    { athlete: first, className: "first", rank: 1 },
+    { athlete: third, className: "third", rank: 3 }
+  ].filter(item => item.athlete); // handles <3 athletes
+
+  container.innerHTML = order.map(item => {
+    const a = item.athlete;
+
+    return `
+      <div class="podium-item ${item.className} show"
+           onclick="goToAthlete('${encodeURIComponent(a.name)}')">
+
+        <div class="podium-rank">
+          ${item.rank === 1 ? "🥇" : item.rank === 2 ? "🥈" : "🥉"}
+        </div>
+
+        <div class="podium-name">${a.name}</div>
+
+        <div class="podium-score">${a.score}</div>
+      </div>
+    `;
+  }).join("");
 }
 
 /* ========================================
@@ -189,4 +219,9 @@ function formatDate(dateStr) {
     day: "numeric",
     year: "numeric"
   });
+}
+
+function goToAthlete(name) {
+  const school = sessionStorage.getItem("school") || "pleasanthill";
+  window.location.href = `athlete.html?name=${name}&school=${school}`;
 }
