@@ -1,5 +1,5 @@
 // ========================================
-// 🔥 ELITE V10 THEME + CONFIG ENGINE (PLEASANT HILL LOCKED)
+// 🔥 ELITE V10 THEME + CONFIG ENGINE (FIXED)
 // ========================================
 
 window.SCHOOL_CONFIG = null;
@@ -10,11 +10,9 @@ window.SCHOOL_CONFIG = null;
 
 function getBasePath() {
   const path = window.location.pathname;
-
   if (path.includes("/Elite-Athletic-Performance/")) {
     return "/Elite-Athletic-Performance/";
   }
-
   return "/";
 }
 
@@ -27,7 +25,7 @@ window.APP_READY = new Promise(async (resolve, reject) => {
 
     const base = getBasePath();
 
-    // 🔥 HARD-CODED CONFIG (PLEASANT HILL ONLY)
+    // 🔥 HARD-CODED CONFIG (WITH THEME)
     const config = {
       key: "pleasanthill",
       name: "Pleasant Hill Roosters",
@@ -35,12 +33,24 @@ window.APP_READY = new Promise(async (resolve, reject) => {
       logo: base + "images/roosters-logo.png",
 
       dataURL: "https://script.google.com/macros/s/AKfycbx4PyTeFkNyFE_LpovykeiFXiLgPwcB3shbjwDIyFMARi496yZ2wHq_G5jwXJsqV_3o/exec",
-      submitURL: "https://script.google.com/macros/s/AKfycbx4PyTeFkNyFE_LpovykeiFXiLgPwcB3shbjwDIyFMARi496yZ2wHq_G5jwXJsqV_3o/exec"
+      submitURL: "https://script.google.com/macros/s/AKfycbx4PyTeFkNyFE_LpovykeiFXiLgPwcB3shbjwDIyFMARi496yZ2wHq_G5jwXJsqV_3o/exec",
+
+      // 🔥 THIS WAS MISSING
+      theme: {
+        primary: "#5a2ca0",        // Pleasant Hill purple
+        primaryLight: "#8b5cf6",
+        primaryDark: "#3b1a6e",
+        secondary: "#a78bfa",
+        secondaryLight: "#c4b5fd"
+      }
     };
 
     window.SCHOOL_CONFIG = config;
 
-    console.log("🏫 CONFIG LOADED (HARDCODED):", config);
+    console.log("🏫 CONFIG LOADED:", config);
+
+    // ✅ APPLY THEME (🔥 KEY FIX)
+    applyTheme(config.theme);
 
     // ✅ APPLY BASE
     applyBaseTheme(config);
@@ -56,6 +66,30 @@ window.APP_READY = new Promise(async (resolve, reject) => {
     reject(err);
   }
 });
+
+/* ========================================
+   🎨 APPLY THEME (🔥 NEW)
+======================================== */
+
+function applyTheme(theme) {
+  if (!theme) return;
+
+  const root = document.documentElement;
+
+  root.style.setProperty("--primary", theme.primary);
+  root.style.setProperty("--primaryLight", theme.primaryLight);
+  root.style.setProperty("--primaryDark", theme.primaryDark);
+  root.style.setProperty("--secondary", theme.secondary);
+  root.style.setProperty("--secondaryLight", theme.secondaryLight);
+
+  // 🔥 STORE FOR OTHER PAGES (CRITICAL)
+  sessionStorage.setItem(
+    "theme-" + "pleasanthill",
+    JSON.stringify(theme)
+  );
+
+  console.log("🎨 THEME APPLIED:", theme);
+}
 
 /* ========================================
    🎨 BASE THEME
@@ -96,7 +130,7 @@ function waitForHeader() {
         attempts++;
         setTimeout(check, 50);
       } else {
-        console.warn("⚠️ Header not detected, forcing branding anyway");
+        console.warn("⚠️ Header not detected");
         resolve();
       }
     };
@@ -115,17 +149,12 @@ function applyHeaderBranding(config) {
   const name = document.getElementById("schoolName");
 
   if (logo) {
-
     const logoURL = config.logo + "?v=" + Date.now();
-
     logo.src = logoURL;
 
-    logo.onload = () => {
-      logo.classList.add("loaded");
-    };
+    logo.onload = () => logo.classList.add("loaded");
 
     logo.onerror = () => {
-      console.warn("⚠️ Logo failed to load, using fallback");
       logo.src = getBasePath() + "images/default-logo.png";
       logo.classList.add("loaded");
     };
@@ -138,8 +167,6 @@ function applyHeaderBranding(config) {
   if (name) {
     name.textContent = config.name;
   }
-
-  console.log("🎨 HEADER BRANDING APPLIED");
 }
 
 /* ========================================
