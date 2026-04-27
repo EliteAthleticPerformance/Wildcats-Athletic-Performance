@@ -1,5 +1,5 @@
 // ========================================
-// 🔥 ELITE DATA LOADER (PRODUCTION READY)
+// 🔥 ELITE DATA LOADER (BULLETPROOF)
 // ========================================
 
 let APP_DATA = [];
@@ -16,29 +16,71 @@ async function loadAthleteData() {
       throw new Error("Missing SCHOOL_CONFIG or dataURL");
     }
 
-    // ✅ Ensure school param is included
-    const school = config.key;
-    const url = `${config.dataURL}?school=${school}&t=${Date.now()}`;
+    // ========================================
+    // 🧠 BULLETPROOF SCHOOL DETECTION
+    // ========================================
 
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const school =
+      urlParams.get("school") ||   // ✅ PRIMARY (URL)
+      config.key ||                // ✅ fallback (config)
+      config.school ||             // ✅ fallback alt
+      "";
+
+    if (!school) {
+      throw new Error("❌ Missing school parameter (URL or config)");
+    }
+
+    // ========================================
+    // 🔗 BUILD SAFE URL
+    // ========================================
+
+    const separator = config.dataURL.includes("?") ? "&" : "?";
+
+    const url = `${config.dataURL}${separator}school=${encodeURIComponent(school)}&t=${Date.now()}`;
+
+    console.log("🏫 SCHOOL:", school);
     console.log("📡 Loading data from:", url);
 
+    // ========================================
+    // 🌐 FETCH (SAFE)
+    // ========================================
+
     const res = await fetch(url);
-    const raw = await res.json();
+
+    if (!res.ok) {
+      throw new Error(`API request failed: ${res.status}`);
+    }
+
+    let raw;
+
+    try {
+      raw = await res.json();
+    } catch (e) {
+      const text = await res.text();
+      console.error("❌ Non-JSON response:", text);
+      throw new Error("API did not return valid JSON");
+    }
 
     console.log("🧪 RAW API:", raw);
 
-    if (!Array.isArray(raw) || raw.length === 0) {
+    if (!Array.isArray(raw)) {
+      console.warn("⚠️ API did not return an array");
+      return [];
+    }
+
+    if (raw.length === 0) {
       console.warn("⚠️ No data returned from API");
       return [];
     }
 
     // ========================================
-    // 🔁 MAP DATA (SUPPORTS BOTH FORMATS)
+    // 🔁 MAP DATA (DUAL FORMAT SUPPORT)
     // ========================================
 
     APP_DATA = raw.map(row => {
 
-      // ✅ Prefer clean API keys first
       const name =
         row.name ||
         row["Student-Athlete"] ||
@@ -106,7 +148,7 @@ async function loadAthleteData() {
     })
 
     // ========================================
-    // ✅ FINAL FILTER (CRITICAL FIX)
+    // ✅ FINAL FILTER (CRITICAL)
     // ========================================
 
     .filter(a =>
@@ -122,6 +164,8 @@ async function loadAthleteData() {
 
   } catch (err) {
     console.error("❌ Data load failed:", err);
+
+    // Optional: surface error to UI later
     return [];
   }
 }
