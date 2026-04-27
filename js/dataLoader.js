@@ -114,7 +114,7 @@ console.log("🔗 FINAL URL:", url);
         hour: clean(row.hour || row["Hour"]),
         grade: clean(row.grade || row["Grade"]),
         weight: num(row.weight || row["Actual Weight"]),
-        weightClass: num(row.weightClass || row["Weight Group"]),
+        group: num(row["Weight Group"]),
 
         // 🏋️ STRENGTH
         bench: num(row.bench || row["Bench Press"]),
