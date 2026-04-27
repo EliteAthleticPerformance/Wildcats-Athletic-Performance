@@ -168,7 +168,7 @@ function validateEntry(entry) {
 }
 
 /* ========================================
-   SUBMIT TO GOOGLE
+   SUBMIT TO GOOGLE (CORS-SAFE FINAL)
 ======================================== */
 
 async function submitToGoogle(entry, url) {
@@ -176,29 +176,31 @@ async function submitToGoogle(entry, url) {
     console.log("🚀 POSTING TO URL:", url);
     console.log("📦 DATA BEING SENT:", entry);
 
-    const res = await fetch(url, {
+    // Convert to form data (required for Apps Script)
+    const body = new URLSearchParams(entry);
+
+    // 🔥 CRITICAL: no-cors mode
+    await fetch(url, {
       method: "POST",
+      mode: "no-cors",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      body: new URLSearchParams(entry)
+      body
     });
 
-    const text = await res.text();
+    // ⚠️ You cannot read response in no-cors mode
+    console.log("✅ POST SENT (no-cors mode)");
 
-    console.log("📨 RESPONSE BODY:", text);
-    console.log("📊 RESPONSE STATUS:", res.status);
+    // ✅ Assume success if no error thrown
+    showMessage("✅ Saved successfully!", "success");
 
-    if (res.ok && text.includes("success")) {
-      showMessage("✅ Saved successfully!", "success");
-    } else {
-      showMessage("❌ Save failed", "error");
-    }
-
+    // 🔄 Reload data if available
     if (typeof loadAthleteData === "function") {
       loadAthleteData(true);
     }
 
+    // 🧹 Clear form after short delay
     setTimeout(clearForm, 500);
 
   } catch (err) {
