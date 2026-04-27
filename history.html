@@ -10,64 +10,20 @@
 <title>Athlete History</title>
 
 <link rel="stylesheet" href="/Elite-Athletic-Performance/styles.css">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* ===== MODAL ===== */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
+.modal { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:999; }
 .modal.hidden { display:none; }
+.modal-content { background:#111; padding:20px; border-radius:12px; width:300px; box-shadow:0 0 20px var(--primary); }
+.modal-content input { width:100%; margin:8px 0; padding:8px; }
+.modal-actions { display:flex; justify-content:space-between; }
 
-.modal-content {
-  background:#111;
-  padding:20px;
-  border-radius:12px;
-  width:300px;
-  box-shadow:0 0 20px var(--primary);
-}
-.modal-content input {
-  width:100%;
-  margin:8px 0;
-  padding:8px;
-}
-.modal-actions {
-  display:flex;
-  justify-content:space-between;
-}
-
-/* ===== TOAST ===== */
-.toast {
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#111;
-  padding:10px 16px;
-  border-radius:8px;
-  display:flex;
-  gap:10px;
-  box-shadow:0 0 10px var(--primary);
-}
+.toast { position:fixed; bottom:20px; right:20px; background:#111; padding:10px 16px; border-radius:8px; display:flex; gap:10px; box-shadow:0 0 10px var(--primary); }
 .toast.hidden { display:none; }
 
-/* ===== ACTION BUTTONS ===== */
-.row-actions {
-  margin-top:8px;
-  display:flex;
-  gap:8px;
-}
-.row-actions button {
-  cursor:pointer;
-}
+.row-actions { margin-top:8px; display:flex; gap:8px; }
 </style>
-
 </head>
 
 <body>
@@ -97,7 +53,6 @@
     <input id="editBench">
     <input id="editSquat">
     <input id="editClean">
-
     <div class="modal-actions">
       <button onclick="saveEdit()">Save</button>
       <button onclick="closeEdit()">Cancel</button>
@@ -112,15 +67,11 @@
 </div>
 
 <script src="/Elite-Athletic-Performance/js/dataLoader.js"></script>
+<script src="/Elite-Athletic-Performance/js/historyActions.js"></script>
 
 <script>
-let CURRENT_EDIT_ID = null;
-let LAST_DELETED = null;
 let CURRENT_NAME = null;
-
-/* ========================================
-INIT
-======================================== */
+let DATA_MAP = {};
 
 document.addEventListener("headerLoaded", init);
 
@@ -138,10 +89,6 @@ async function init() {
   else renderAll(data);
 }
 
-/* ========================================
-SINGLE ATHLETE
-======================================== */
-
 function renderSingle(name, data) {
   const container = document.getElementById("historyContainer");
 
@@ -153,6 +100,10 @@ function renderSingle(name, data) {
     container.innerHTML = `<p>No data found</p>`;
     return;
   }
+
+  // BUILD MAP
+  DATA_MAP = {};
+  history.forEach(r => DATA_MAP[r.id] = r);
 
   document.getElementById("historyTitle").textContent = name;
 
@@ -169,8 +120,8 @@ function renderSingle(name, data) {
         <div>Clean: ${r.clean || "-"}</div>
 
         <div class="row-actions">
-          <button onclick='openEdit(${JSON.stringify(r)})'>✏️</button>
-          <button onclick='deleteRow(${JSON.stringify(r)})'>🗑</button>
+          <button onclick="openEditById('${r.id}')">✏️</button>
+          <button onclick="deleteById('${r.id}')">🗑</button>
         </div>
       </div>
     `).join("")}
@@ -179,9 +130,17 @@ function renderSingle(name, data) {
   renderChart(history);
 }
 
-/* ========================================
-ALL ATHLETES
-======================================== */
+function openEditById(id) {
+  const row = DATA_MAP[id];
+  if (!row) return;
+  openEdit(row);
+}
+
+function deleteById(id) {
+  const row = DATA_MAP[id];
+  if (!row) return;
+  deleteRow(row);
+}
 
 function renderAll(data) {
   const container = document.getElementById("historyContainer");
@@ -195,115 +154,10 @@ function renderAll(data) {
   `).join("");
 }
 
-/* ========================================
-EDIT
-======================================== */
-
-function openEdit(row) {
-  CURRENT_EDIT_ID = row.id;
-
-  document.getElementById("editName").value = row.name || "";
-  document.getElementById("editBench").value = row.bench || "";
-  document.getElementById("editSquat").value = row.squat || "";
-  document.getElementById("editClean").value = row.clean || "";
-
-  document.getElementById("editModal").classList.remove("hidden");
-}
-
-function closeEdit() {
-  document.getElementById("editModal").classList.add("hidden");
-}
-
-async function saveEdit() {
-  const config = await window.APP_READY;
-
-  const payload = new URLSearchParams({
-    action: "update",
-    school: config.key,
-    id: CURRENT_EDIT_ID,
-    name: document.getElementById("editName").value,
-    bench: document.getElementById("editBench").value,
-    squat: document.getElementById("editSquat").value,
-    clean: document.getElementById("editClean").value
-  });
-
-  await fetch(config.submitURL, {
-    method: "POST",
-    body: payload
-  });
-
-  closeEdit();
-  refresh();
-}
-
-/* ========================================
-DELETE
-======================================== */
-
-async function deleteRow(row) {
-  const config = await window.APP_READY;
-
-  LAST_DELETED = row;
-
-  await fetch(config.submitURL, {
-    method: "POST",
-    body: new URLSearchParams({
-      action: "delete",
-      school: config.key,
-      id: row.id
-    })
-  });
-
-  showToast();
-  refresh();
-}
-
-async function undoDelete() {
-  const config = await window.APP_READY;
-
-  await fetch(config.submitURL, {
-    method: "POST",
-    body: new URLSearchParams({
-      action: "undo",
-      school: config.key,
-      id: LAST_DELETED.id
-    })
-  });
-
-  hideToast();
-  refresh();
-}
-
-/* ========================================
-TOAST
-======================================== */
-
-let toastTimeout;
-
-function showToast() {
-  const t = document.getElementById("toast");
-  t.classList.remove("hidden");
-
-  toastTimeout = setTimeout(hideToast, 5000);
-}
-
-function hideToast() {
-  document.getElementById("toast").classList.add("hidden");
-  clearTimeout(toastTimeout);
-}
-
-/* ========================================
-REFRESH
-======================================== */
-
 async function refresh() {
   const data = await loadAthleteData();
   renderSingle(CURRENT_NAME, data);
 }
-
-/* ========================================
-CHART
-======================================== */
 
 function renderChart(history) {
   const ctx = document.getElementById("chart");
@@ -320,10 +174,6 @@ function renderChart(history) {
     }
   });
 }
-
-/* ========================================
-NAV
-======================================== */
 
 function goTo(name) {
   const school = new URLSearchParams(window.location.search).get("school");
