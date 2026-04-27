@@ -86,6 +86,8 @@ console.log("🔗 FINAL URL:", url);
 
     APP_DATA = raw.map(row => {
 
+console.log("🧪 ROW DATA:", row);
+       
       const name =
         row.name ||
         row["Student-Athlete"] ||
