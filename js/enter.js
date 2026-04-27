@@ -96,19 +96,19 @@ function normalizeName(name) {
 ======================================== */
 
 function getWeightClass(weight) {
-  if (weight <= 120) return "100";
-  if (weight <= 140) return "121";
-  if (weight <= 160) return "141";
-  if (weight <= 180) return "161";
-  if (weight <= 195) return "181";
-  if (weight <= 210) return "196";
-  if (weight <= 225) return "211";
-  if (weight <= 240) return "226";
-  if (weight <= 255) return "241";
-  if (weight <= 270) return "256";
-  if (weight <= 285) return "271";
-  if (weight <= 300) return "286";
-  return "301";
+  if (weight <= 120) return 100;
+  if (weight <= 140) return 121;
+  if (weight <= 160) return 141;
+  if (weight <= 180) return 161;
+  if (weight <= 195) return 181;
+  if (weight <= 210) return 196;
+  if (weight <= 225) return 211;
+  if (weight <= 240) return 226;
+  if (weight <= 255) return 241;
+  if (weight <= 270) return 256;
+  if (weight <= 285) return 271;
+  if (weight <= 300) return 286;
+  return 301;
 }
 
 /* ========================================
