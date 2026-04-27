@@ -22,11 +22,16 @@ async function loadAthleteData() {
 
     const urlParams = new URLSearchParams(window.location.search);
 
-    const school =
-      urlParams.get("school") ||   // ✅ PRIMARY (URL)
-      config.key ||                // ✅ fallback (config)
-      config.school ||             // ✅ fallback alt
-      "";
+let school = urlParams.get("school");
+
+// 🔥 HARD FALLBACK (guaranteed)
+if (!school) {
+  console.warn("⚠️ No school in URL — forcing default");
+  school = "pleasanthill";
+}
+
+// normalize
+school = school.toLowerCase().replace(/\s+/g, "");
 
     if (!school) {
       throw new Error("❌ Missing school parameter (URL or config)");
@@ -38,10 +43,10 @@ async function loadAthleteData() {
 
     const separator = config.dataURL.includes("?") ? "&" : "?";
 
-    const url = `${config.dataURL}${separator}school=${encodeURIComponent(school)}&t=${Date.now()}`;
+    const url = `${config.dataURL}?school=${school}&t=${Date.now()}`;
 
-    console.log("🏫 SCHOOL:", school);
-    console.log("📡 Loading data from:", url);
+   console.log("🏫 FINAL SCHOOL:", school);
+console.log("🔗 FINAL URL:", url);
 
     // ========================================
     // 🌐 FETCH (SAFE)
