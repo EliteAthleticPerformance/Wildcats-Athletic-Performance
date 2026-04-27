@@ -11,17 +11,69 @@
 
 <link rel="stylesheet" href="/Elite-Athletic-Performance/styles.css">
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* ===== MODAL ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal.hidden { display:none; }
+
+.modal-content {
+  background:#111;
+  padding:20px;
+  border-radius:12px;
+  width:300px;
+  box-shadow:0 0 20px var(--primary);
+}
+.modal-content input {
+  width:100%;
+  margin:8px 0;
+  padding:8px;
+}
+.modal-actions {
+  display:flex;
+  justify-content:space-between;
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#111;
+  padding:10px 16px;
+  border-radius:8px;
+  display:flex;
+  gap:10px;
+  box-shadow:0 0 10px var(--primary);
+}
+.toast.hidden { display:none; }
+
+/* ===== ACTION BUTTONS ===== */
+.row-actions {
+  margin-top:8px;
+  display:flex;
+  gap:8px;
+}
+.row-actions button {
+  cursor:pointer;
+}
+</style>
 
 </head>
 
 <body>
 
-<!-- HEADER -->
 <div id="header-placeholder"></div>
 
-<!-- 🔥 LOAD ORDER -->
 <script src="/Elite-Athletic-Performance/js/themeLoader.js"></script>
 <script src="/Elite-Athletic-Performance/js/header.js"></script>
 
@@ -37,39 +89,57 @@
 
 </main>
 
-<!-- DATA + LOGIC -->
+<!-- EDIT MODAL -->
+<div id="editModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>Edit Athlete</h3>
+    <input id="editName">
+    <input id="editBench">
+    <input id="editSquat">
+    <input id="editClean">
+
+    <div class="modal-actions">
+      <button onclick="saveEdit()">Save</button>
+      <button onclick="closeEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden">
+  <span>Deleted</span>
+  <button onclick="undoDelete()">Undo</button>
+</div>
+
 <script src="/Elite-Athletic-Performance/js/dataLoader.js"></script>
 
 <script>
+let CURRENT_EDIT_ID = null;
+let LAST_DELETED = null;
+let CURRENT_NAME = null;
+
 /* ========================================
-   INIT
+INIT
 ======================================== */
 
 document.addEventListener("headerLoaded", init);
 
 async function init() {
-  try {
-    await window.APP_READY;
+  await window.APP_READY;
 
-    const data = await loadAthleteData();
+  const params = new URLSearchParams(window.location.search);
+  const name = params.get("name");
 
-    const params = new URLSearchParams(window.location.search);
-    const name = params.get("name");
+  CURRENT_NAME = name;
 
-    if (name) {
-      renderSingle(name, data);
-    } else {
-      renderAll(data);
-    }
+  const data = await loadAthleteData();
 
-  } catch (err) {
-    console.error(err);
-    showError("Failed to load history");
-  }
+  if (name) renderSingle(name, data);
+  else renderAll(data);
 }
 
 /* ========================================
-   SINGLE ATHLETE
+SINGLE ATHLETE
 ======================================== */
 
 function renderSingle(name, data) {
@@ -90,13 +160,27 @@ function renderSingle(name, data) {
     <div class="card">
       <canvas id="chart" height="120"></canvas>
     </div>
+
+    ${history.map(r => `
+      <div class="card">
+        <div>${r.date}</div>
+        <div>Bench: ${r.bench || "-"}</div>
+        <div>Squat: ${r.squat || "-"}</div>
+        <div>Clean: ${r.clean || "-"}</div>
+
+        <div class="row-actions">
+          <button onclick='openEdit(${JSON.stringify(r)})'>✏️</button>
+          <button onclick='deleteRow(${JSON.stringify(r)})'>🗑</button>
+        </div>
+      </div>
+    `).join("")}
   `;
 
   renderChart(history);
 }
 
 /* ========================================
-   ALL ATHLETES
+ALL ATHLETES
 ======================================== */
 
 function renderAll(data) {
@@ -112,29 +196,133 @@ function renderAll(data) {
 }
 
 /* ========================================
-   CHART
+EDIT
+======================================== */
+
+function openEdit(row) {
+  CURRENT_EDIT_ID = row.id;
+
+  document.getElementById("editName").value = row.name || "";
+  document.getElementById("editBench").value = row.bench || "";
+  document.getElementById("editSquat").value = row.squat || "";
+  document.getElementById("editClean").value = row.clean || "";
+
+  document.getElementById("editModal").classList.remove("hidden");
+}
+
+function closeEdit() {
+  document.getElementById("editModal").classList.add("hidden");
+}
+
+async function saveEdit() {
+  const config = await window.APP_READY;
+
+  const payload = new URLSearchParams({
+    action: "update",
+    school: config.key,
+    id: CURRENT_EDIT_ID,
+    name: document.getElementById("editName").value,
+    bench: document.getElementById("editBench").value,
+    squat: document.getElementById("editSquat").value,
+    clean: document.getElementById("editClean").value
+  });
+
+  await fetch(config.submitURL, {
+    method: "POST",
+    body: payload
+  });
+
+  closeEdit();
+  refresh();
+}
+
+/* ========================================
+DELETE
+======================================== */
+
+async function deleteRow(row) {
+  const config = await window.APP_READY;
+
+  LAST_DELETED = row;
+
+  await fetch(config.submitURL, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "delete",
+      school: config.key,
+      id: row.id
+    })
+  });
+
+  showToast();
+  refresh();
+}
+
+async function undoDelete() {
+  const config = await window.APP_READY;
+
+  await fetch(config.submitURL, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "undo",
+      school: config.key,
+      id: LAST_DELETED.id
+    })
+  });
+
+  hideToast();
+  refresh();
+}
+
+/* ========================================
+TOAST
+======================================== */
+
+let toastTimeout;
+
+function showToast() {
+  const t = document.getElementById("toast");
+  t.classList.remove("hidden");
+
+  toastTimeout = setTimeout(hideToast, 5000);
+}
+
+function hideToast() {
+  document.getElementById("toast").classList.add("hidden");
+  clearTimeout(toastTimeout);
+}
+
+/* ========================================
+REFRESH
+======================================== */
+
+async function refresh() {
+  const data = await loadAthleteData();
+  renderSingle(CURRENT_NAME, data);
+}
+
+/* ========================================
+CHART
 ======================================== */
 
 function renderChart(history) {
   const ctx = document.getElementById("chart");
 
-  if (!ctx || typeof Chart === "undefined") return;
-
   new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: history.map(a => a.date),
-      datasets: [{
-        label: "Score",
-        data: history.map(a => a.score),
-        tension: 0.3
+    type:"line",
+    data:{
+      labels:history.map(a=>a.date),
+      datasets:[{
+        label:"Score",
+        data:history.map(a=>a.score),
+        tension:0.3
       }]
     }
   });
 }
 
 /* ========================================
-   NAV
+NAV
 ======================================== */
 
 function goTo(name) {
@@ -143,14 +331,6 @@ function goTo(name) {
   window.location.href = school
     ? `history.html?name=${encodeURIComponent(name)}&school=${school}`
     : `history.html?name=${encodeURIComponent(name)}`;
-}
-
-/* ========================================
-   ERROR
-======================================== */
-
-function showError(msg) {
-  document.getElementById("historyContainer").innerHTML = `<p>${msg}</p>`;
 }
 </script>
 
