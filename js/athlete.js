@@ -55,7 +55,8 @@ function renderAthlete(name) {
   document.getElementById("athleteName").textContent = formatName(name);
 
   applyRanking(name, latest.score);
-
+  
+set("gender", latest.gender);
   set("bench", latest.bench);
   set("squat", latest.squat);
   set("clean", latest.clean);
