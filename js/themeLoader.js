@@ -10,18 +10,23 @@ window.SCHOOL_CONFIG = null;
 
 function getSchool() {
   const urlParams = new URLSearchParams(window.location.search);
-  const urlSchool = urlParams.get("school");
+const urlSchool = urlParams.get("school");
+const stored = sessionStorage.getItem("school");
 
-  const stored = sessionStorage.getItem("school");
+let school = urlSchool || stored;
 
-  const school = (urlSchool || stored || "pleasanthill")
-    .toLowerCase()
-    .replace(/\s+/g, "");
+// 🔥 If no school yet, use first available from config
+if (!school) {
+  const firstSchool = window.SCHOOL_CONFIG_LIST?.[0]?.key;
 
-  // ✅ ALWAYS sync storage
-  sessionStorage.setItem("school", school);
+  school = firstSchool || "pleasanthill"; // fallback safety
+}
 
-  console.log("🎯 ACTIVE SCHOOL:", school);
+school = school.toLowerCase().replace(/\s+/g, "");
+
+sessionStorage.setItem("school", school);
+
+console.log("🏫 ACTIVE SCHOOL:", school);
 
   return school;
 }
