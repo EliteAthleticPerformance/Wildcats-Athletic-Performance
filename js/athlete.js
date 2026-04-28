@@ -56,7 +56,7 @@ function renderAthlete(name) {
 
   applyRanking(name, latest.score);
   
-set("gender", latest.gender);
+
   set("bench", latest.bench);
   set("squat", latest.squat);
   set("clean", latest.clean);
