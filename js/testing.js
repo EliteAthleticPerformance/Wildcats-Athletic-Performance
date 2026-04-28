@@ -167,7 +167,7 @@ function renderTable(data) {
     tr.innerHTML = `
       <td>${formatName(a.name)}</td>
       <td>${formatDate(a.date)}</td>
-      <td>${a.hour || "-"}</td>
+      <td>${a.gender || "-"}</td>
       <td>${a.grade || "-"}</td>
       <td>${format(a.weight)}</td>
       <td>${a.group || "-"}</td>
