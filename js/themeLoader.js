@@ -53,13 +53,13 @@ const CONFIG_MAP = (() => {
     springhill: {
       key: "springhill",
       name: "Spring Hill Broncos",
-      logo: base + "images/default-logo.png", // 🔥 replace when ready
+      logo: base + "images/broncos-logo.png", // 🔥 replace when ready
       theme: {
-        primary: "#166534",
-        primaryLight: "#22c55e",
-        primaryDark: "#14532d",
-        secondary: "#4ade80",
-        secondaryLight: "#86efac"
+        primary: "#5A2D91",
+        primaryLight: "#6A3FB0",
+        primaryDark: "#3F166",
+        secondary: "#FDBB30",
+        secondaryLight: "#FFD166"
       }
     }
 
