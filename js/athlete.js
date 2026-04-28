@@ -150,6 +150,7 @@ function getComparisonData(type, athlete) {
 ======================================== */
 
 function renderRadar(a, comparison=null) {
+  console.log("CHART DATA:", a);
   const ctx = document.getElementById("radarChart");
   if (!ctx) return;
 
