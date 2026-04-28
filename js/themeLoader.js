@@ -53,7 +53,7 @@ const CONFIG_MAP = (() => {
      raypec: {
       key: "raypec",
       name: "Ray-Pec Panthers",
-      logo: base + "images/Panthers-logo.png",
+      logo: base + "images/panthers-logo.png",
       theme: {
         primary: "#C9A646",
         primaryLight: "#E2C46A",
