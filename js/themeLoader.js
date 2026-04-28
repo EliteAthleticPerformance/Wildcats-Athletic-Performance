@@ -191,6 +191,23 @@ function applyHeaderBranding(config) {
 }
 
 /* ========================================
+   🔐 GLOBAL LOGOUT (FIX)
+======================================== */
+
+window.logout = function () {
+  console.log("🔒 Logging out...");
+
+  sessionStorage.clear();
+  localStorage.clear();
+
+  const base = window.location.pathname.includes("/Elite-Athletic-Performance/")
+    ? "/Elite-Athletic-Performance/"
+    : "/";
+
+  window.location.href = base + "index.html";
+};
+
+/* ========================================
    🚨 FAIL SAFE
 ======================================== */
 
