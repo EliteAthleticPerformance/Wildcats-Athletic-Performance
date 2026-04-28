@@ -5,33 +5,6 @@
 window.SCHOOL_CONFIG = null;
 
 /* ========================================
-   🌐 GET SCHOOL (FIXED)
-======================================== */
-
-function getSchool() {
-  const urlParams = new URLSearchParams(window.location.search);
-const urlSchool = urlParams.get("school");
-const stored = sessionStorage.getItem("school");
-
-let school = urlSchool || stored;
-
-// 🔥 If no school yet, use first available from config
-if (!school) {
-  const firstSchool = window.SCHOOL_CONFIG_LIST?.[0]?.key;
-
-  school = firstSchool || "pleasanthill"; // fallback safety
-}
-
-school = school.toLowerCase().replace(/\s+/g, "");
-
-sessionStorage.setItem("school", school);
-
-console.log("🏫 ACTIVE SCHOOL:", school);
-
-  return school;
-}
-
-/* ========================================
    🌐 BASE PATH
 ======================================== */
 
@@ -44,52 +17,95 @@ function getBasePath() {
 }
 
 /* ========================================
+   🔥 CONFIG MAP (ADD NEW SCHOOLS HERE ONLY)
+======================================== */
+
+const CONFIG_MAP = (() => {
+  const base = getBasePath();
+
+  return {
+    pleasanthill: {
+      key: "pleasanthill",
+      name: "Pleasant Hill Roosters",
+      logo: base + "images/roosters-logo.png",
+      theme: {
+        primary: "#5a2ca0",
+        primaryLight: "#8b5cf6",
+        primaryDark: "#3b1a6e",
+        secondary: "#a78bfa",
+        secondaryLight: "#c4b5fd"
+      }
+    },
+
+    harrisonville: {
+      key: "harrisonville",
+      name: "Harrisonville Wildcats",
+      logo: base + "images/wildcats-logo.png",
+      theme: {
+        primary: "#1e3a8a",
+        primaryLight: "#3b82f6",
+        primaryDark: "#1e40af",
+        secondary: "#60a5fa",
+        secondaryLight: "#93c5fd"
+      }
+    },
+
+    springhill: {
+      key: "springhill",
+      name: "Spring Hill Broncos",
+      logo: base + "images/default-logo.png", // 🔥 replace when ready
+      theme: {
+        primary: "#166534",
+        primaryLight: "#22c55e",
+        primaryDark: "#14532d",
+        secondary: "#4ade80",
+        secondaryLight: "#86efac"
+      }
+    }
+
+  };
+})();
+
+/* ========================================
+   🌐 GET SCHOOL (FINAL FIXED VERSION)
+======================================== */
+
+function getSchool() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlSchool = urlParams.get("school");
+  const stored = sessionStorage.getItem("school");
+
+  let school = urlSchool || stored;
+
+  // 🔥 AUTO DEFAULT = FIRST SCHOOL IN CONFIG
+  if (!school) {
+    school = Object.keys(CONFIG_MAP)[0];
+  }
+
+  school = school.toLowerCase().replace(/\s+/g, "");
+
+  sessionStorage.setItem("school", school);
+
+  console.log("🏫 ACTIVE SCHOOL:", school);
+
+  return school;
+}
+
+/* ========================================
    🌐 APP READY
 ======================================== */
 
 window.APP_READY = new Promise(async (resolve, reject) => {
   try {
 
-    const base = getBasePath();
     const school = getSchool();
 
-    // 🔥 MULTI-SCHOOL CONFIG MAP
-    const CONFIG_MAP = {
-
-      pleasanthill: {
-        key: "pleasanthill",
-        name: "Pleasant Hill Roosters",
-        logo: base + "images/roosters-logo.png",
-        theme: {
-          primary: "#5a2ca0",
-          primaryLight: "#8b5cf6",
-          primaryDark: "#3b1a6e",
-          secondary: "#a78bfa",
-          secondaryLight: "#c4b5fd"
-        }
-      },
-
-      harrisonville: {
-        key: "harrisonville",
-        name: "Harrisonville Wildcats",
-        logo: base + "images/wildcats-logo.png", // 🔥 CHANGE if needed
-        theme: {
-          primary: "#1e3a8a",     // blue example
-          primaryLight: "#3b82f6",
-          primaryDark: "#1e40af",
-          secondary: "#60a5fa",
-          secondaryLight: "#93c5fd"
-        }
-      }
-
-    };
-
-    const selected = CONFIG_MAP[school] || CONFIG_MAP["pleasanthill"];
+    const selected = CONFIG_MAP[school] || CONFIG_MAP[Object.keys(CONFIG_MAP)[0]];
 
     const config = {
       ...selected,
 
-      // 🔥 SAME API FOR ALL
+      // 🔥 SAME API FOR ALL SCHOOLS
       dataURL: "https://script.google.com/macros/s/AKfycbwnSjmwlod_AoqmTEoownI1CsWhjpTu9ubLrb78DsLBTaH0WDnYxXNiXEyJmY1J0Uh2/exec",
       submitURL: "https://script.google.com/macros/s/AKfycbwnSjmwlod_AoqmTEoownI1CsWhjpTu9ubLrb78DsLBTaH0WDnYxXNiXEyJmY1J0Uh2/exec"
     };
@@ -127,7 +143,6 @@ function applyTheme(theme, school) {
   root.style.setProperty("--secondary", theme.secondary);
   root.style.setProperty("--secondaryLight", theme.secondaryLight);
 
-  // ✅ store PER SCHOOL
   sessionStorage.setItem("theme-" + school, JSON.stringify(theme));
 
   console.log("🎨 THEME APPLIED:", theme);
@@ -196,7 +211,7 @@ function applyHeaderBranding(config) {
 }
 
 /* ========================================
-   🔐 GLOBAL LOGOUT (FIX)
+   🔐 GLOBAL LOGOUT
 ======================================== */
 
 window.logout = function () {
