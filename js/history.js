@@ -63,8 +63,8 @@ function renderAthlete(name) {
       <td>${h.med}</td>
       <td>${h.agility}</td>
       <td>${h.situps}</td>
-      <td>${h.ten}</td>
-      <td>${h.forty}</td>
+      <td>${h.10yd}</td>
+      <td>${h.40yd}</td>
       <td>${h.score}</td>
     </tr>
   `).join("");
@@ -87,8 +87,8 @@ function renderAthlete(name) {
               <th>Med</th>
               <th>Agility</th>
               <th>Sit</th>
-              <th>10yd</th>
-              <th>40yd</th>
+              <th>ten</th>
+              <th>forty</th>
               <th>Score</th>
             </tr>
           </thead>
