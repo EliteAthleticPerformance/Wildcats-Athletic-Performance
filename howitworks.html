@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>About | Elite Athletic Performance</title>
+<title>How It Works | Elite Athletic Performance</title>
 
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGRNFWTPJ5"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-TGRNFWTPJ5');
-  </script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGRNFWTPJ5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TGRNFWTPJ5');
+</script>
 
 <link rel="stylesheet" href="/Elite-Athletic-Performance/styles.css">
 <link id="dynamicFavicon" rel="icon" type="image/png">
@@ -30,50 +30,51 @@
 
 <main>
 
-  <!-- VIDEO -->
-<section class="section" style="text-align:center;">
-  <div class="card">
+  <!-- VIDEO SECTION -->
+  <section class="section" style="text-align:center;">
+    <div class="card">
 
-    <h2>🎥 See It In Action</h2>
-    <p style="color: var(--muted); max-width:600px; margin:auto;">
-      Watch how coaches use Elite Athletic Performance to track and analyze athletes.
-    </p>
+      <h2>🎥 See It In Action</h2>
+      <p style="color: var(--muted); max-width:600px; margin:auto;">
+        Watch how coaches use Elite Athletic Performance to track and analyze athletes.
+      </p>
 
-    <div style="margin-top:20px; position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px;">
-      <iframe 
-  id="demoVideo"
-  src="https://www.youtube.com/embed/CL4ZH_Ufg68?enablejsapi=1"
-  frameborder="0"
-  allowfullscreen
-  style="position:absolute; top:0; left:0; width:100%; height:100%;">
-</iframe>
+      <!-- VIDEO CONTAINER -->
+      <div 
+        onclick="trackVideoClick()"
+        style="margin-top:20px; position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px; cursor:pointer;"
+      >
+        <iframe 
+          id="demoVideo"
+          src="https://www.youtube-nocookie.com/embed/CL4ZH_Ufg68"
+          title="Demo Video"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          style="position:absolute; top:0; left:0; width:100%; height:100%;">
+        </iframe>
+      </div>
+
+      <!-- FALLBACK LINK -->
+      <p style="margin-top:15px; font-size:14px;">
+        Having trouble viewing? 
+        <a href="https://www.youtube.com/watch?v=CL4ZH_Ufg68" target="_blank" style="color:gold;">
+          Watch the video here
+        </a>
+      </p>
+
     </div>
+  </section>
 
-  </div>
-</section>
+</main>
 
-   <script>
-var tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-document.body.appendChild(tag);
-
-var player;
-
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player('demoVideo', {
-    events: {
-      'onStateChange': onPlayerStateChange
-    }
+<!-- TRACKING (SAFE + RELIABLE) -->
+<script>
+function trackVideoClick() {
+  gtag('event', 'video_click', {
+    event_category: 'engagement',
+    event_label: 'Demo Video'
   });
-}
-
-function onPlayerStateChange(event) {
-  if (event.data == YT.PlayerState.PLAYING) {
-    gtag('event', 'video_play', {
-      event_category: 'engagement',
-      event_label: 'Demo Video'
-    });
-  }
 }
 </script>
 
@@ -85,6 +86,6 @@ function onPlayerStateChange(event) {
   <a href="privacy.html" style="color:gold; text-decoration:none;">Privacy Policy</a> |
   <a href="terms.html" style="color:gold; text-decoration:none;">Terms of Service</a>
 </div>
-  
+
 </body>
 </html>
