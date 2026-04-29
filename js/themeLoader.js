@@ -25,7 +25,20 @@ const CONFIG_MAP = (() => {
 
   return {
     
-    cassmidway: {
+    harrisonville: {
+      key: "harrisonville",
+      name: "Harrisonville Wildcats",
+      logo: base + "images/wildcats-logo.png",
+      theme: {
+        primary: "#1e3a8a",
+        primaryLight: "#3b82f6",
+        primaryDark: "#1e40af",
+        secondary: "#60a5fa",
+        secondaryLight: "#93c5fd"
+      }
+    },
+     
+     cassmidway: {
       key: "cassmidway",
       name: "Cass Midway Vikings",
       logo: base + "images/vikings-logo.png",
@@ -38,19 +51,6 @@ const CONFIG_MAP = (() => {
       }
     },
      
-     harrisonville: {
-      key: "harrisonville",
-      name: "Harrisonville Wildcats",
-      logo: base + "images/wildcats-logo.png",
-      theme: {
-        primary: "#1e3a8a",
-        primaryLight: "#3b82f6",
-        primaryDark: "#1e40af",
-        secondary: "#60a5fa",
-        secondaryLight: "#93c5fd"
-      }
-    },
-
      pleasanthill: {
       key: "pleasanthill",
       name: "Pleasant Hill Roosters",
