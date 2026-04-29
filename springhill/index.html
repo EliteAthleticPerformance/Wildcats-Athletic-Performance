@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harrisonville | Elite Athletic Performance</title>
+
+  <script>
+    const school = "springhill";
+    const target = `/?school=${school}`;
+
+    localStorage.setItem('school', school);
+    window.location.replace(target);
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <h2>Loading Harrisonville Dashboard...</h2>
+    <p>If you are not redirected,
+      <a href="/?school=harrisonville" style="color: gold;">click here</a>.
+    </p>
+  </div>
+</body>
+</html>
