@@ -38,6 +38,19 @@ const CONFIG_MAP = (() => {
     },
 
     harrisonville: {
+      key: "cassmidway",
+      name: "Cass Midway Vikings",
+      logo: base + "images/vikings-logo.png",
+      theme: {
+        primary: "#4B0082",
+        primaryLight: "#6A1BB9",
+        primaryDark: "#2E0054",
+        secondary: "#C0C0C0",
+        secondaryLight: "#E6E6E6"
+      }
+    },
+     
+     harrisonville: {
       key: "harrisonville",
       name: "Harrisonville Wildcats",
       logo: base + "images/wildcats-logo.png",
