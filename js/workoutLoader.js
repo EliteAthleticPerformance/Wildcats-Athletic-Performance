@@ -32,9 +32,59 @@ window.loadWorkout = async function loadWorkout() {
 
     const res = await fetch(url);
     const text = await res.text();
-    workoutData.length = 0;
 
     console.log("📦 CSV received:", text.slice(0, 200));
 
-        console.log("✅ loadWorkout COMPLETE");
+    const rows = parseCSV(text);
+
+    // ✅ CLEAR DATA (correct way)
+    window.workoutData.length = 0;
+
+    for (const r of rows) {
+
+        const firstCell = String(r[0] || "")
+            .replace(/"/g, "")
+            .trim()
+            .toLowerCase();
+
+        // skip headers / config rows
+        if (!firstCell || firstCell === "set") continue;
+
+        // SET rows
+        if (!isNaN(parseInt(firstCell))) {
+
+            const workSec = Number(r[8]) || 30;
+            const rotateSec = Number(r[9]) || 30;
+            const breakSec = Number(r[10]) || 90;
+
+            window.workoutData.push({
+                type: "set",
+
+                coreLift: r[1],
+                percentage: r[2],
+                coreReps: r[3],
+
+                auxLift: r[4],
+                auxReps: r[5],
+
+                movement: r[6],
+                movementReps: r[7],
+
+                workSec,
+                rotateSec,
+                breakSec
+            });
+        }
+
+        // BREAK rows
+        if (firstCell === "break") {
+            window.workoutData.push({
+                type: "break",
+                breakSec: Number(r[10]) || 90
+            });
+        }
+    }
+
+    console.log("✅ Parsed workoutData:", window.workoutData.length);
+    console.log("🔥 First item:", window.workoutData[0]);
 };
