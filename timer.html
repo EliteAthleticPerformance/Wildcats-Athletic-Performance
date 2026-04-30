@@ -11,11 +11,11 @@
 <title>Harrisonville Wildcats | 4 Quadrant Training Timer</title>
 
 <script>
-let workoutData = [];
+let window.workoutData = [];
 
-Object.defineProperty(window, "workoutData", {
-    get: () => workoutData,
-    set: (val) => { workoutData = val; }
+Object.defineProperty(window, "window.workoutData", {
+    get: () => window.workoutData,
+    set: (val) => { window.workoutData = val; }
 });
 </script>
 
@@ -560,7 +560,7 @@ function goFullscreen() {
 
 /* ---------- COUNT TOTAL SETS ---------- */
 function getTotalSets() {
-    return workoutData.filter(item => item.type === "set").length;
+    return window.workoutData.filter(item => item.type === "set").length;
 }
 
   
@@ -622,7 +622,7 @@ function calculateTotalTime() {
     prepTotal += dressOutDuration;
     prepTotal += dynamicStretchDuration;
 
-    workoutData.forEach(item => {
+    window.workoutData.forEach(item => {
 
         if (item.type === "set") {
 
@@ -684,7 +684,7 @@ function preciseTick() {
 function startTimer() {
 
     // Safety: require workout
-    if (!workoutData.length) {
+    if (!window.workoutData || !window.workoutData.length) {
         console.warn("Workout not loaded yet.");
         return;
     }
@@ -906,14 +906,14 @@ function startAutoScheduler() {
 ====================================================== */
 
 function preloadFirstSet() {
-    if (!workoutData.length) return;
+    if (!window.workoutData || !window.workoutData.length) return;
     loadSetData(0);
 }
 
 function previewNextSet() {
-    if (!workoutData.length) return;
+    if (!window.workoutData || !window.workoutData.length) return;
 
-    const nextItem = workoutData[currentSet] || null;
+    const nextItem = window.workoutData[currentSet + 1] || null;
 
     if (nextItem && nextItem.type === "set") {
         loadSetData(currentSet);
@@ -1018,7 +1018,7 @@ const response = await fetch(
         /* =============================
            RESET GLOBALS
         ============================= */
-        workoutData.length = 0;
+        window.workoutData.length = 0;
         autoStartEnabled = false;
         mondayTimes = [];
         tueWedTimes = [];
@@ -1038,7 +1038,7 @@ for (const r of rows) {
 
     // ---------- TRUE EMPTY ROW ----------
     if (!r || r.length === 0) {
-        workoutData.push({
+        window.workoutData.push({
             type: "break",
             breakSec: breakDuration
         });
@@ -1055,7 +1055,7 @@ for (const r of rows) {
 
     // ---------- BULLETPROOF BLANK ROW ----------
     if (isEffectivelyBlankRow(r)) {
-        workoutData.push({
+        window.workoutData.push({
             type: "break",
             breakSec: breakDuration
         });
@@ -1066,7 +1066,7 @@ for (const r of rows) {
     if (firstCell.replace(/\s+/g, "") === "break") {
         const breakSec = parseSheetNumber(r[10], breakDuration);
 
-        workoutData.push({
+        window.workoutData.push({
             type: "break",
             breakSec
         });
@@ -1188,7 +1188,7 @@ for (const r of rows) {
         const rotateSec = parseSheetNumber(r[9]);
         const breakSec = parseSheetNumber(r[10], breakDuration);
 
-       workoutData.push({ 
+       window.workoutData.push({ 
     type: "set",
 
     coreLift: clean(r[1]),
@@ -1217,7 +1217,7 @@ for (const r of rows) {
     }
 }
 
-        console.log("✅ Workout rows:", workoutData.length);
+        console.log("✅ Workout rows:", window.workoutData.length);
         console.log("✅ Auto start:", autoStartEnabled);
 
         preloadFirstSet();
@@ -1235,12 +1235,12 @@ originalTotalSeconds = finalTotal;
 
 updateTotalDisplay();
 
-      console.log("✅ Final workoutData:", workoutData);
+      console.log("✅ Final window.workoutData:", window.workoutData);
 
 // 🔥 FORCE UI TO LOAD FIRST SET
-if (workoutData.length > 0) {
-    currentSet = 1;
-    displaySetNumber = 1;
+if (window.workoutData.length > 0) {
+    displaySetNumber = 0;
+currentSet = 0;
 
     loadSetData(1);
     updatePhaseDisplay();
@@ -1277,8 +1277,8 @@ if (workoutData.length > 0) {
   function getNextSetIndex() {
 
     // Start searching AFTER currentSet
-    for (let i = currentSet; i < workoutData.length; i++) {
-        if (workoutData[i].type === "set") {
+    for (let i = currentSet; i < window.workoutData.length; i++) {
+        if (window.workoutData[i].type === "set") {
             return i + 1; // convert to 1-based index
         }
     }
@@ -1294,7 +1294,7 @@ if (workoutData.length > 0) {
 
   function getWorkDuration() {
 
-    const currentItem = workoutData[currentSet - 1] || {};
+    const currentItem = window.workoutData[currentSet - 1] || {};
 
     // 1️⃣ per-set override
     if (currentItem?.workSec) {
@@ -1444,7 +1444,7 @@ function tick() {
 
         rotationCount = 0;
 
-        const nextItem = workoutData[currentSet] || null;
+        const nextItem = window.workoutData[currentSet] || null;
 
         // 🔴 no more items
         if (!nextItem) {
@@ -1489,7 +1489,7 @@ function tick() {
 
         case "break": {
 
-            const nextItem = workoutData[currentSet] || null;
+            const nextItem = window.workoutData[currentSet] || null;
 
             if (!nextItem) {
                 workoutComplete();
@@ -1674,7 +1674,7 @@ function speakBreakPrep() {
 function getRestDuration() {
 
     // 1️⃣ per-set override
-    const currentItem = workoutData[currentSet - 1] || {}; // ✅ safer
+    const currentItem = window.workoutData[currentSet - 1] || {}; // ✅ safer
     if (currentItem.rotateSec) {
         console.log("⏱ Using per-set rotate:", currentItem.rotateSec);
         return currentItem.rotateSec;
@@ -1746,7 +1746,7 @@ function resetCenterClock() {
 
 function loadSetData(setNumber) {
 
-    const workout = workoutData[setNumber - 1];
+    const workout = window.workoutData[setNumber - 1];
 
     if (!workout || workout.type !== "set") return;
 
