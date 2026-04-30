@@ -993,6 +993,11 @@ async function loadWorkout() {
     try {
         const config = window.SCHOOL_CONFIG;
 
+      if (!config) {
+    console.error("❌ No SCHOOL_CONFIG found");
+    return;
+}
+
 const response = await fetch(
 `${config.dataURL}?school=${config.key}&type=workout`
 );
@@ -1783,11 +1788,12 @@ window.addEventListener("keydown", (e) => {
    INITIAL PAGE LOAD
 ====================================================== */
 
-window.addEventListener("unhandledrejection", e => {
-    console.warn("Unhandled promise:", e.reason);
-});
+window.addEventListener("DOMContentLoaded", async () => {
 
-window.addEventListener("DOMContentLoaded", () => {
+    // 🔥 WAIT FOR THEME + CONFIG TO LOAD
+    const config = await window.APP_READY;
+
+    console.log("✅ SCHOOL CONFIG READY:", config);
 
     applyDaySpecificClassLength();
 
@@ -1795,7 +1801,8 @@ window.addEventListener("DOMContentLoaded", () => {
     originalTotalSeconds = classBlockLength;
     updateTotalDisplay();
 
-    loadWorkout();
+    // 🔥 NOW SAFE TO LOAD WORKOUT
+    await loadWorkout();
 
     // auto detect if class already started
     setTimeout(autoDetectActiveClass, 2000);
