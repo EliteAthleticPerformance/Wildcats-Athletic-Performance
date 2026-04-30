@@ -478,11 +478,12 @@ body {
 </div>
 
 <script>
-console.log("🔥 SCRIPT STARTED");  
+console.log("🔥 SCRIPT STARTED"); 
+  console.log("STEP 1");
 
   
 /* ===================== STATE ===================== */
-
+console.log("STEP 2");
 let timer = null;
 let timeLeft = 0;
 let totalSeconds = 0;
@@ -543,7 +544,7 @@ let onBreak = false;
 let selectedVoice = null;
 let displaySetNumber = 1;
 
-  console.log("🔥 MID SCRIPT1");
+  
 
 /* ===================== UTIL ===================== */
 
@@ -551,7 +552,7 @@ function goFullscreen() {
     document.documentElement.requestFullscreen();
 }
 
-  console.log("🔥 MID SCRIPT2");
+  
 
 /* ======================================================
    START / STOP + TOTAL TIME CALCULATION
@@ -562,7 +563,7 @@ function getTotalSets() {
     return workoutData.filter(item => item.type === "set").length;
 }
 
-  console.log("🔥 MID SCRIPT3");
+  
 
 /* ======================================================
    RESET STATE (NEW - SAFE INITIALIZATION)
@@ -574,7 +575,7 @@ function resetWorkoutState() {
     currentSet = 1;
 }
 
-console.log("🔥 MID SCRIPT4");
+
   
 /* ======================================================
    APPLY DAY-SPECIFIC CLASS LENGTH
@@ -598,7 +599,7 @@ function applyDaySpecificClassLength() {
     console.log("📊 Thu/Fri minutes:", thuFriMinutes);
 }
 
-  console.log("🔥 MID SCRIPT5");
+  
 
 /* ======================================================
    CALCULATE TOTAL CLASS TIME
@@ -655,7 +656,7 @@ function calculateTotalTime() {
     return classBlockLength;
 }
 
-console.log("🔥 MID SCRIPT6");
+
   
 function preciseTick() {
 
@@ -678,7 +679,7 @@ function preciseTick() {
 
 }
 
-  console.log("🔥 MID SCRIPT7");
+  
 
 function startTimer() {
 
@@ -699,7 +700,7 @@ function startTimer() {
         return;
     }
 
-  console.log("🔥 MID SCRIPT");
+  
   
     /* ---------- START STATE ---------- */
     isRunning = true;
@@ -735,7 +736,7 @@ document.getElementById("startBtn").innerText = "STOP";
     timer = setTimeout(preciseTick, 1000);
 }
 
-console.log("🔥 MID SCRIPT8");
+
   
 /* ---------- AUTO START ---------- */
 
@@ -763,7 +764,7 @@ function getEffectiveNow() {
     return new Date();
 }
 
-  console.log("🔥 MID SCRIPT9");
+ 
 
 function autoDetectActiveClass() {
 
@@ -808,7 +809,7 @@ function autoDetectActiveClass() {
     }
 }
 
-  console.log("🔥 MID SCRIPT10");
+  
 
 function startAutoScheduler() {
 
@@ -877,7 +878,7 @@ function startAutoScheduler() {
     }, 1000);
 }
 
-  console.log("🔥 MID SCRIPT11");
+  
   
 /* ======================================================
    LOAD WORKOUT FROM GOOGLE SHEETS — CLEAN + BULLETPROOF
@@ -898,7 +899,7 @@ function previewNextSet() {
     }
 }
 
-console.log("🔥 MID SCRIPT12");
+
   
 /* ======================================================
    ROBUST CSV PARSER
@@ -955,7 +956,7 @@ function parseCSV(text) {
     return rows;
 }
 
-  console.log("🔥 MID SCRIPT14");
+  
   
 /* ======================================================
    SAFE NUMBER PARSER
@@ -973,12 +974,12 @@ function parseSheetNumber(val, fallback = null) {
     return isNaN(num) ? fallback : num;
 }
 
-  console.log("🔥 MID SCRIPT15");
+  
   
 /* ======================================================
    MAIN LOADER
 ====================================================== */
-
+console.log("STEP 3");
 function isEffectivelyBlankRow(row) {
     if (!row || row.length === 0) return true;
 
@@ -1012,7 +1013,7 @@ function getSheetGid() {
 }
 
   
-  console.log("🔥 ABOUT TO DEFINE loadWorkout");;
+  console.log("STEP 4 — BEFORE LOADWORKOUT");
 window.loadWorkout = async function loadWorkout() {
     
 
