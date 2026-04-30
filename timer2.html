@@ -1,0 +1,2034 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type='text/javascript' >
+const lsijVersion = 1;
+
+
+
+class Flags {
+	constructor(url, terms) {
+		this.url = url;
+		this.matched = {};
+
+		this.terms = [];
+		terms.forEach((term) => {
+			let s = term.replace(/[\]{}?^$().*\\+|[]/g, '\\$&');
+			s = s.replace(/\\\*/g, '.*');
+			s = s.replace(/\\\?/g, '.');
+			let regex = new RegExp('\\b' + s + '\\b', 'gi');
+			this.terms.push({term: term, regex: regex});
+		});
+	}
+
+	report(flags) {
+        console.debug('[LS Filter] flag report');
+		if (!flags.length)
+            return;
+
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', document.location.origin + '/dd4ad7d21f7b6024c47c51c8626bfd5a0ccacff265ed59a9f866c4fa35e6e399/log_flag', true);
+		console.debug('[LS Filter] sending -> ', flags);
+		xhr.send(JSON.stringify({
+			url: this.url.href,
+			flags: flags,
+			at_epoch_ms: Date.now()
+		}));
+	}
+
+	matchTerms(input, flagAll) {
+		const matches = [];
+		this.terms.forEach((term) => {
+			const hits = input.match(term.regex);
+			if (!hits || !hits.length)
+				return;
+
+			let added = false;
+			if (typeof(this.matched[term.term]) === 'undefined')
+				added = true
+
+			let count = hits.length;
+			if (!added)
+				count -= this.matched[term.term];
+
+			this.matched[term.term] = hits.length;
+
+			if (added || flagAll)
+				matches.push([term.term, count]);
+		});
+		return matches;
+	}
+
+	scanIntentValue(value) {
+		const matches = this.matchTerms(value, true);
+		const changes = [];
+		matches.forEach((match) => {
+			match[2] = true; // mark as user entered
+			changes.push(match);
+		});
+
+		if (changes.length)
+			this.report(changes);
+	}
+
+	scanIntentValues(values) {
+		values.forEach((value) => {
+			this.scanIntentValue(value);
+		});
+	}
+
+	scanIntentEvent(event) {
+		switch (event.target.tagName.toLowerCase()) {
+		case 'input':
+			let type = event.target.type || 'text';
+			type = type.toLowerCase();
+
+			// Dont scan password fields
+			if (type === 'password')
+				return;
+			this.scanIntentValue(event.target.value);
+			break;
+		case 'textarea':
+			this.scanIntentValue(event.target.value);
+			break;
+		}
+	}
+
+	scanIntent(event) {
+		if (typeof(gatherIntent) === 'function') {
+			const intent = gatherIntent();
+			if (intent.length)
+				this.scanIntentValues(intent);
+		}
+	}
+
+	onChange(event) {
+		this.scanIntentEvent(event);
+	}
+
+	onKeyup(event) {
+		this.scanIntentEvent(event);
+	}
+
+	bindDOM() {
+		document.addEventListener('change', this.onChange.bind(this));
+		document.addEventListener('keyup', this.onKeyup.bind(this));
+		setInterval(() => {
+			this.scanIntent();
+		}, 1000);
+	}
+}
+
+const initFlagScanning = function(terms) {
+	if (!terms.length)
+		return;
+
+	console.debug('[LS Filter] init flag scanning');
+	const a = document.createElement('A');
+	a.href = window.location.href;
+	const flags = new Flags(a, terms);
+	
+	console.debug('[LS Filter] flagging intent');
+	if (typeof(initGatherIntent) === 'function')
+		initGatherIntent();
+
+	flags.bindDOM();
+	
+};
+
+initFlagScanning(["Anarchist cookbook","Become a terrorist","Binge and purge","binging and purging","Bitch","Bong rips","Bulimia ","Buy alcohol underage","Buy gun","Buy knives","commit suicide","Cock","Cunt","Cutting yourself","Dumb bitch","Dumbass","Dyke","Faggot","Gun in school","Fuck you","Heroin","Homemade bomb","How to hang yourself","How to become anorexic","How to get revenge","How to join a gang","How to join ISIS","How to kill","How to make myself throw up","How to sext","How to sneak things past security","I hate myself","I want to cut myself","kill you","Kill myself","Make a bomb","Make a bong","Murder suicide","My life is shit","My life is worthless","Naked girls","Naked pics","nigga","Nigger","Pipe bomb","Porn","Pussy","Queer","Rape","Retard","Sex online","Slut","Smoke weed","Sneak gun in school","Suicide bomb","Suicide by cop","Suicide vest","Where to buy drugs","Whore","Blow up school","I want to die","Suicide","White pride","how to get rid of search history","delete search history","delete history"]);
+
+function checkCurrentSite(yt, url) {
+  const xhr = new XMLHttpRequest();
+  const body = JSON.stringify({
+    url: url || window.location.href,
+    youtube: yt
+  });
+  console.log('[LS Filter] reporting ->', body);
+  const checkUrl = document.location.origin + '/dd4ad7d21f7b6024c47c51c8626bfd5a0ccacff265ed59a9f866c4fa35e6e399/log';
+  xhr.open('POST', checkUrl, true);
+  xhr.send(body);
+  xhr.onreadystatechange = function () {
+    if (this.status === 200 && xhr.responseText) {
+      const score = JSON.parse(xhr.responseText);
+      console.log('[LS Filter] score ->', score.allow);
+      if (score.redirect) {
+        window.location.href = score.redirect;
+        hardBlock();
+      }
+    }
+  };
+}
+
+let hardBlockPolicy;
+function getHardBlockPolicy() {
+  if (typeof(trustedTypes) !== 'undefined' && !hardBlockPolicy) {
+    hardBlockPolicy = trustedTypes.createPolicy('hardBlock', {
+      createHTML: (string) => string
+    });
+  }
+  return hardBlockPolicy;
+}
+
+function hardBlock() {
+  stopVideo();
+  const stopInt = setInterval(stopVideo, 500);
+  setTimeout(() => {
+    const policy = getHardBlockPolicy();
+    if (policy) {
+      document.body.innerHTML = policy.createHTML('<img src="/dd4ad7d21f7b6024c47c51c8626bfd5a0ccacff265ed59a9f866c4fa35e6e399/blocked-image-search.png" style="width: 100%; height: 100%">');
+    } else {
+      document.body.innerHTML = '<img src="/dd4ad7d21f7b6024c47c51c8626bfd5a0ccacff265ed59a9f866c4fa35e6e399/blocked-image-search.png" style="width: 100%; height: 100%">';
+    }
+    clearInterval(stopInt);
+  }, 3000)
+}
+
+function stopVideo() {
+  const ea = document.getElementsByTagName('video');
+  for (i in ea) {
+    if (typeof(ea[i].pause) !== 'function') {
+      continue;
+    }
+    if (!ea[i].paused) {
+        console.debug('[LS Filter] pause video');
+        ea[i].pause();
+    }
+  }
+}
+
+function googleVideo() {
+  if (window.location.href.match(/google\.com\/search\?/)) {
+    const vidMatcher = /google\.com\/search\?.*vid:([^#\&\?]{11})/;
+    let prevVideo;
+    new MutationObserver(function() {
+      console.log('[LS Filter] MutationObserver');
+      let video;
+      let m = window.location.href.match(vidMatcher)
+      if (m) {
+        video = m[1];
+      }
+      if (video === prevVideo) { return; }           
+      console.log('[LS Filter] scoring video ->', video);
+      prevVideo = video;
+      checkCurrentSite(true, 'https://www.youtube.com/watch?v=' + video);
+    }).observe(document, {subtree: true, childList: true});
+  }
+}
+
+function onLoad() {
+  console.log('[LS Filter] loaded');
+  if (window.top === window.self) {
+    console.log('[LS Filter] top window: ' + window.location.href);
+    googleVideo();
+  }
+}
+
+onLoad();
+
+</script>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+
+<title>Harrisonville Wildcats | 4 Quadrant Training Timer</title>
+
+<!-- ✅ LOAD THEME ENGINE FIRST -->
+<script src="js/themeLoader.js"></script>
+
+<!-- ✅ APPLY THEME -->
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const school = params.get("school") || sessionStorage.getItem("school") || "harrisonville";
+  sessionStorage.setItem("school", school);
+
+  let theme = null;
+try {
+  theme = JSON.parse(sessionStorage.getItem("theme-" + school));
+} catch (e) {}
+
+  if (theme) {
+    const root = document.documentElement;
+
+    root.style.setProperty("--primary", theme.primary);
+    root.style.setProperty("--primaryLight", theme.primaryLight);
+    root.style.setProperty("--primaryDark", theme.primaryDark);
+    root.style.setProperty("--secondary", theme.secondary);
+    root.style.setProperty("--secondaryLight", theme.secondaryLight);
+    root.style.setProperty("--background", theme.background);
+  }
+})();
+</script>
+
+<style>
+
+:root {
+    /* ✅ Dynamic theme variables (controlled by themeLoader) */
+    --primary: #505152;
+    --primaryLight: #B0B7BE;
+    --primaryDark: #222;
+    --secondary: #888;
+    --secondaryLight: #aaa;
+
+    /* ✅ Legacy support (kept so nothing breaks) */
+    --royal:#505152;
+    --silver:#B0B7BE;
+}
+
+
+/* ===================== MODE STATES ===================== */
+/* 🔥 These stay hardcoded intentionally (performance + clarity) */
+
+.workMode {
+    border-color:#32CD32 !important;
+    background:radial-gradient(circle at center,#32CD32 0%,#0a2 60%,#000 100%);
+    box-shadow:0 0 20px #32CD32, 0 0 50px #32CD32, 0 0 80px #32CD32;
+}
+
+.rotateMode {
+    border-color:#FFD700 !important;
+    background:radial-gradient(circle at center,#FFD700 0%,#b8860b 60%,#000 100%);
+    box-shadow:0 0 20px #FFD700, 0 0 50px #FFD700, 0 0 80px #FFD700;
+}
+
+.breakMode {
+    border-color:#FF0000 !important;
+    background:radial-gradient(circle at center,#FF1A1A 0%,#8B0000 60%,#000 100%);
+    box-shadow:0 0 30px #FF0000, 0 0 70px #FF0000, 0 0 120px #FF0000;
+}
+
+.dressMode {
+    border-color:#00E5FF !important;
+    background:radial-gradient(circle at center,#00E5FF 0%,#008B9A 60%,#000 100%);
+    box-shadow:0 0 25px #00E5FF, 0 0 60px #00E5FF, 0 0 110px #00E5FF;
+}
+
+.stretchMode {
+    border-color:#FF8C00 !important;
+    background:radial-gradient(circle at center,#FFA500 0%,#CC7000 60%,#000 100%);
+    box-shadow:0 0 25px #FFA500, 0 0 60px #FF8C00, 0 0 110px #FF8C00;
+}
+
+
+/* ===================== BASE ===================== */
+
+html, body {
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+body {
+    margin:0;
+
+    /* 🔥 NOW THEME-AWARE (but still defaults to black) */
+    background:var(--background, #000);
+
+    color:#fff;
+    font-family:'Arial Black', sans-serif;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+
+/* ===================== HEADER ===================== */
+
+#schoolHeader {
+    position:relative;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:5px;
+    padding:20px 25px;
+
+    /* 🔥 THEME-AWARE GRADIENT */
+    background:linear-gradient(
+        90deg,
+        #000,
+        var(--primaryDark),
+        var(--primaryLight),
+        var(--primaryDark),
+        #000
+    );
+
+    border-top:4px solid #fff;
+    border-bottom:6px solid #fff;
+    box-shadow:0 8px 25px rgba(0,0,0,0.8);
+    overflow:hidden;
+}
+
+.header-left,
+.header-center,
+.header-right {
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+
+/* ===================== WATERMARK ===================== */
+
+#schoolHeader::before {
+    /* 🔥 Leave static for now (we’ll make this dynamic later if you want) */
+    content:"STRENGTH  -  SPEED  -  AGILITY  -  POWER  -  EXPLOSIVENESS";
+
+    position:absolute;
+    white-space:nowrap;
+    font-size:140px;
+    font-weight:900;
+    letter-spacing:10px;
+
+    /* 🔥 Slightly theme-influenced glow */
+    color:rgba(255,255,255,0.06);
+
+    top:50%;
+    transform:translateY(-50%);
+    animation:scrollWatermark 25s linear infinite;
+    pointer-events:none;
+    z-index:0;
+}
+
+
+/* ===================== SHIMMER ===================== */
+
+#schoolHeader::after {
+    content:"";
+    position:absolute;
+    top:0;
+    left:-50%;
+    width:50%;
+    height:100%;
+
+    /* 🔥 THEME-AWARE SHIMMER */
+    background:linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--primary) 40%, transparent),
+        rgba(255,255,255,0.1),
+        color-mix(in srgb, var(--primary) 40%, transparent)
+    );
+
+    transform:skewX(-25deg);
+    animation:shimmer 3s infinite;
+    z-index:1;
+}
+
+@keyframes shimmer {
+    0% { left:-50%; }
+    100% { left:150%; }
+}
+
+
+/* ===================== CENTER PULSE ===================== */
+
+@keyframes centerPulse {
+    0% {
+        transform:translate(-50%, -50%) scale(1);
+        filter:brightness(1);
+    }
+    50% {
+        transform:translate(-50%, -50%) scale(1.06);
+        filter:brightness(1.25);
+    }
+    100% {
+        transform:translate(-50%, -50%) scale(1);
+        filter:brightness(1);
+    }
+}
+
+#schoolHeader span {
+    font-size:9vh;
+    font-weight:900;
+    letter-spacing:2px;
+}
+
+
+  /* ===================== 3D CHAMPIONSHIP TEXT ===================== */
+
+#headerMotto {
+    font-size:9vh;
+    font-weight:900;
+    letter-spacing:2px;
+    position:relative;
+    color:#f5f9ff;
+    text-shadow:
+    0 1px 0 #111,
+    0 2px 0 #111,
+    0 3px 0 #111,
+    0 4px 0 #111,
+    0 5px 0 #111,
+    0 6px 8px color-mix(in srgb, var(--primary) 45%, transparent);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+}
+
+
+/* ===================== LOGO BASE ===================== */
+
+#teamLogo {
+    position:relative;
+    z-index:2;
+    animation:none;
+    transition:filter 0.25s ease;
+}
+
+.logoDefault {
+    filter:
+        drop-shadow(0 0 6px #ffffff)
+        drop-shadow(0 0 16px var(--primary));
+}
+
+.logoWork {
+    filter:
+        drop-shadow(0 0 10px #32CD32)
+        drop-shadow(0 0 28px #32CD32)
+        drop-shadow(0 0 50px #32CD32);
+}
+
+
+.logoRotate {
+    filter:
+        drop-shadow(0 0 10px #FFD700)
+        drop-shadow(0 0 28px #FFD700)
+        drop-shadow(0 0 50px #FFD700);
+}
+
+.logoBreak {
+    filter:
+        drop-shadow(0 0 12px #FF1A1A)
+        drop-shadow(0 0 32px #FF0000)
+        drop-shadow(0 0 60px #FF0000);
+}
+
+@keyframes logoPulse {
+    0% { transform:scale(1); }
+    50% { transform:scale(1.12); }
+    100% { transform:scale(1); }
+}
+
+
+/* ===================== TOOLBAR ===================== */
+
+#toolbar {
+    display:flex;
+    gap:15px;
+    padding:15px;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(
+    180deg,
+    #000,
+    var(--primaryDark)
+);
+    border-bottom:4px solid var(--silver);
+}
+
+#toolbar input {
+    width:50px;
+    text-align:center;
+    font-weight:bold;
+    border-radius:4px;
+    border:2px solid var(--secondaryLight);
+    background:#000;
+    color:#fff;
+}
+
+#toolbar button {
+    padding:10px 20px;
+    font-weight:bold;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    background:var(--primary);
+    color:#fff;
+}
+
+#toolbar button:hover {
+    background:var(--primaryDark);
+}
+
+
+/* ===================== GRID ===================== */
+
+#display {
+    position:absolute;
+    top:120px;
+    bottom:0;
+    left:0;
+    right:0;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:2vh;
+    padding:2vh;
+}
+
+.quad {
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:10px;
+}
+
+.quad-title { font-size:3.5vh; }
+.quad-text  { font-size:6.5vh; font-weight:900; }
+
+.q1{background:#000;color:#fff;border:8px solid var(--silver);}
+.q2{background:#fff;color:#000;border:8px solid var(--silver);}
+.q3 {
+    background:var(--primary);
+    color:#fff;
+    border:8px solid var(--secondaryLight);
+}
+.q4{background:#555555d5;color:#fff;border:8px solid var(--silver);}
+
+  
+/* ===================== CENTER CLOCK ===================== */
+
+#center {
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    width:clamp(180px, 24vmin, 420px);
+    height:clamp(180px, 24vmin, 420px);
+    border:clamp(6px, 1vmin, 16px) solid var(--silver);
+    border-radius:50%;
+    background:radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--primary) 25%, #111),
+    #000 70%
+);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    transition:all 0.3s ease;
+
+    /* ⭐ NEW */
+    animation:centerPulse 1.6s ease-in-out infinite;
+}
+
+#clock {
+    font-size:clamp(48px, 8vmin, 140px);
+    font-weight:900;
+    letter-spacing:2px;
+    font-variant-numeric:tabular-nums;
+}
+
+#phase {
+    font-size:clamp(14px, 2.2vmin, 36px);
+    font-weight:900;
+    text-align:center;
+    margin-top:0.5vh;
+    white-space:pre-line;
+}
+
+.smallPhase { font-size:1.4vh !important; }
+
+
+/* ===================== ANIMATIONS ===================== */
+
+@keyframes scrollWatermark {
+    0%   { transform:translateY(-50%) translateX(100%); }
+    100% { transform:translateY(-50%) translateX(-100%); }
+}
+</style>
+</head>
+
+<body>
+
+<div id="schoolHeader">
+    <span id="totalTime">00:00</span>
+
+    <img id="teamLogo"
+         src="08e2c126-be8e-4415-8531-6140d87ed954.png"
+         height="80">
+
+    <span id="headerMotto">Speed - Strength - Agility</span>
+</div>
+
+<div id="toolbar" style="display:none;">
+    WORK:
+    <input type="number" id="workTime" value="10" min="1" onchange="syncTime()">
+
+    REST:
+    <input type="number" id="restTime" value="10" min="1" onchange="syncTime()">
+
+    <button onclick="startTimer()" id="startBtn">START</button>
+
+    SET:
+    <input type="number" id="of" value="3" min="1">
+</div>
+
+<div id="display">
+
+    <div class="quad q1" id="q1">
+        <div class="quad-title">Core Lift</div>
+        <div class="quad-text">Squats</div>
+        <div class="quad-text">Reps: 10</div>
+        <div class="quad-text">Percentage: 65</div>
+    </div>
+
+    <div class="quad q2" id="q2">
+        <div class="quad-title">Aux Lift</div>
+        <div class="quad-text">Aux Lift</div>
+        <div class="quad-text">Reps: 10</div>
+    </div>
+
+    <div class="quad q3" id="q3">
+        <div class="quad-title">REST</div>
+        <div class="quad-text">Spot</div>
+    </div>
+
+    <div class="quad q4" id="q4">
+        <div class="quad-title">Movement / Stability Skill</div>
+        <div class="quad-text">Movement</div>
+        <div class="quad-text">Reps/Time:</div>
+    </div>
+
+    <div id="center">
+        <div id="clock">30</div>
+        <div id="phase">WORK</div>
+    </div>
+
+</div>
+
+<script>
+
+  
+/* ===================== STATE ===================== */
+
+let timer = null;
+let timeLeft = 0;
+let totalSeconds = 0;
+let originalTotalSeconds = 0;
+let isRunning = false;
+let currentPhase = "idle";
+let audioCtx = null;
+let lastCountdownSpoken = null;
+let phaseJustChanged = false;
+let nextTickTime = null;
+
+let workoutData = [];
+
+/* ✅ safer global access (no desync risk) */
+Object.defineProperty(window, "workoutData", {
+    get: () => workoutData
+});
+
+
+/* ===================== SETS ===================== */
+
+let currentSet = 1;
+let maxSets = 1;
+let rotationCount = 0;
+const maxRotations = 4;
+
+
+/* ===================== PERIOD AUTO START ===================== */
+
+let autoStartEnabled = false;
+let mondayTimes = [];
+let tueWedTimes = [];
+let thuFriTimes = [];
+let autoStartTimer = null;
+let lastAutoStartMinute = null;
+let todayOnlyMode = false;
+let forceDateString = null;
+let sheetWorkDuration = null;
+let sheetRotateDuration = null;
+let manualWorkoutOverride = null;
+
+
+/* ===================== DURATIONS ===================== */
+
+let mondayMinutes = 45;
+let tueWedMinutes = 90;
+let thuFriMinutes = 90;
+let classBlockLength = 90 * 60;
+let dressOutDuration = 600;
+let dynamicStretchDuration = 600;
+let breakDuration = 120;
+let cooldownDuration = 0;
+
+
+/* ===================== FLAGS ===================== */
+
+let dressWarningSpoken = false;
+let onBreak = false;
+let selectedVoice = null;
+let displaySetNumber = 1;
+
+
+/* ===================== UTIL ===================== */
+
+function goFullscreen() {
+    document.documentElement.requestFullscreen();
+}
+
+
+/* ======================================================
+   START / STOP + TOTAL TIME CALCULATION
+====================================================== */
+
+/* ---------- COUNT TOTAL SETS ---------- */
+function getTotalSets() {
+    return workoutData.filter(item => item.type === "set").length;
+}
+
+
+/* ======================================================
+   RESET STATE (NEW - SAFE INITIALIZATION)
+====================================================== */
+
+function resetWorkoutState() {
+    displaySetNumber = 1;
+    rotationCount = 0;
+    currentSet = 1;
+}
+
+
+/* ======================================================
+   APPLY DAY-SPECIFIC CLASS LENGTH
+====================================================== */
+
+function applyDaySpecificClassLength() {
+    const now = getEffectiveNow();
+    const day = now.getDay(); // 0=Sun
+
+    let minutes = mondayMinutes; // safe default
+
+    if (day === 1) minutes = mondayMinutes;
+    else if (day === 2 || day === 3) minutes = tueWedMinutes;
+    else if (day === 4 || day === 5) minutes = thuFriMinutes;
+
+    classBlockLength = minutes * 60;
+
+    console.log("📅 Using class length:", minutes, "minutes");
+    console.log("📊 Monday minutes:", mondayMinutes);
+    console.log("📊 Tue/Wed minutes:", tueWedMinutes);
+    console.log("📊 Thu/Fri minutes:", thuFriMinutes);
+}
+
+
+/* ======================================================
+   CALCULATE TOTAL CLASS TIME
+====================================================== */
+function calculateTotalTime() {
+
+    if (!workoutData.length) {
+        console.warn("Workout still loading...");
+        return;
+    }
+
+    const work = parseInt(document.getElementById("workTime").value, 10) || 0;
+    const rest = parseInt(document.getElementById("restTime").value, 10) || 0;
+
+    let prepTotal = 0;
+    let workoutTotal = 0;
+    let breakTotal = 0;
+
+    /* ---------- PREP BLOCKS ---------- */
+    prepTotal += dressOutDuration;
+    prepTotal += dynamicStretchDuration;
+
+    workoutData.forEach(item => {
+
+        if (item.type === "set") {
+
+            for (let i = 0; i < maxRotations; i++) {
+                workoutTotal += work;
+
+                if (i < maxRotations - 1) {
+                    workoutTotal += rest;
+                }
+            }
+        }
+
+        if (item.type === "break") {
+            breakTotal += item.breakSec || breakDuration;
+        }
+
+    });
+
+    /* ---------- TOTAL WORKOUT BEFORE COOLDOWN ---------- */
+    const workoutBlock = prepTotal + workoutTotal + breakTotal;
+
+    /* ---------- COOLDOWN CALCULATION ---------- */
+    cooldownDuration = Math.max(
+        classBlockLength - workoutBlock,
+        0
+    );
+
+    console.log("Cooldown calculated:", cooldownDuration);
+
+    /* ---------- FINAL TOTAL (ALWAYS CLASS LENGTH) ---------- */
+    return classBlockLength;
+}
+
+function preciseTick() {
+
+    if (!isRunning) return;
+
+    const now = Date.now();
+
+    if (!nextTickTime) {
+        nextTickTime = now + 1000;
+    }
+
+    // catch up if browser slept
+    while (nextTickTime <= now) {
+        tick();
+        nextTickTime += 1000;
+    }
+
+    const delay = Math.max(0, nextTickTime - now);
+    timer = setTimeout(preciseTick, delay);
+
+}
+
+function startTimer() {
+
+    // Safety: require workout
+    if (!workoutData.length) {
+        console.warn("Workout not loaded yet.");
+        return;
+    }
+
+    // Initialize audio once
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    // Toggle stop if already running
+    if (isRunning) {
+        stopAllTimers();
+        return;
+    }
+
+  
+    /* ---------- START STATE ---------- */
+    isRunning = true;
+    applyDaySpecificClassLength();
+
+// ⭐ Force fresh class time calculation
+totalSeconds = classBlockLength;
+originalTotalSeconds = classBlockLength;
+updateTotalDisplay();
+
+document.getElementById("startBtn").innerText = "STOP";
+
+    // FULL RESET
+    displaySetNumber = 1;
+    rotationCount = 0;
+    currentSet = 1;
+    dressWarningSpoken = false;
+    lastAutoStartMinute = null;
+
+    preloadFirstSet();
+
+    /* ---------- START WITH DRESS PHASE ---------- */
+    currentPhase = "dress";
+    timeLeft = dressOutDuration;
+
+    const classLimit = classBlockLength;
+    
+    updatePhaseDisplay();
+    updateClock();
+    updateTotalDisplay();
+
+    nextTickTime = Date.now() + 1000;
+    timer = setTimeout(preciseTick, 1000);
+}
+
+/* ---------- AUTO START ---------- */
+
+function getEffectiveNow() {
+
+    // ⭐ FORCE_DATE override (LOCAL TIME SAFE)
+    if (forceDateString) {
+        const parts = forceDateString.split(/[T:\-]/);
+
+        if (parts.length >= 6) {
+            const forced = new Date(
+                Number(parts[0]),     // year
+                Number(parts[1]) - 1, // month
+                Number(parts[2]),     // day
+                Number(parts[3]),     // hour
+                Number(parts[4]),     // minute
+                Number(parts[5])      // second
+            );
+
+            // ✅ FIXED (proper Date validation)
+            if (!isNaN(forced.getTime())) return forced;
+        }
+    }
+
+    return new Date();
+}
+
+function autoDetectActiveClass() {
+
+    // ✅ FIXED (allow sync even if already running)
+    if (!autoStartEnabled) return;
+
+    const now = getEffectiveNow();
+    const day = now.getDay();
+
+    let todaySchedule = [];
+
+    if (day === 1) todaySchedule = mondayTimes;
+    else if (day === 2 || day === 3) todaySchedule = tueWedTimes;
+    else if (day === 4 || day === 5) todaySchedule = thuFriTimes;
+
+    for (const timeStr of todaySchedule) {
+
+        if (!timeStr || !timeStr.includes(":")) continue;
+
+        const [h, m] = timeStr.split(":").map(Number);
+
+        const start = new Date(now);
+        start.setHours(h, m, 0, 0);
+
+        const end = new Date(start.getTime() + classBlockLength * 1000);
+
+        if (now >= start && now < end) {
+
+            console.log("⚡ Class already in progress. Auto syncing timer.");
+
+            startTimer();
+
+            const elapsed = Math.floor((now - start) / 1000);
+
+            totalSeconds = Math.max(classBlockLength - elapsed, 1);
+            originalTotalSeconds = totalSeconds;
+
+            updateTotalDisplay();
+
+            break;
+        }
+    }
+}
+
+function startAutoScheduler() {
+
+    if (autoStartTimer) {
+        clearInterval(autoStartTimer);
+    }
+
+    autoStartTimer = setInterval(() => {
+
+        if (!autoStartEnabled) return;
+
+        const now = getEffectiveNow();
+        const day = now.getDay(); // 0=Sun, 1=Mon...
+
+        if (todayOnlyMode) {
+            const today = now.getDay();
+            if (today === 0 || today === 6) return; // block weekends
+        }
+
+        if (isRunning) return;
+
+        let todaySchedule = [];
+
+        if (day === 1) todaySchedule = mondayTimes;
+        else if (day === 2 || day === 3) todaySchedule = tueWedTimes;
+        else if (day === 4 || day === 5) todaySchedule = thuFriTimes;
+        else return; // weekend
+
+        for (const timeStr of todaySchedule) {
+
+            const parts = timeStr.split(":");
+            if (parts.length !== 2) continue;
+
+            const targetHour = parseInt(parts[0], 10);
+            const targetMinute = parseInt(parts[1], 10);
+
+            if (isNaN(targetHour) || isNaN(targetMinute)) continue;
+
+            // start within first 5 seconds of the minute
+            const currentMinuteStamp =
+                String(now.getHours()).padStart(2, "0") + ":" +
+                String(now.getMinutes()).padStart(2, "0");
+
+            const currentTotalSeconds =
+                now.getHours() * 3600 +
+                now.getMinutes() * 60 +
+                now.getSeconds();
+
+            const targetTotalSeconds =
+                targetHour * 3600 +
+                targetMinute * 60;
+
+            if (
+                currentTotalSeconds >= targetTotalSeconds &&
+                currentTotalSeconds < targetTotalSeconds + 5 &&
+                lastAutoStartMinute !== currentMinuteStamp
+            ) {
+                lastAutoStartMinute = currentMinuteStamp;
+
+                console.log("🔔 Auto starting:", timeStr);
+                startTimer();
+                break;
+            }
+        }
+
+    }, 1000);
+}
+
+  
+/* ======================================================
+   LOAD WORKOUT FROM GOOGLE SHEETS — CLEAN + BULLETPROOF
+====================================================== */
+
+function preloadFirstSet() {
+    if (!workoutData.length) return;
+    loadSetData(1);
+}
+
+function previewNextSet() {
+    if (!workoutData.length) return;
+
+    const nextItem = workoutData[currentSet] ?? null;
+
+    if (nextItem && nextItem.type === "set") {
+        loadSetData(currentSet + 1); // loadSetData is 1-based
+    }
+}
+
+  
+/* ======================================================
+   ROBUST CSV PARSER
+====================================================== */
+function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let cell = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        // escaped quote
+        if (char === '"' && inQuotes && next === '"') {
+            cell += '"';
+            i++;
+            continue;
+        }
+
+        // toggle quotes
+        if (char === '"') {
+            inQuotes = !inQuotes;
+            continue;
+        }
+
+        // comma separator
+        if (char === "," && !inQuotes) {
+            row.push(cell);
+            cell = "";
+            continue;
+        }
+
+        // row break
+        if ((char === "\n" || char === "\r") && !inQuotes) {
+            if (cell !== "" || row.length) {
+                row.push(cell);
+                rows.push(row);
+                row = [];
+                cell = "";
+            }
+            continue;
+        }
+
+        cell += char;
+    }
+
+    if (cell !== "" || row.length) {
+        row.push(cell);
+        rows.push(row);
+    }
+
+    return rows;
+}
+
+  
+/* ======================================================
+   SAFE NUMBER PARSER
+====================================================== */
+function parseSheetNumber(val, fallback = null) {
+    if (val === undefined || val === null) return fallback;
+
+    const cleaned = String(val)
+        .replace(/\r/g, "")
+        .trim();
+
+    if (!cleaned) return fallback;
+
+    const num = Number(cleaned);
+    return isNaN(num) ? fallback : num;
+}
+
+  
+/* ======================================================
+   MAIN LOADER
+====================================================== */
+
+function isEffectivelyBlankRow(row) {
+    if (!row || row.length === 0) return true;
+
+    return row.every(cell =>
+        String(cell ?? "")
+            .replace(/\u00A0/g, "") // non-breaking space
+            .replace(/\s/g, "")
+            .trim() === ""
+    );
+}
+
+  
+/* ======================================================
+   AUTO-DETECT WORKOUT BY DAY (ELITE)
+====================================================== */
+function getSheetGid() {
+    const params = new URLSearchParams(window.location.search);
+
+    // URL override still allowed
+    const urlGid = params.get("gid");
+    if (urlGid) return urlGid;
+
+    // Auto by day only
+    const today = new Date().getDay();
+
+    if (today === 1) return "1830705073";
+    if (today === 2 || today === 3) return "313721530";
+    if (today === 4 || today === 5) return "1752992010";
+
+    return "1830705073";
+}
+
+async function loadWorkout() {
+    console.log("🚀 loadWorkout started");
+
+    try {
+        const gid = getSheetGid();
+
+const response = await fetch(
+`https://docs.google.com/spreadsheets/d/e/2PACX-1vRjAVNz1buONnBF0Fkqse6QQwdpcreJdvdQGWiVNWp6UGewHgd-4f5uC0ZcyHhfRZxTU7BDC3_AjQA1/pub?gid=${gid}&single=true&output=csv`
+);
+
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+
+        const text = await response.text();
+
+        console.log("CSV length:", text.length);
+
+        const rows = parseCSV(text);
+
+        const DEBUG = true;
+
+        if (DEBUG) {
+        console.log("CSV preview:", text.slice(0,200));
+        console.log("First rows:", rows.slice(0,10));
+        }
+        console.log("Rows parsed:", rows.length);
+        
+
+        console.log("First 10 rows:", rows.slice(0, 10));
+
+        /* =============================
+           RESET GLOBALS
+        ============================= */
+        workoutData.length = 0;
+        autoStartEnabled = false;
+        mondayTimes = [];
+        tueWedTimes = [];
+        thuFriTimes = [];
+
+        const clean = v =>
+            String(v || "")
+                .replace(/\u00A0/g, "")
+                .replace(/\r/g, "")
+                .trim();
+
+      
+       /* =============================
+   PROCESS ROWS
+============================= */
+for (const r of rows) {
+
+    // ---------- TRUE EMPTY ROW ----------
+    if (!r || r.length === 0) {
+        workoutData.push({
+            type: "break",
+            breakSec: breakDuration
+        });
+        console.log("📥 Empty CSV row → break inserted");
+        continue;
+    }
+
+    const firstRaw = clean(r[0] ?? "");
+    const firstCell = firstRaw.toLowerCase();
+
+    // ---------- BULLETPROOF BLANK ROW ----------
+    if (isEffectivelyBlankRow(r)) {
+        workoutData.push({
+            type: "break",
+            breakSec: breakDuration
+        });
+        continue;
+    }
+
+    // ---------- EXPLICIT BREAK ----------
+    if (firstCell.replace(/\s+/g, "") === "break") {
+        const breakSec = parseSheetNumber(r[10], breakDuration);
+
+        workoutData.push({
+            type: "break",
+            breakSec
+        });
+
+        console.log("📥 Explicit break parsed:", breakSec);
+        continue;
+    }
+
+    // ---------- HEADER SKIP ----------
+    if (firstCell === "set" || firstCell === "sets") continue;
+
+    /* =================================================
+       CONFIG FLAGS
+    ================================================= */
+
+    if (firstCell === "auto_start") {
+        autoStartEnabled = clean(r[1]).toLowerCase() === "true";
+        continue;
+    }
+
+    if (firstCell === "today_only") {
+        todayOnlyMode = clean(r[1]).toLowerCase() === "true";
+        continue;
+    }
+
+    if (firstCell === "force_date") {
+        forceDateString = clean(r[1]) || null;
+        continue;
+    }
+
+    /* ---------- CLASS LENGTH BY DAY ---------- */
+
+    if (firstCell === "monday_minutes") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) mondayMinutes = v;
+        continue;
+    }
+
+    if (firstCell === "tuewed_minutes") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) tueWedMinutes = v;
+        continue;
+    }
+
+    if (firstCell === "thufri_minutes") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) thuFriMinutes = v;
+        continue;
+    }
+
+    /* ---------- SCHEDULE TIMES ---------- */
+
+    if (firstCell === "monday_times") {
+        mondayTimes = clean(r[1] || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean);
+        continue;
+    }
+
+    if (firstCell === "tuewed_times") {
+        tueWedTimes = clean(r[1] || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean);
+        continue;
+    }
+
+    if (firstCell === "thufri_times") {
+        thuFriTimes = clean(r[1] || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean);
+        continue;
+    }
+
+    /* ---------- GLOBAL TIMINGS ---------- */
+
+    if (
+        firstCell === "dress_seconds" ||
+        firstCell === "dress" ||
+        firstCell === "get_dressed" ||
+        firstCell === "get_dress"
+    ) {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) {
+            dressOutDuration = v;
+            console.log("📥 Dress time:", dressOutDuration);
+        }
+        continue;
+    }
+
+    if (firstCell === "stretch_seconds") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) {
+            dynamicStretchDuration = v;
+            console.log("📥 Stretch time:", dynamicStretchDuration);
+        }
+        continue;
+    }
+
+    if (firstCell === "break_seconds") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) breakDuration = v;
+        continue;
+    }
+}
+
+          
+            /* =================================================
+               FLEXIBLE SET DETECTION
+            ================================================= */
+
+            const looksLikeSetNumber =
+                /^\d+$/.test(firstCell) ||
+                /^\d+\.$/.test(firstCell) ||
+                /^set\s*\d*$/i.test(firstRaw);
+
+            if (looksLikeSetNumber) {
+
+                const workSec = parseSheetNumber(r[8]);
+                const rotateSec = parseSheetNumber(r[9]);
+                const breakSec = parseSheetNumber(r[10], breakDuration);
+
+                workoutData.push({
+                    type: "set",
+                    core: clean(r[1]),
+                    percent: clean(r[2]),
+                    reps: clean(r[3]),
+                    aux: clean(r[4]),
+                    auxReps: clean(r[5]),
+                    move: clean(r[6]),
+                    moveReps: clean(r[7]),
+                    workSec,
+                    rotateSec,
+                    breakSec
+                });
+
+                console.log("📥 Set parsed:", {
+                    set: firstRaw,
+                    workSec,
+                    rotateSec,
+                    breakSec
+                });
+
+                continue;
+            }
+        }
+
+        console.log("✅ Workout rows:", workoutData.length);
+        console.log("✅ Auto start:", autoStartEnabled);
+
+        preloadFirstSet();
+startAutoScheduler();
+
+// ⭐ Apply class minutes from worksheet
+applyDaySpecificClassLength();
+
+// ⭐ Recalculate preview total
+const planned = calculateTotalTime();
+const finalTotal = Math.min(planned, classBlockLength);
+
+totalSeconds = finalTotal;
+originalTotalSeconds = finalTotal;
+
+updateTotalDisplay();
+
+    } catch (err) {
+        console.error("❌ Failed to load workout:", err);
+    }
+}
+
+  
+/* ======================================================
+   STOP ALL TIMERS
+====================================================== */
+
+ function stopAllTimers() {
+
+    if (timer) {
+        clearTimeout(timer); // ✅ CORRECT for setTimeout loop
+        timer = null;
+    }
+
+    nextTickTime = null; // prevents drift on restart
+
+    isRunning = false;
+    document.getElementById("startBtn").innerText = "START";
+}
+
+/* ======================================================
+   GET NEXT SET INDEX (1-BASED)
+====================================================== */
+
+  function getNextSetIndex() {
+
+    // Start searching AFTER currentSet
+    for (let i = currentSet; i < workoutData.length; i++) {
+        if (workoutData[i].type === "set") {
+            return i + 1; // convert to 1-based index
+        }
+    }
+
+    // No more sets found
+    return null;
+}
+
+  
+/* ======================================================
+   WORK DURATION (seconds)
+====================================================== */
+
+  function getWorkDuration() {
+
+    const currentItem = workoutData[currentSet - 1] || {};
+
+    // 1️⃣ per-set override
+    if (currentItem?.workSec) {
+        console.log("⏱ Work time (set override):", {
+            set: currentSet,
+            value: currentItem.workSec
+        });
+        return currentItem.workSec;
+    }
+
+    // 2️⃣ sheet global override
+    if (sheetWorkDuration) {
+        console.log("⏱ Work time (sheet global):", sheetWorkDuration);
+        return sheetWorkDuration;
+    }
+
+    // 3️⃣ UI fallback
+    const val = parseInt(document.getElementById("workTime").value, 10);
+    const safeVal = isNaN(val) || val <= 0 ? 1 : val;
+
+    console.log("⏱ Work time (UI fallback):", safeVal);
+
+    return safeVal;
+}
+
+  
+/* ======================================================
+   MAIN TICK
+====================================================== */
+
+function tick() {
+
+    if (!isRunning) return;
+
+    phaseJustChanged = false;
+
+  
+    /* ======================================================
+       1️⃣ MASTER CLASS TIMER (authoritative)
+    ====================================================== */
+    if (totalSeconds <= 0) {
+        workoutFinishScreen();
+        return;
+    }
+
+    totalSeconds = Math.max(0, totalSeconds - 1);
+    updateTotalDisplay();
+
+  
+    /* ======================================================
+       2️⃣ PHASE TIMER
+    ====================================================== */
+   
+  timeLeft = Math.max(0, timeLeft - 1);
+
+  
+    /* ======================================================
+       3️⃣ DRESS WARNING (exact trigger)
+    ====================================================== */
+  
+  if (
+        currentPhase === "dress" &&
+        timeLeft === 120 &&
+        !dressWarningSpoken
+    ) {
+        speakDressWarning();
+        dressWarningSpoken = true;
+    }
+
+    
+    /* ======================================================
+       4️⃣ FINAL COUNTDOWN (no repeats)
+    ====================================================== */
+    
+  if (timeLeft >= 1 && timeLeft <= 5) {
+        if (lastCountdownSpoken !== timeLeft) {
+            speakNumber(timeLeft);
+            lastCountdownSpoken = timeLeft;
+        }
+    }
+
+    
+    /* ======================================================
+       5️⃣ UPDATE CLOCK
+    ====================================================== */
+    
+  updateClock();
+
+  
+    /* ======================================================
+       6️⃣ EXIT IF TIME REMAINS
+    ====================================================== */
+    
+  if (timeLeft > 0) return;
+
+    lastCountdownSpoken = null;
+
+    console.log("Set:", currentSet, "Rotation:", rotationCount);
+
+  
+    /* ======================================================
+       PHASE TRANSITIONS (STATE MACHINE)
+    ====================================================== */
+   
+  switch (currentPhase) {
+
+        case "dress":
+            currentPhase = "stretch";
+            timeLeft = dynamicStretchDuration;
+            dressWarningSpoken = false;
+            phaseJustChanged = true;
+            speakStretch();
+            break;
+
+        case "stretch":
+            currentPhase = "work";
+            rotationCount = 0;
+            currentSet = 1;
+            displaySetNumber = 1;
+
+            loadSetData(1);
+
+            timeLeft = getWorkDuration();
+            phaseJustChanged = true;
+            speakLift();
+            break;
+
+        case "work": {
+            rotateQuadrants();
+            rotationCount++;
+
+            currentPhase = "rotate";
+            timeLeft = getRestDuration();
+            phaseJustChanged = true;
+            speakRotate();
+            break;
+        }
+
+      
+        /* ---------- ROTATE → NEXT ---------- */
+      
+    case "rotate": {
+
+    const finishedRotations = rotationCount >= maxRotations;
+
+    if (finishedRotations) {
+
+        rotationCount = 0;
+
+        const nextItem = workoutData[currentSet] ?? null;
+
+        // 🔴 no more items
+        if (!nextItem) {
+            workoutComplete();
+            return;
+        }
+
+
+        // 🟡 break row
+        if (nextItem.type === "break") {
+
+            // advance pointer onto the break row
+            currentSet++;
+
+            currentPhase = "break";
+
+            timeLeft = Math.max(
+                1,
+                nextItem.breakSec || breakDuration
+            );
+
+            phaseJustChanged = true;
+            speakBreakPrep();
+
+            previewNextSet();
+            break;
+        }
+
+
+        // ✅ next is real set
+        currentSet++;
+        displaySetNumber++;
+        loadSetData(currentSet);
+    }
+
+    currentPhase = "work";
+    timeLeft = getWorkDuration();
+    phaseJustChanged = true;
+    speakLift();
+    break;
+}
+
+        case "break": {
+
+            const nextItem = workoutData[currentSet] ?? null;
+
+            if (!nextItem) {
+                workoutComplete();
+                return;
+            }
+
+          
+            // ✅ ONLY advance when next is a set
+            if (nextItem.type === "set") {
+                currentSet++;
+                displaySetNumber++;
+                loadSetData(currentSet);
+            }
+
+            currentPhase = "work";
+            timeLeft = getWorkDuration();
+            phaseJustChanged = true;
+            speakLift();
+            break;
+        }
+
+    } // ✅ CLOSES switch(currentPhase)
+
+  
+    /* ======================================================
+       FINAL UI UPDATE
+    ====================================================== */
+    
+  if (phaseJustChanged) {
+    lastCountdownSpoken = null;
+    updatePhaseDisplay();
+}
+}
+
+  
+/* ======================================================
+   PHASE DISPLAY + CENTER MODES
+====================================================== */
+
+function updatePhaseDisplay() {
+
+    const logo = document.getElementById("teamLogo");
+    const center = document.getElementById("center");
+
+    // ✅ safety check (prevents crashes if DOM changes)
+    if (!center || !logo) return;
+
+    // 🔥 CLEAR ALL CENTER MODES FIRST (CRITICAL)
+    center.classList.remove(
+        "workMode",
+        "rotateMode",
+        "breakMode",
+        "dressMode",
+        "stretchMode"
+    );
+
+    logo.classList.remove(
+        "logoDefault",
+        "logoWork",
+        "logoRotate",
+        "logoBreak"
+    );
+
+    const phaseEl = document.getElementById("phase");
+
+    switch (currentPhase) {
+
+        case "dress":
+            center.classList.add("dressMode");
+            logo.classList.add("logoDefault");
+            break;
+
+        case "stretch":
+            center.classList.add("stretchMode");
+            logo.classList.add("logoDefault");
+            break;
+
+        case "cooldown":
+            center.classList.add("dressMode");
+            logo.classList.add("logoDefault");
+            break;
+
+        case "work":
+            center.classList.add("workMode");
+            logo.classList.add("logoWork"); // ✅ FIXED
+            break;
+
+        case "rotate":
+            center.classList.add("rotateMode");
+            logo.classList.add("logoRotate"); // ✅ FIXED
+            break;
+
+        case "break":
+            center.classList.add("breakMode");
+            logo.classList.add("logoBreak"); // ✅ consistency improvement
+            phaseEl.innerText = "BREAK\nPREP NEXT LIFT";
+            return;
+    }
+
+    /* ---------- LABEL MAP ---------- */
+    const labels = {
+        dress: "DRESS OUT & ATTENDANCE",
+        stretch: "DYNAMIC STRETCH",
+        work: "WORK",
+        rotate: "ROTATE",
+        break: "BREAK",
+        cooldown: "COOL DOWN / CLEAN-UP / DRESS"
+    };
+
+    /* ---------- WORK SPECIAL LABEL ---------- */
+    if (currentPhase === "work") {
+        phaseEl.innerText =
+`WORK\nSet ${displaySetNumber} of ${getTotalSets()}\nRotation ${rotationCount + 1} of ${maxRotations}`;
+    } else {
+        phaseEl.innerText = labels[currentPhase] || "";
+    }
+}
+
+  
+/* ======================================================
+   SPEECH ENGINE (shared helper)
+====================================================== */
+
+function speak(text, rate = 1, pitch = 1) {
+
+    // Prevent queue pile-up
+    speechSynthesis.cancel();
+
+    const utter = new SpeechSynthesisUtterance(text);
+
+    if (selectedVoice) utter.voice = selectedVoice;
+
+    utter.volume = 1;
+    utter.rate = rate;
+    utter.pitch = pitch;
+
+    // ✅ slight delay prevents overlap glitches
+    setTimeout(() => speechSynthesis.speak(utter), 50);
+}
+
+
+/* ---------- COUNTDOWN ---------- */
+function speakNumber(num) {
+    speak(num.toString(), 1, 1);
+}
+
+
+/* ---------- ROTATE ---------- */
+function speakRotate() {
+    speak("Rotate!", 1.6, 1.5);
+}
+
+
+/* ---------- DRESS WARNING ---------- */
+function speakDressWarning() {
+    speak("Two minute warning", 1, 1);
+}
+
+
+/* ---------- LIFT ---------- */
+function speakLift() {
+    speak("Lift!", 1.6, 1.3);
+}
+
+
+/* ---------- STRETCH ---------- */
+function speakStretch() {
+    speak("Dynamic Stretch!", 1.3, 1.2);
+}
+
+
+/* ---------- BREAK PREP ---------- */
+function speakBreakPrep() {
+    speak("Break! Prep next lift!", 1.2, 1.1);
+}
+
+
+/* ======================================================
+   REST DURATION (seconds)
+====================================================== */
+
+function getRestDuration() {
+
+    // 1️⃣ per-set override
+    const currentItem = workoutData[currentSet - 1] || {}; // ✅ safer
+    if (currentItem.rotateSec) {
+        console.log("⏱ Using per-set rotate:", currentItem.rotateSec);
+        return currentItem.rotateSec;
+    }
+
+    // 2️⃣ sheet override
+    if (sheetRotateDuration) {
+        console.log("⏱ Using sheet rotate:", sheetRotateDuration);
+        return sheetRotateDuration;
+    }
+
+    // 3️⃣ UI fallback
+    const val = parseInt(document.getElementById("restTime").value, 10);
+    const safe = isNaN(val) || val <= 0 ? 1 : val;
+
+    console.log("⏱ Using UI rotate:", safe);
+    return safe;
+}
+
+
+function syncTime() {
+
+    if (!isRunning) {
+
+        const workVal = getWorkDuration();
+        const restVal = getRestDuration();
+
+        timeLeft = (currentPhase === "work") ? workVal : restVal;
+
+        updateClock();
+
+        // Always show full class block
+        totalSeconds = classBlockLength;
+        originalTotalSeconds = classBlockLength;
+
+        updateTotalDisplay();
+    }
+}
+
+
+/* ======================================================
+   RESET CENTER CLOCK
+====================================================== */
+
+function resetCenterClock() {
+
+    const center = document.getElementById("center");
+
+    center.classList.remove(
+        "workMode",
+        "rotateMode",
+        "breakMode",
+        "dressMode",
+        "stretchMode"
+    );
+
+    center.classList.add("workMode");
+
+    document.getElementById("clock").innerText =
+        document.getElementById("workTime").value;
+
+    document.getElementById("phase").innerText = "WORK";
+}
+
+
+/* ======================================================
+   LOAD SET INTO QUADRANTS
+====================================================== */
+
+function loadSetData(setNumber) {
+
+    const workout = workoutData[setNumber - 1];
+
+    if (!workout || workout.type !== "set") return;
+
+    /* ---------- CORE ---------- */
+    const q1Texts = document.querySelectorAll("#q1 .quad-text");
+    if (q1Texts.length >= 3) {
+        q1Texts[0].innerText = workout.core;
+        q1Texts[1].innerText = "Reps: " + workout.reps;
+        q1Texts[2].innerText =
+            "Percentage: " + (workout.percent ? workout.percent + "%" : "");
+    }
+
+    /* ---------- AUX ---------- */
+    const q2Texts = document.querySelectorAll("#q2 .quad-text");
+    if (q2Texts.length >= 2) {
+        q2Texts[0].innerText = workout.aux;
+        q2Texts[1].innerText = "Reps: " + workout.auxReps;
+    }
+
+    /* ---------- MOVEMENT ---------- */
+    const q4Texts = document.querySelectorAll("#q4 .quad-text");
+    if (q4Texts.length >= 2) {
+        q4Texts[0].innerText = workout.move;
+        q4Texts[1].innerText = "Reps/Time: " + workout.moveReps;
+    }
+}
+
+
+/* ======================================================
+   SPACEBAR CONTROL
+====================================================== */
+
+window.addEventListener("keydown", (e) => {
+
+    const tag = document.activeElement?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+    if (e.repeat) return;
+
+    if (e.code === "Space") {
+        e.preventDefault();
+        startTimer();
+    }
+});
+
+
+/* ======================================================
+   INITIAL PAGE LOAD
+====================================================== */
+
+window.addEventListener("unhandledrejection", e => {
+    console.warn("Unhandled promise:", e.reason);
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+
+    applyDaySpecificClassLength();
+
+    totalSeconds = classBlockLength;
+    originalTotalSeconds = classBlockLength;
+    updateTotalDisplay();
+
+    loadWorkout();
+
+    // auto detect if class already started
+    setTimeout(autoDetectActiveClass, 2000);
+
+});
+
+
+
+
