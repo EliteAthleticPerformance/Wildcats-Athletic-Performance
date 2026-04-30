@@ -1,3 +1,5 @@
+window.workoutData.push(...)
+window.workoutData.length = 0
 
 function parseCSV(text) {
     return text
