@@ -12,13 +12,12 @@
 
 <!-- ✅ LOAD THEME ENGINE FIRST -->
 <script src="js/themeLoader.js"></script>
+<script src="js/workoutLoader.js"></script>  
 
 <!-- ✅ APPLY THEME -->
 <script>
 
-  try {
-
-console.log("🔥 SCRIPT STARTED");
+ 
 
     (function () {
   const params = new URLSearchParams(window.location.search);
@@ -1012,9 +1011,6 @@ function getSheetGid() {
     return "1830705073";
 }
 
-} catch (err) {
-    console.error("🔥 CRASH FOUND:", err);
-}
   
   console.log("🔥 ABOUT TO DEFINE loadWorkout");;
 window.loadWorkout = async function loadWorkout() {
