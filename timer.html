@@ -1085,8 +1085,12 @@ for (const r of rows) {
         continue;
     }
 
-    const firstRaw = clean(r[0] || "");
-    const firstCell = firstRaw.replace(/"/g, "").trim().toLowerCase();
+    const firstCell = String(r[0] || "")
+    .replace(/"/g, "")
+    .trim()
+    .toLowerCase();
+
+  console.log("ROW CHECK:", firstCell);
 
     // ---------- BULLETPROOF BLANK ROW ----------
     if (isEffectivelyBlankRow(r)) {
