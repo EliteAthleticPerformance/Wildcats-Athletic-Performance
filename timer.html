@@ -988,7 +988,7 @@ function getSheetGid() {
 }
 
 async function loadWorkout() {
-    console.log("🚀 loadWorkout started");
+    console.log("🚀 loadWorkout STARTED");
 
     try {
         const config = window.SCHOOL_CONFIG;
@@ -1001,6 +1001,8 @@ async function loadWorkout() {
 const response = await fetch(
 `${config.dataURL}?school=${config.key}&type=workout`
 );
+
+      console.log("✅ FETCH COMPLETE");
 
         if (!response.ok) {
             throw new Error("Network response was not ok");
