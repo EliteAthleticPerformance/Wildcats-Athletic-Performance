@@ -1758,24 +1758,24 @@ function loadSetData(setNumber) {
     /* ---------- CORE ---------- */
     const q1Texts = document.querySelectorAll("#q1 .quad-text");
     if (q1Texts.length >= 3) {
-        q1Texts[0].innerText = workout.core;
-        q1Texts[1].innerText = "Reps: " + workout.reps;
+        q1Texts[0].innerText = workout.coreLift;
+        q1Texts[1].innerText = "Reps: " + workout.coreReps;
         q1Texts[2].innerText =
-            "Percentage: " + (workout.percent ? workout.percent + "%" : "");
+            "Percentage: " + (workout.percentage ? workout.percentage + "%" : "");
     }
 
     /* ---------- AUX ---------- */
     const q2Texts = document.querySelectorAll("#q2 .quad-text");
     if (q2Texts.length >= 2) {
-        q2Texts[0].innerText = workout.aux;
+        q2Texts[0].innerText = workout.auxLift;
         q2Texts[1].innerText = "Reps: " + workout.auxReps;
     }
 
     /* ---------- MOVEMENT ---------- */
     const q4Texts = document.querySelectorAll("#q4 .quad-text");
     if (q4Texts.length >= 2) {
-        q4Texts[0].innerText = workout.move;
-        q4Texts[1].innerText = "Reps/Time: " + workout.moveReps;
+        q4Texts[0].innerText = workout.movement;
+        q4Texts[1].innerText = "Reps/Time: " + workout.movementReps;
     }
 }
 
