@@ -1240,6 +1240,18 @@ originalTotalSeconds = finalTotal;
 
 updateTotalDisplay();
 
+      console.log("✅ Final workoutData:", workoutData);
+
+// 🔥 FORCE UI TO LOAD FIRST SET
+if (workoutData.length > 0) {
+    currentSet = 1;
+    displaySetNumber = 1;
+
+    loadSetData(1);
+    updatePhaseDisplay();
+    updateClock();
+}
+
     } catch (err) {
         console.error("❌ Failed to load workout:", err);
     }
