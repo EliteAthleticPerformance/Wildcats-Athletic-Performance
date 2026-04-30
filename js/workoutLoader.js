@@ -33,8 +33,5 @@ window.loadWorkout = async function loadWorkout() {
 
     console.log("📦 CSV received:", text.slice(0, 200));
 
-    // TEMP TEST — prove it works
-    window.workoutData = text;
-
-    console.log("✅ loadWorkout COMPLETE");
+        console.log("✅ loadWorkout COMPLETE");
 };
