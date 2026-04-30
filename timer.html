@@ -606,7 +606,7 @@ function applyDaySpecificClassLength() {
 ====================================================== */
 function calculateTotalTime() {
 
-    if (!workoutData.length) {
+    if (!window.workoutData || !window.workoutData.length) {
         console.warn("Workout still loading...");
         return;
     }
@@ -726,8 +726,7 @@ document.getElementById("startBtn").innerText = "STOP";
     currentPhase = "dress";
     timeLeft = dressOutDuration;
 
-    const classLimit = classBlockLength;
-    
+      
     updatePhaseDisplay();
     updateClock();
     updateTotalDisplay();
@@ -736,7 +735,29 @@ document.getElementById("startBtn").innerText = "STOP";
     timer = setTimeout(preciseTick, 1000);
 }
 
+function loadSetData(index) {
+    const set = window.workoutData[index];
 
+    if (!set) {
+        console.error("❌ No set found at index", index);
+        return;
+    }
+
+    console.log("🎯 Loading set:", set);
+
+    // CORE
+    document.querySelector(".core-lift-title").textContent = set.coreLift;
+    document.querySelector(".core-reps").textContent = "Reps: " + set.coreReps;
+    document.querySelector(".core-percent").textContent = "Percentage: " + set.percentage;
+
+    // AUX
+    document.querySelector(".aux-lift-title").textContent = set.auxLift;
+    document.querySelector(".aux-reps").textContent = "Reps: " + set.auxReps;
+
+    // MOVEMENT
+    document.querySelector(".movement-title").textContent = set.movement;
+    document.querySelector(".movement-reps").textContent = "Reps/Time: " + set.movementReps;
+}
   
 /* ---------- AUTO START ---------- */
 
@@ -886,7 +907,7 @@ function startAutoScheduler() {
 
 function preloadFirstSet() {
     if (!workoutData.length) return;
-    loadSetData(1);
+    loadSetData(0);
 }
 
 function previewNextSet() {
@@ -895,68 +916,10 @@ function previewNextSet() {
     const nextItem = workoutData[currentSet] || null;
 
     if (nextItem && nextItem.type === "set") {
-        loadSetData(currentSet + 1); // loadSetData is 1-based
+        loadSetData(currentSet);
     }
 }
-
-
-  
-/* ======================================================
-   ROBUST CSV PARSER
-====================================================== */
-function parseCSV(text) {
-    const rows = [];
-    let row = [];
-    let cell = "";
-    let inQuotes = false;
-
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const next = text[i + 1];
-
-        // escaped quote
-        if (char === '"' && inQuotes && next === '"') {
-            cell += '"';
-            i++;
-            continue;
-        }
-
-        // toggle quotes
-        if (char === '"') {
-            inQuotes = !inQuotes;
-            continue;
-        }
-
-        // comma separator
-        if (char === "," && !inQuotes) {
-            row.push(cell);
-            cell = "";
-            continue;
-        }
-
-        // row break
-        if ((char === "\n" || char === "\r") && !inQuotes) {
-            if (cell !== "" || row.length) {
-                row.push(cell);
-                rows.push(row);
-                row = [];
-                cell = "";
-            }
-            continue;
-        }
-
-        cell += char;
-    }
-
-    if (cell !== "" || row.length) {
-        row.push(cell);
-        rows.push(row);
-    }
-
-    return rows;
-}
-
-  
+ 
   
 /* ======================================================
    SAFE NUMBER PARSER
