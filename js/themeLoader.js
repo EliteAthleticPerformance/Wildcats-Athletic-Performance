@@ -29,7 +29,7 @@ const CONFIG_MAP = (() => {
       key: "harrisonville",
       name: "Harrisonville Wildcats",
       logo: base + "images/wildcats-logo.png",
-      theme: {
+       theme: {
         primary: "#1e3a8a",
         primaryLight: "#3b82f6",
         primaryDark: "#1e40af",
@@ -42,7 +42,7 @@ const CONFIG_MAP = (() => {
       key: "cassmidway",
       name: "Cass Midway Vikings",
       logo: base + "images/vikings-logo.png",
-      theme: {
+       theme: {
         primary: "#4B0082",
         primaryLight: "#6A1BB9",
         primaryDark: "#2E0054",
@@ -55,7 +55,7 @@ const CONFIG_MAP = (() => {
       key: "pleasanthill",
       name: "Pleasant Hill Roosters",
       logo: base + "images/roosters-logo.png",
-      theme: {
+       theme: {
         primary: "#5a2ca0",
         primaryLight: "#8b5cf6",
         primaryDark: "#3b1a6e",
@@ -68,7 +68,7 @@ const CONFIG_MAP = (() => {
       key: "raypec",
       name: "Ray-Pec Panthers",
       logo: base + "images/panthers-logo.png",
-      theme: {
+       theme: {
         primary: "#C9A646",
         primaryLight: "#E2C46A",
         primaryDark: "#8A6E2F",
@@ -80,8 +80,8 @@ const CONFIG_MAP = (() => {
     springhill: {
       key: "springhill",
       name: "Spring Hill Broncos",
-      logo: base + "images/broncos-logo.png", // 🔥 replace when ready
-      theme: {
+      logo: base + "images/broncos-logo.png", 
+       theme: {
         primary: "#5A2D91",
         primaryLight: "#6A3FB0",
         primaryDark: "#3F166",
