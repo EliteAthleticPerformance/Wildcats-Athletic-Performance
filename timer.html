@@ -1,19 +1,258 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script type='text/javascript' >
+const lsijVersion = 1;
+
+
+
+class Flags {
+	constructor(url, terms) {
+		this.url = url;
+		this.matched = {};
+
+		this.terms = [];
+		terms.forEach((term) => {
+			let s = term.replace(/[\]{}?^$().*\\+|[]/g, '\\$&');
+			s = s.replace(/\\\*/g, '.*');
+			s = s.replace(/\\\?/g, '.');
+			let regex = new RegExp('\\b' + s + '\\b', 'gi');
+			this.terms.push({term: term, regex: regex});
+		});
+	}
+
+	report(flags) {
+        console.debug('[LS Filter] flag report');
+		if (!flags.length)
+            return;
+
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', document.location.origin + '/dd4ad7d21f7b6024c47c51c8626bfd5a0ccacff265ed59a9f866c4fa35e6e399/log_flag', true);
+		console.debug('[LS Filter] sending -> ', flags);
+		xhr.send(JSON.stringify({
+			url: this.url.href,
+			flags: flags,
+			at_epoch_ms: Date.now()
+		}));
+	}
+
+	matchTerms(input, flagAll) {
+		const matches = [];
+		this.terms.forEach((term) => {
+			const hits = input.match(term.regex);
+			if (!hits || !hits.length)
+				return;
+
+			let added = false;
+			if (typeof(this.matched[term.term]) === 'undefined')
+				added = true
+
+			let count = hits.length;
+			if (!added)
+				count -= this.matched[term.term];
+
+			this.matched[term.term] = hits.length;
+
+			if (added || flagAll)
+				matches.push([term.term, count]);
+		});
+		return matches;
+	}
+
+	scanIntentValue(value) {
+		const matches = this.matchTerms(value, true);
+		const changes = [];
+		matches.forEach((match) => {
+			match[2] = true; // mark as user entered
+			changes.push(match);
+		});
+
+		if (changes.length)
+			this.report(changes);
+	}
+
+	scanIntentValues(values) {
+		values.forEach((value) => {
+			this.scanIntentValue(value);
+		});
+	}
+
+	scanIntentEvent(event) {
+		switch (event.target.tagName.toLowerCase()) {
+		case 'input':
+			let type = event.target.type || 'text';
+			type = type.toLowerCase();
+
+			// Dont scan password fields
+			if (type === 'password')
+				return;
+			this.scanIntentValue(event.target.value);
+			break;
+		case 'textarea':
+			this.scanIntentValue(event.target.value);
+			break;
+		}
+	}
+
+	scanIntent(event) {
+		if (typeof(gatherIntent) === 'function') {
+			const intent = gatherIntent();
+			if (intent.length)
+				this.scanIntentValues(intent);
+		}
+	}
+
+	onChange(event) {
+		this.scanIntentEvent(event);
+	}
+
+	onKeyup(event) {
+		this.scanIntentEvent(event);
+	}
+
+	bindDOM() {
+		document.addEventListener('change', this.onChange.bind(this));
+		document.addEventListener('keyup', this.onKeyup.bind(this));
+		setInterval(() => {
+			this.scanIntent();
+		}, 1000);
+	}
+}
+
+const initFlagScanning = function(terms) {
+	if (!terms.length)
+		return;
+
+	console.debug('[LS Filter] init flag scanning');
+	const a = document.createElement('A');
+	a.href = window.location.href;
+	const flags = new Flags(a, terms);
+	
+	console.debug('[LS Filter] flagging intent');
+	if (typeof(initGatherIntent) === 'function')
+		initGatherIntent();
+
+	flags.bindDOM();
+	
+};
+
+initFlagScanning(["Anarchist cookbook","Become a terrorist","Binge and purge","binging and purging","Bitch","Bong rips","Bulimia ","Buy alcohol underage","Buy gun","Buy knives","commit suicide","Cock","Cunt","Cutting yourself","Dumb bitch","Dumbass","Dyke","Faggot","Gun in school","Fuck you","Heroin","Homemade bomb","How to hang yourself","How to become anorexic","How to get revenge","How to join a gang","How to join ISIS","How to kill","How to make myself throw up","How to sext","How to sneak things past security","I hate myself","I want to cut myself","kill you","Kill myself","Make a bomb","Make a bong","Murder suicide","My life is shit","My life is worthless","Naked girls","Naked pics","nigga","Nigger","Pipe bomb","Porn","Pussy","Queer","Rape","Retard","Sex online","Slut","Smoke weed","Sneak gun in school","Suicide bomb","Suicide by cop","Suicide vest","Where to buy drugs","Whore","Blow up school","I want to die","Suicide","White pride","how to get rid of search history","delete search history","delete history"]);
+
+function checkCurrentSite(yt, url) {
+  const xhr = new XMLHttpRequest();
+  const body = JSON.stringify({
+    url: url || window.location.href,
+    youtube: yt
+  });
+  console.log('[LS Filter] reporting ->', body);
+  const checkUrl = document.location.origin + '/dd4ad7d21f7b6024c47c51c8626bfd5a0ccacff265ed59a9f866c4fa35e6e399/log';
+  xhr.open('POST', checkUrl, true);
+  xhr.send(body);
+  xhr.onreadystatechange = function () {
+    if (this.status === 200 && xhr.responseText) {
+      const score = JSON.parse(xhr.responseText);
+      console.log('[LS Filter] score ->', score.allow);
+      if (score.redirect) {
+        window.location.href = score.redirect;
+        hardBlock();
+      }
+    }
+  };
+}
+
+let hardBlockPolicy;
+function getHardBlockPolicy() {
+  if (typeof(trustedTypes) !== 'undefined' && !hardBlockPolicy) {
+    hardBlockPolicy = trustedTypes.createPolicy('hardBlock', {
+      createHTML: (string) => string
+    });
+  }
+  return hardBlockPolicy;
+}
+
+function hardBlock() {
+  stopVideo();
+  const stopInt = setInterval(stopVideo, 500);
+  setTimeout(() => {
+    const policy = getHardBlockPolicy();
+    if (policy) {
+      document.body.innerHTML = policy.createHTML('<img src="/dd4ad7d21f7b6024c47c51c8626bfd5a0ccacff265ed59a9f866c4fa35e6e399/blocked-image-search.png" style="width: 100%; height: 100%">');
+    } else {
+      document.body.innerHTML = '<img src="/dd4ad7d21f7b6024c47c51c8626bfd5a0ccacff265ed59a9f866c4fa35e6e399/blocked-image-search.png" style="width: 100%; height: 100%">';
+    }
+    clearInterval(stopInt);
+  }, 3000)
+}
+
+function stopVideo() {
+  const ea = document.getElementsByTagName('video');
+  for (i in ea) {
+    if (typeof(ea[i].pause) !== 'function') {
+      continue;
+    }
+    if (!ea[i].paused) {
+        console.debug('[LS Filter] pause video');
+        ea[i].pause();
+    }
+  }
+}
+
+function googleVideo() {
+  if (window.location.href.match(/google\.com\/search\?/)) {
+    const vidMatcher = /google\.com\/search\?.*vid:([^#\&\?]{11})/;
+    let prevVideo;
+    new MutationObserver(function() {
+      console.log('[LS Filter] MutationObserver');
+      let video;
+      let m = window.location.href.match(vidMatcher)
+      if (m) {
+        video = m[1];
+      }
+      if (video === prevVideo) { return; }           
+      console.log('[LS Filter] scoring video ->', video);
+      prevVideo = video;
+      checkCurrentSite(true, 'https://www.youtube.com/watch?v=' + video);
+    }).observe(document, {subtree: true, childList: true});
+  }
+}
+
+function onLoad() {
+  console.log('[LS Filter] loaded');
+  if (window.top === window.self) {
+    console.log('[LS Filter] top window: ' + window.location.href);
+    googleVideo();
+  }
+}
+
+onLoad();
+
+</script>
 <meta charset="UTF-8">
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+
+<title>Harrisonville Wildcats | 4 Quadrant Training Timer</title>
+
+<!-- ✅ LOAD THEME ENGINE FIRST -->
+<script src="js/themeLoader.js"></script>
+
+<!-- ✅ APPLY THEME -->
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
   const school = params.get("school") || sessionStorage.getItem("school") || "harrisonville";
   sessionStorage.setItem("school", school);
 
-  const theme = JSON.parse(sessionStorage.getItem("theme-" + school));
+  let theme = null;
+try {
+  theme = JSON.parse(sessionStorage.getItem("theme-" + school));
+} catch (e) {}
+
   if (theme) {
     const root = document.documentElement;
+
     root.style.setProperty("--primary", theme.primary);
     root.style.setProperty("--primaryLight", theme.primaryLight);
     root.style.setProperty("--primaryDark", theme.primaryDark);
@@ -24,48 +263,58 @@
 })();
 </script>
 
-<script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  const school = params.get("school") || sessionStorage.getItem("school") || "harrisonville";
-  sessionStorage.setItem("school", school);
-
-  const logo = sessionStorage.getItem("logo-" + school);
-  if (logo) {
-    document.addEventListener("DOMContentLoaded", () => {
-      const el = document.getElementById("schoolLogo");
-      if (el) el.src = logo;
-    });
-  }
-})();
-</script>
-
-<title>4 Quadrant Training Timer</title>
-
-      <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGRNFWTPJ5"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-TGRNFWTPJ5');
-  </script>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
-<script src="js/themeLoader.js"></script>
-
 <style>
 
-/* ===================== ROOT ===================== */
 :root {
-  --primary: #444;
-  --primaryLight: #777;
-  --primaryDark: #222;
-  --secondary: #888;
-  --secondaryLight: #aaa;
+    /* ✅ Dynamic theme variables (controlled by themeLoader) */
+    --primary: #505152;
+    --primaryLight: #B0B7BE;
+    --primaryDark: #222;
+    --secondary: #888;
+    --secondaryLight: #aaa;
+
+    /* ✅ Legacy support (kept so nothing breaks) */
+    --royal:#505152;
+    --silver:#B0B7BE;
 }
 
+
+/* ===================== MODE STATES ===================== */
+/* 🔥 These stay hardcoded intentionally (performance + clarity) */
+
+.workMode {
+    border-color:#32CD32 !important;
+    background:radial-gradient(circle at center,#32CD32 0%,#0a2 60%,#000 100%);
+    box-shadow:0 0 20px #32CD32, 0 0 50px #32CD32, 0 0 80px #32CD32;
+}
+
+.rotateMode {
+    border-color:#FFD700 !important;
+    background:radial-gradient(circle at center,#FFD700 0%,#b8860b 60%,#000 100%);
+    box-shadow:0 0 20px #FFD700, 0 0 50px #FFD700, 0 0 80px #FFD700;
+}
+
+.breakMode {
+    border-color:#FF0000 !important;
+    background:radial-gradient(circle at center,#FF1A1A 0%,#8B0000 60%,#000 100%);
+    box-shadow:0 0 30px #FF0000, 0 0 70px #FF0000, 0 0 120px #FF0000;
+}
+
+.dressMode {
+    border-color:#00E5FF !important;
+    background:radial-gradient(circle at center,#00E5FF 0%,#008B9A 60%,#000 100%);
+    box-shadow:0 0 25px #00E5FF, 0 0 60px #00E5FF, 0 0 110px #00E5FF;
+}
+
+.stretchMode {
+    border-color:#FF8C00 !important;
+    background:radial-gradient(circle at center,#FFA500 0%,#CC7000 60%,#000 100%);
+    box-shadow:0 0 25px #FFA500, 0 0 60px #FF8C00, 0 0 110px #FF8C00;
+}
+
+
 /* ===================== BASE ===================== */
+
 html, body {
     width:100%;
     height:100%;
@@ -74,179 +323,322 @@ html, body {
 
 body {
     margin:0;
-    background:#000;
+
+    /* 🔥 NOW THEME-AWARE (but still defaults to black) */
+    background:var(--background, #000);
+
     color:#fff;
     font-family:'Arial Black', sans-serif;
     height:100vh;
+    display:flex;
+    flex-direction:column;
 }
 
+
 /* ===================== HEADER ===================== */
+
 #schoolHeader {
-    display:grid;
-    grid-template-columns: auto 1fr auto;
-    align-items:center;
-    padding:18px 40px;
-    height:200px;
     position:relative;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:5px;
+    padding:20px 25px;
+
+    /* 🔥 THEME-AWARE GRADIENT */
+    background:linear-gradient(
+        90deg,
+        #000,
+        var(--primaryDark),
+        var(--primaryLight),
+        var(--primaryDark),
+        #000
+    );
+
+    border-top:4px solid #fff;
+    border-bottom:6px solid #fff;
+    box-shadow:0 8px 25px rgba(0,0,0,0.8);
     overflow:hidden;
 }
 
-/* watermark */
+.header-left,
+.header-center,
+.header-right {
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+
+/* ===================== WATERMARK ===================== */
+
 #schoolHeader::before {
+    /* 🔥 Leave static for now (we’ll make this dynamic later if you want) */
     content:"STRENGTH  -  SPEED  -  AGILITY  -  POWER  -  EXPLOSIVENESS";
+
     position:absolute;
-    top:50%;
-    left:0;
-    transform:translateY(-50%);
     white-space:nowrap;
-    font-size:120px;
+    font-size:140px;
     font-weight:900;
-    letter-spacing:8px;
+    letter-spacing:10px;
+
+    /* 🔥 Slightly theme-influenced glow */
     color:rgba(255,255,255,0.06);
+
+    top:50%;
+    transform:translateY(-50%);
     animation:scrollWatermark 25s linear infinite;
+    pointer-events:none;
     z-index:0;
 }
 
-/* REMOVE shimmer */
+
+/* ===================== SHIMMER ===================== */
+
 #schoolHeader::after {
-    display:none;
-}
-
-@keyframes scrollWatermark {
-    0% { transform:translateX(100%) translateY(-50%); }
-    100% { transform:translateX(-100%) translateY(-50%); }
-}
-
-/* header text */
-#totalTime {
-    font-family:'Orbitron', sans-serif;
-    font-size:3.2vh;
-    font-weight:900;
-    color:#fff;
-    text-shadow:
-        0 0 6px var(--primary),
-        0 0 12px var(--primaryLight),
-        0 0 20px var(--primaryLight);
-}
-
-#headerMotto {
-    text-align:center;
-    font-size:clamp(32px, 5vh, 60px);
-    font-weight:900;
-    letter-spacing:8px;
-    color: var(--primaryLight);
-    text-shadow:
-        0 2px 4px rgba(0,0,0,0.9),
-        0 0 10px var(--primary),
-        0 0 20px var(--primaryLight),
-        0 0 35px var(--secondaryLight);
-    white-space:nowrap;
-}
-
-#schoolLogo {
-    height:75px;
-}
-
-/* ===================== GRID ===================== */
-#display {
-    position:absolute;
-    top:200px;
-    bottom:0;
-    left:0;
-    right:0;
-
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    grid-template-rows:1fr 1fr;
-
-    gap:0;
-}
-
-/* center cross lines */
-#display::before,
-#display::after {
     content:"";
     position:absolute;
-    background:#000;
+    top:0;
+    left:-50%;
+    width:50%;
+    height:100%;
+
+    /* 🔥 THEME-AWARE SHIMMER */
+    background:linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--primary) 40%, transparent),
+        rgba(255,255,255,0.1),
+        color-mix(in srgb, var(--primary) 40%, transparent)
+    );
+
+    transform:skewX(-25deg);
+    animation:shimmer 3s infinite;
     z-index:1;
 }
 
-#display::before {
-    width:6px;
-    height:100%;
-    left:50%;
-    transform:translateX(-50%);
+@keyframes shimmer {
+    0% { left:-50%; }
+    100% { left:150%; }
 }
 
-#display::after {
-    height:6px;
-    width:100%;
-    top:50%;
-    transform:translateY(-50%);
+
+/* ===================== CENTER PULSE ===================== */
+
+@keyframes centerPulse {
+    0% {
+        transform:translate(-50%, -50%) scale(1);
+        filter:brightness(1);
+    }
+    50% {
+        transform:translate(-50%, -50%) scale(1.06);
+        filter:brightness(1.25);
+    }
+    100% {
+        transform:translate(-50%, -50%) scale(1);
+        filter:brightness(1);
+    }
 }
 
-/* ===================== QUADS ===================== */
+#schoolHeader span {
+    font-size:9vh;
+    font-weight:900;
+    letter-spacing:2px;
+}
+
+
+  /* ===================== 3D CHAMPIONSHIP TEXT ===================== */
+
+#headerMotto {
+    font-size:9vh;
+    font-weight:900;
+    letter-spacing:2px;
+    position:relative;
+    color:#f5f9ff;
+    text-shadow:
+    0 1px 0 #111,
+    0 2px 0 #111,
+    0 3px 0 #111,
+    0 4px 0 #111,
+    0 5px 0 #111,
+    0 6px 8px color-mix(in srgb, var(--primary) 45%, transparent);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+}
+
+
+/* ===================== LOGO BASE ===================== */
+
+#teamLogo {
+    position:relative;
+    z-index:2;
+    animation:none;
+    transition:filter 0.25s ease;
+}
+
+.logoDefault {
+    filter:
+        drop-shadow(0 0 6px #ffffff)
+        drop-shadow(0 0 16px var(--primary));
+}
+
+.logoWork {
+    filter:
+        drop-shadow(0 0 10px #32CD32)
+        drop-shadow(0 0 28px #32CD32)
+        drop-shadow(0 0 50px #32CD32);
+}
+
+
+.logoRotate {
+    filter:
+        drop-shadow(0 0 10px #FFD700)
+        drop-shadow(0 0 28px #FFD700)
+        drop-shadow(0 0 50px #FFD700);
+}
+
+.logoBreak {
+    filter:
+        drop-shadow(0 0 12px #FF1A1A)
+        drop-shadow(0 0 32px #FF0000)
+        drop-shadow(0 0 60px #FF0000);
+}
+
+@keyframes logoPulse {
+    0% { transform:scale(1); }
+    50% { transform:scale(1.12); }
+    100% { transform:scale(1); }
+}
+
+
+/* ===================== TOOLBAR ===================== */
+
+#toolbar {
+    display:flex;
+    gap:15px;
+    padding:15px;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(
+    180deg,
+    #000,
+    var(--primaryDark)
+);
+    border-bottom:4px solid var(--silver);
+}
+
+#toolbar input {
+    width:50px;
+    text-align:center;
+    font-weight:bold;
+    border-radius:4px;
+    border:2px solid var(--secondaryLight);
+    background:#000;
+    color:#fff;
+}
+
+#toolbar button {
+    padding:10px 20px;
+    font-weight:bold;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    background:var(--primary);
+    color:#fff;
+}
+
+#toolbar button:hover {
+    background:var(--primaryDark);
+}
+
+
+/* ===================== GRID ===================== */
+
+#display {
+    position:absolute;
+    top:120px;
+    bottom:0;
+    left:0;
+    right:0;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:2vh;
+    padding:2vh;
+}
+
 .quad {
     display:flex;
     flex-direction:column;
     justify-content:center;
     align-items:center;
     text-align:center;
+    padding:10px;
 }
 
-.quad-title { font-size:3vh; }
-.quad-text  { font-size:5vh; font-weight:900; }
+.quad-title { font-size:3.5vh; }
+.quad-text  { font-size:6.5vh; font-weight:900; }
 
-.q1 { background:#000; color:#fff; border:8px solid #ccc; }
-
-.q2 {
-    background:#f4f4f4;
-    color:#000;
-    border:8px solid #ccc;
-}
-
+.q1{background:#000;color:#fff;border:8px solid var(--silver);}
+.q2{background:#fff;color:#000;border:8px solid var(--silver);}
 .q3 {
     background:var(--primary);
     color:#fff;
-    border:8px solid #ccc;
-    box-shadow:
-        inset 0 0 20px rgba(0,0,0,0.4),
-        0 0 20px var(--primary);
+    border:8px solid var(--secondaryLight);
 }
+.q4{background:#555555d5;color:#fff;border:8px solid var(--silver);}
 
-.q4 { background:#555; color:#fff; border:8px solid #ccc; }
+  
+/* ===================== CENTER CLOCK ===================== */
 
-/* ===================== CENTER ===================== */
 #center {
     position:absolute;
     top:50%;
     left:50%;
     transform:translate(-50%, -50%);
-    width:220px;
-    height:220px;
-    border:10px solid #ccc;
+    width:clamp(180px, 24vmin, 420px);
+    height:clamp(180px, 24vmin, 420px);
+    border:clamp(6px, 1vmin, 16px) solid var(--silver);
     border-radius:50%;
-    background:#000;
+    background:radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--primary) 25%, #111),
+    #000 70%
+);
     display:flex;
     flex-direction:column;
     justify-content:center;
     align-items:center;
-    z-index:2;
+    transition:all 0.3s ease;
+
+    /* ⭐ NEW */
+    animation:centerPulse 1.6s ease-in-out infinite;
 }
 
 #clock {
-    font-size:80px;
+    font-size:clamp(48px, 8vmin, 140px);
     font-weight:900;
-    text-shadow:
-        0 0 10px #fff,
-        0 0 25px var(--primaryLight);
+    letter-spacing:2px;
+    font-variant-numeric:tabular-nums;
 }
 
 #phase {
-    font-size:18px;
-    opacity:0.8;
+    font-size:clamp(14px, 2.2vmin, 36px);
+    font-weight:900;
+    text-align:center;
+    margin-top:0.5vh;
+    white-space:pre-line;
 }
 
+.smallPhase { font-size:1.4vh !important; }
+
+
+/* ===================== ANIMATIONS ===================== */
+
+@keyframes scrollWatermark {
+    0%   { transform:translateY(-50%) translateX(100%); }
+    100% { transform:translateY(-50%) translateX(-100%); }
+}
 </style>
 </head>
 
@@ -254,8 +646,25 @@ body {
 
 <div id="schoolHeader">
     <span id="totalTime">00:00</span>
-    <span id="headerMotto">Elite Athletic Performance</span>
-    <img id="schoolLogo">
+
+    <img id="teamLogo"
+         src="08e2c126-be8e-4415-8531-6140d87ed954.png"
+         height="80">
+
+    <span id="headerMotto">Speed - Strength - Agility</span>
+</div>
+
+<div id="toolbar" style="display:none;">
+    WORK:
+    <input type="number" id="workTime" value="10" min="1" onchange="syncTime()">
+
+    REST:
+    <input type="number" id="restTime" value="10" min="1" onchange="syncTime()">
+
+    <button onclick="startTimer()" id="startBtn">START</button>
+
+    SET:
+    <input type="number" id="of" value="3" min="1">
 </div>
 
 <div id="display">
@@ -294,22 +703,26 @@ body {
 <script>
 
   
-
-      /* ===================== STATE ===================== */
+/* ===================== STATE ===================== */
 
 let timer = null;
 let timeLeft = 0;
 let totalSeconds = 0;
 let originalTotalSeconds = 0;
-
 let isRunning = false;
 let currentPhase = "idle";
 let audioCtx = null;
 let lastCountdownSpoken = null;
 let phaseJustChanged = false;
 let nextTickTime = null;
+
 let workoutData = [];
-window.workoutData = workoutData;
+
+/* ✅ safer global access (no desync risk) */
+Object.defineProperty(window, "workoutData", {
+    get: () => workoutData
+});
+
 
 /* ===================== SETS ===================== */
 
@@ -317,6 +730,7 @@ let currentSet = 1;
 let maxSets = 1;
 let rotationCount = 0;
 const maxRotations = 4;
+
 
 /* ===================== PERIOD AUTO START ===================== */
 
@@ -332,29 +746,33 @@ let sheetWorkDuration = null;
 let sheetRotateDuration = null;
 let manualWorkoutOverride = null;
 
+
 /* ===================== DURATIONS ===================== */
 
 let mondayMinutes = 45;
 let tueWedMinutes = 90;
 let thuFriMinutes = 90;
 let classBlockLength = 90 * 60;
-
 let dressOutDuration = 600;
 let dynamicStretchDuration = 600;
 let breakDuration = 120;
 let cooldownDuration = 0;
 
+
 /* ===================== FLAGS ===================== */
 
 let dressWarningSpoken = false;
-
 let onBreak = false;
 let selectedVoice = null;
 let displaySetNumber = 1;
 
+
+/* ===================== UTIL ===================== */
+
 function goFullscreen() {
     document.documentElement.requestFullscreen();
 }
+
 
 /* ======================================================
    START / STOP + TOTAL TIME CALCULATION
@@ -365,12 +783,21 @@ function getTotalSets() {
     return workoutData.filter(item => item.type === "set").length;
 }
 
+
 /* ======================================================
-   START TIMER (INITIAL RESET DEFAULTS)
+   RESET STATE (NEW - SAFE INITIALIZATION)
 ====================================================== */
-displaySetNumber = 1;
-rotationCount = 0;
-currentSet = 1;
+
+function resetWorkoutState() {
+    displaySetNumber = 1;
+    rotationCount = 0;
+    currentSet = 1;
+}
+
+
+/* ======================================================
+   APPLY DAY-SPECIFIC CLASS LENGTH
+====================================================== */
 
 function applyDaySpecificClassLength() {
     const now = getEffectiveNow();
@@ -389,6 +816,7 @@ function applyDaySpecificClassLength() {
     console.log("📊 Tue/Wed minutes:", tueWedMinutes);
     console.log("📊 Thu/Fri minutes:", thuFriMinutes);
 }
+
 
 /* ======================================================
    CALCULATE TOTAL CLASS TIME
@@ -485,6 +913,7 @@ function startTimer() {
         return;
     }
 
+  
     /* ---------- START STATE ---------- */
     isRunning = true;
     applyDaySpecificClassLength();
@@ -509,16 +938,8 @@ document.getElementById("startBtn").innerText = "STOP";
     currentPhase = "dress";
     timeLeft = dressOutDuration;
 
-    const plannedWorkoutTime = calculateTotalTime();
-
     const classLimit = classBlockLength;
-    const finalTotal = Math.min(plannedWorkoutTime, classLimit);
-
-   // Only update preview if workout loaded
-// ⭐ Correct total class time
-totalSeconds = finalTotal;
-originalTotalSeconds = finalTotal;
-
+    
     updatePhaseDisplay();
     updateClock();
     updateTotalDisplay();
@@ -545,17 +966,18 @@ function getEffectiveNow() {
                 Number(parts[5])      // second
             );
 
-            if (!isNaN(forced)) return forced;
+            // ✅ FIXED (proper Date validation)
+            if (!isNaN(forced.getTime())) return forced;
         }
     }
 
     return new Date();
 }
 
-
 function autoDetectActiveClass() {
 
-    if (!autoStartEnabled || isRunning) return;
+    // ✅ FIXED (allow sync even if already running)
+    if (!autoStartEnabled) return;
 
     const now = getEffectiveNow();
     const day = now.getDay();
@@ -567,6 +989,8 @@ function autoDetectActiveClass() {
     else if (day === 4 || day === 5) todaySchedule = thuFriTimes;
 
     for (const timeStr of todaySchedule) {
+
+        if (!timeStr || !timeStr.includes(":")) continue;
 
         const [h, m] = timeStr.split(":").map(Number);
 
@@ -593,10 +1017,9 @@ function autoDetectActiveClass() {
     }
 }
 
-
 function startAutoScheduler() {
 
-        if (autoStartTimer) {
+    if (autoStartTimer) {
         clearInterval(autoStartTimer);
     }
 
@@ -608,7 +1031,6 @@ function startAutoScheduler() {
         const day = now.getDay(); // 0=Sun, 1=Mon...
 
         if (todayOnlyMode) {
-            // Only allow today's schedule
             const today = now.getDay();
             if (today === 0 || today === 6) return; // block weekends
         }
@@ -632,6 +1054,11 @@ function startAutoScheduler() {
 
             if (isNaN(targetHour) || isNaN(targetMinute)) continue;
 
+            // start within first 5 seconds of the minute
+            const currentMinuteStamp =
+                String(now.getHours()).padStart(2, "0") + ":" +
+                String(now.getMinutes()).padStart(2, "0");
+
             const currentTotalSeconds =
                 now.getHours() * 3600 +
                 now.getMinutes() * 60 +
@@ -640,11 +1067,6 @@ function startAutoScheduler() {
             const targetTotalSeconds =
                 targetHour * 3600 +
                 targetMinute * 60;
-
-            // start within first 5 seconds of the minute
-            const currentMinuteStamp =
-                String(now.getHours()).padStart(2, "0") + ":" +
-                String(now.getMinutes()).padStart(2, "0");
 
             if (
                 currentTotalSeconds >= targetTotalSeconds &&
@@ -661,6 +1083,8 @@ function startAutoScheduler() {
 
     }, 1000);
 }
+
+  
 /* ======================================================
    LOAD WORKOUT FROM GOOGLE SHEETS — CLEAN + BULLETPROOF
 ====================================================== */
@@ -673,13 +1097,14 @@ function preloadFirstSet() {
 function previewNextSet() {
     if (!workoutData.length) return;
 
-    const nextItem = workoutData[currentSet]; // look ahead safely
+    const nextItem = workoutData[currentSet] ?? null;
 
     if (nextItem && nextItem.type === "set") {
         loadSetData(currentSet + 1); // loadSetData is 1-based
     }
 }
 
+  
 /* ======================================================
    ROBUST CSV PARSER
 ====================================================== */
@@ -735,6 +1160,7 @@ function parseCSV(text) {
     return rows;
 }
 
+  
 /* ======================================================
    SAFE NUMBER PARSER
 ====================================================== */
@@ -751,6 +1177,7 @@ function parseSheetNumber(val, fallback = null) {
     return isNaN(num) ? fallback : num;
 }
 
+  
 /* ======================================================
    MAIN LOADER
 ====================================================== */
@@ -766,6 +1193,7 @@ function isEffectivelyBlankRow(row) {
     );
 }
 
+  
 /* ======================================================
    AUTO-DETECT WORKOUT BY DAY (ELITE)
 ====================================================== */
@@ -786,18 +1214,6 @@ function getSheetGid() {
     return "1830705073";
 }
 
-      const schoolSheets = {
-  harrisonville: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjAVNz1buONnBF0Fkqse6QQwdpcreJdvdQGWiVNWp6UGewHgd-4f5uC0ZcyHhfRZxTU7BDC3_AjQA1/pub",
-
-  cassmidway:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR18KdSP11cPqGPh_flsCq-4fC-z8EgkMQaHBL943j53J7-sdVUZQeRZAZfDUwi5DhYTsAs6dQch9eO/pub",
-            
-  raypec: "PASTE_RAYPEC_SHEET_URL_HERE",
-
-  pleasanthill: "PASTE_PLEASANT_HILL_SHEET_URL_HERE"
-
-  springhill:  ""          
-};
-
 async function loadWorkout() {
     console.log("🚀 loadWorkout started");
 
@@ -815,12 +1231,17 @@ const response = await fetch(
         const text = await response.text();
 
         console.log("CSV length:", text.length);
-        console.log("CSV preview:", text.slice(0,200));
 
         const rows = parseCSV(text);
 
-        console.log("Rows parsed:", rows.length);
+        const DEBUG = true;
+
+        if (DEBUG) {
+        console.log("CSV preview:", text.slice(0,200));
         console.log("First rows:", rows.slice(0,10));
+        }
+        console.log("Rows parsed:", rows.length);
+        
 
         console.log("First 10 rows:", rows.slice(0, 10));
 
@@ -839,146 +1260,148 @@ const response = await fetch(
                 .replace(/\r/g, "")
                 .trim();
 
-        /* =============================
-           PROCESS ROWS
-        ============================= */
-        for (const r of rows) {
+      
+       /* =============================
+   PROCESS ROWS
+============================= */
+for (const r of rows) {
 
-            // ---------- TRUE EMPTY ROW ----------
-            if (!r || r.length === 0) {
-            workoutData.push({
+    // ---------- TRUE EMPTY ROW ----------
+    if (!r || r.length === 0) {
+        workoutData.push({
             type: "break",
             breakSec: breakDuration
-    });
-            console.log("📥 Empty CSV row → break inserted");
-            continue;
+        });
+        console.log("📥 Empty CSV row → break inserted");
+        continue;
+    }
+
+    const firstRaw = clean(r[0] ?? "");
+    const firstCell = firstRaw.toLowerCase();
+
+    // ---------- BULLETPROOF BLANK ROW ----------
+    if (isEffectivelyBlankRow(r)) {
+        workoutData.push({
+            type: "break",
+            breakSec: breakDuration
+        });
+        continue;
+    }
+
+    // ---------- EXPLICIT BREAK ----------
+    if (firstCell.replace(/\s+/g, "") === "break") {
+        const breakSec = parseSheetNumber(r[10], breakDuration);
+
+        workoutData.push({
+            type: "break",
+            breakSec
+        });
+
+        console.log("📥 Explicit break parsed:", breakSec);
+        continue;
+    }
+
+    // ---------- HEADER SKIP ----------
+    if (firstCell === "set" || firstCell === "sets") continue;
+
+    /* =================================================
+       CONFIG FLAGS
+    ================================================= */
+
+    if (firstCell === "auto_start") {
+        autoStartEnabled = clean(r[1]).toLowerCase() === "true";
+        continue;
+    }
+
+    if (firstCell === "today_only") {
+        todayOnlyMode = clean(r[1]).toLowerCase() === "true";
+        continue;
+    }
+
+    if (firstCell === "force_date") {
+        forceDateString = clean(r[1]) || null;
+        continue;
+    }
+
+    /* ---------- CLASS LENGTH BY DAY ---------- */
+
+    if (firstCell === "monday_minutes") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) mondayMinutes = v;
+        continue;
+    }
+
+    if (firstCell === "tuewed_minutes") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) tueWedMinutes = v;
+        continue;
+    }
+
+    if (firstCell === "thufri_minutes") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) thuFriMinutes = v;
+        continue;
+    }
+
+    /* ---------- SCHEDULE TIMES ---------- */
+
+    if (firstCell === "monday_times") {
+        mondayTimes = clean(r[1] || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean);
+        continue;
+    }
+
+    if (firstCell === "tuewed_times") {
+        tueWedTimes = clean(r[1] || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean);
+        continue;
+    }
+
+    if (firstCell === "thufri_times") {
+        thuFriTimes = clean(r[1] || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean);
+        continue;
+    }
+
+    /* ---------- GLOBAL TIMINGS ---------- */
+
+    if (
+        firstCell === "dress_seconds" ||
+        firstCell === "dress" ||
+        firstCell === "get_dressed" ||
+        firstCell === "get_dress"
+    ) {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) {
+            dressOutDuration = v;
+            console.log("📥 Dress time:", dressOutDuration);
+        }
+        continue;
+    }
+
+    if (firstCell === "stretch_seconds") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) {
+            dynamicStretchDuration = v;
+            console.log("📥 Stretch time:", dynamicStretchDuration);
+        }
+        continue;
+    }
+
+    if (firstCell === "break_seconds") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) breakDuration = v;
+        continue;
+    }
 }
 
-            const firstRaw = clean(r[0]);
-            const firstCell = firstRaw.toLowerCase(); // ⭐ REQUIRED
-
-// ---------- BULLETPROOF BLANK ROW ----------
-if (isEffectivelyBlankRow(r)) {
-    workoutData.push({
-        type: "break",
-        breakSec: breakDuration
-    });
-    continue;
-}
-
-
-            // ---------- EXPLICIT BREAK ----------
-            if (firstCell.replace(/\s+/g, "") === "break") {
-                const breakSec = parseSheetNumber(r[10]);
-
-                workoutData.push({
-                    type: "break",
-                    breakSec
-                });
-
-                console.log("📥 Explicit break parsed:", breakSec);
-                continue;
-            }
-
-            // ---------- HEADER SKIP ----------
-            if (firstCell === "set") continue;
-
-            /* =================================================
-               CONFIG FLAGS
-            ================================================= */
-
-            if (firstCell === "auto_start") {
-                autoStartEnabled = clean(r[1]).toLowerCase() === "true";
-                continue;
-            }
-
-            if (firstCell === "today_only") {
-                todayOnlyMode = clean(r[1]).toLowerCase() === "true";
-                continue;
-            }
-
-            if (firstCell === "force_date") {
-                forceDateString = clean(r[1]) || null;
-                continue;
-            }
-
-            /* ---------- CLASS LENGTH BY DAY ---------- */
-
-            if (firstCell === "monday_minutes") {
-                const v = parseSheetNumber(r[1]);
-                if (v !== null) mondayMinutes = v;
-                continue;
-            }
-
-            if (firstCell === "tuewed_minutes") {
-                const v = parseSheetNumber(r[1]);
-                if (v !== null) tueWedMinutes = v;
-                continue;
-            }
-
-            if (firstCell === "thufri_minutes") {
-                const v = parseSheetNumber(r[1]);
-                if (v !== null) thuFriMinutes = v;
-                continue;
-            }
-
-            /* ---------- SCHEDULE TIMES ---------- */
-
-            if (firstCell === "monday_times") {
-                mondayTimes = clean(r[1])
-                    .split(",")
-                    .map(s => s.trim())
-                    .filter(Boolean);
-                continue;
-            }
-
-            if (firstCell === "tuewed_times") {
-                tueWedTimes = clean(r[1])
-                    .split(",")
-                    .map(s => s.trim())
-                    .filter(Boolean);
-                continue;
-            }
-
-            if (firstCell === "thufri_times") {
-                thuFriTimes = clean(r[1])
-                    .split(",")
-                    .map(s => s.trim())
-                    .filter(Boolean);
-                continue;
-            }
-
-            /* ---------- GLOBAL TIMINGS ---------- */
-
-            if (
-                firstCell === "dress_seconds" ||
-                firstCell === "dress" ||
-                firstCell === "get_dressed" ||
-                firstCell === "get_dress"
-            ) {
-                const v = parseSheetNumber(r[1]);
-                if (v !== null) {
-                    dressOutDuration = v;
-                    console.log("📥 Dress time:", dressOutDuration);
-                }
-                continue;
-            }
-
-            if (firstCell === "stretch_seconds") {
-                const v = parseSheetNumber(r[1]);
-                if (v !== null) {
-                    dynamicStretchDuration = v;
-                    console.log("📥 Stretch time:", dynamicStretchDuration);
-                }
-                continue;
-            }
-
-            if (firstCell === "break_seconds") {
-                const v = parseSheetNumber(r[1]);
-                if (v !== null) breakDuration = v;
-                continue;
-            }
-
+          
             /* =================================================
                FLEXIBLE SET DETECTION
             ================================================= */
@@ -992,7 +1415,7 @@ if (isEffectivelyBlankRow(r)) {
 
                 const workSec = parseSheetNumber(r[8]);
                 const rotateSec = parseSheetNumber(r[9]);
-                const breakSec = parseSheetNumber(r[10]);
+                const breakSec = parseSheetNumber(r[10], breakDuration);
 
                 workoutData.push({
                     type: "set",
@@ -1042,17 +1465,19 @@ updateTotalDisplay();
     }
 }
 
+  
 /* ======================================================
    STOP ALL TIMERS
 ====================================================== */
-function stopAllTimers() {
+
+ function stopAllTimers() {
 
     if (timer) {
-        clearTimeout(timer);
+        clearTimeout(timer); // ✅ CORRECT for setTimeout loop
         timer = null;
     }
 
-    nextTickTime = null; // ⭐ prevents drift on restart
+    nextTickTime = null; // prevents drift on restart
 
     isRunning = false;
     document.getElementById("startBtn").innerText = "START";
@@ -1061,7 +1486,8 @@ function stopAllTimers() {
 /* ======================================================
    GET NEXT SET INDEX (1-BASED)
 ====================================================== */
-function getNextSetIndex() {
+
+  function getNextSetIndex() {
 
     // Start searching AFTER currentSet
     for (let i = currentSet; i < workoutData.length; i++) {
@@ -1074,12 +1500,14 @@ function getNextSetIndex() {
     return null;
 }
 
+  
 /* ======================================================
    WORK DURATION (seconds)
 ====================================================== */
-function getWorkDuration() {
 
-    const currentItem = workoutData[currentSet - 1];
+  function getWorkDuration() {
+
+    const currentItem = workoutData[currentSet - 1] || {};
 
     // 1️⃣ per-set override
     if (currentItem?.workSec) {
@@ -1105,6 +1533,7 @@ function getWorkDuration() {
     return safeVal;
 }
 
+  
 /* ======================================================
    MAIN TICK
 ====================================================== */
@@ -1115,6 +1544,7 @@ function tick() {
 
     phaseJustChanged = false;
 
+  
     /* ======================================================
        1️⃣ MASTER CLASS TIMER (authoritative)
     ====================================================== */
@@ -1126,15 +1556,19 @@ function tick() {
     totalSeconds = Math.max(0, totalSeconds - 1);
     updateTotalDisplay();
 
+  
     /* ======================================================
        2️⃣ PHASE TIMER
     ====================================================== */
-    timeLeft = Math.max(0, timeLeft - 1);
+   
+  timeLeft = Math.max(0, timeLeft - 1);
 
+  
     /* ======================================================
        3️⃣ DRESS WARNING (exact trigger)
     ====================================================== */
-    if (
+  
+  if (
         currentPhase === "dress" &&
         timeLeft === 120 &&
         !dressWarningSpoken
@@ -1143,34 +1577,42 @@ function tick() {
         dressWarningSpoken = true;
     }
 
+    
     /* ======================================================
        4️⃣ FINAL COUNTDOWN (no repeats)
     ====================================================== */
-    if (timeLeft >= 1 && timeLeft <= 3) {
+    
+  if (timeLeft >= 1 && timeLeft <= 5) {
         if (lastCountdownSpoken !== timeLeft) {
             speakNumber(timeLeft);
             lastCountdownSpoken = timeLeft;
         }
     }
 
+    
     /* ======================================================
        5️⃣ UPDATE CLOCK
     ====================================================== */
-    updateClock();
+    
+  updateClock();
 
+  
     /* ======================================================
        6️⃣ EXIT IF TIME REMAINS
     ====================================================== */
-    if (timeLeft > 0) return;
+    
+  if (timeLeft > 0) return;
 
     lastCountdownSpoken = null;
 
     console.log("Set:", currentSet, "Rotation:", rotationCount);
 
+  
     /* ======================================================
        PHASE TRANSITIONS (STATE MACHINE)
     ====================================================== */
-    switch (currentPhase) {
+   
+  switch (currentPhase) {
 
         case "dress":
             currentPhase = "stretch";
@@ -1204,8 +1646,10 @@ function tick() {
             break;
         }
 
+      
         /* ---------- ROTATE → NEXT ---------- */
-        case "rotate": {
+      
+    case "rotate": {
 
     const finishedRotations = rotationCount >= maxRotations;
 
@@ -1213,7 +1657,7 @@ function tick() {
 
         rotationCount = 0;
 
-        const nextItem = workoutData[currentSet]; // look ahead
+        const nextItem = workoutData[currentSet] ?? null;
 
         // 🔴 no more items
         if (!nextItem) {
@@ -1225,7 +1669,6 @@ function tick() {
         // 🟡 break row
         if (nextItem.type === "break") {
 
-
             // advance pointer onto the break row
             currentSet++;
 
@@ -1235,7 +1678,6 @@ function tick() {
                 1,
                 nextItem.breakSec || breakDuration
             );
-
 
             phaseJustChanged = true;
             speakBreakPrep();
@@ -1260,13 +1702,14 @@ function tick() {
 
         case "break": {
 
-            const nextItem = workoutData[currentSet];
+            const nextItem = workoutData[currentSet] ?? null;
 
             if (!nextItem) {
                 workoutComplete();
                 return;
             }
 
+          
             // ✅ ONLY advance when next is a set
             if (nextItem.type === "set") {
                 currentSet++;
@@ -1283,59 +1726,29 @@ function tick() {
 
     } // ✅ CLOSES switch(currentPhase)
 
+  
     /* ======================================================
        FINAL UI UPDATE
     ====================================================== */
-    if (phaseJustChanged) {
-        updatePhaseDisplay();
-    }
-}
-
-/* ======================================================
-   WORKOUT COMPLETE
-====================================================== */
-function workoutComplete() {
-
-    if (currentPhase === "cooldown") return;
-
-    currentPhase = "cooldown";
-
-    timeLeft = Math.max(cooldownDuration, 1);
-
+    
+  if (phaseJustChanged) {
+    lastCountdownSpoken = null;
     updatePhaseDisplay();
-    updateClock();
+}
 }
 
-/* ======================================================
-   FINAL FINISH SCREEN
-====================================================== */
-function workoutFinishScreen() {
-    stopAllTimers();
-    playHorn(); // optional — keeps your finish horn
-}
-
-/* ======================================================
-   CLOCK DISPLAY
-====================================================== */
-function updateClock() {
-
-    const safeTime = Math.max(0, timeLeft);
-
-    const minutes = Math.floor(safeTime / 60);
-    const seconds = safeTime % 60;
-
-    document.getElementById("clock").innerText =
-        `${minutes}:${seconds.toString().padStart(2, "0")}`;
-}
-
+  
 /* ======================================================
    PHASE DISPLAY + CENTER MODES
 ====================================================== */
+
 function updatePhaseDisplay() {
 
-    const logo = document.getElementById("schoolLogo");
-if (!logo) return;
+    const logo = document.getElementById("teamLogo");
     const center = document.getElementById("center");
+
+    // ✅ safety check (prevents crashes if DOM changes)
+    if (!center || !logo) return;
 
     // 🔥 CLEAR ALL CENTER MODES FIRST (CRITICAL)
     center.classList.remove(
@@ -1374,14 +1787,17 @@ if (!logo) return;
 
         case "work":
             center.classList.add("workMode");
+            logo.classList.add("logoWork"); // ✅ FIXED
             break;
 
         case "rotate":
             center.classList.add("rotateMode");
+            logo.classList.add("logoRotate"); // ✅ FIXED
             break;
 
         case "break":
             center.classList.add("breakMode");
+            logo.classList.add("logoBreak"); // ✅ consistency improvement
             phaseEl.innerText = "BREAK\nPREP NEXT LIFT";
             return;
     }
@@ -1405,122 +1821,7 @@ if (!logo) return;
     }
 }
 
-/* ======================================================
-   TOTAL DISPLAY
-====================================================== */
-function updateTotalDisplay() {
-
-    // Prevent negative time showing
-    const safeTotal = Math.max(0, totalSeconds);
-
-    const minutes = Math.floor(safeTotal / 60);
-    const seconds = safeTotal % 60;
-
-    const totalEl = document.getElementById("totalTime");
-    if (!totalEl) return;
-
-    totalEl.innerText =
-        `${minutes.toString().padStart(2, "0")}:` +
-        `${seconds.toString().padStart(2, "0")}`;
-}
-
-/* -------------------- ROTATE QUADRANTS -------------------- */
-function rotateQuadrants() {
-
-    const mapping = {
-        q1: "q2",
-        q2: "q4",
-        q4: "q3",
-        q3: "q1"
-    };
-
-    const colors = {};
-    const textColors = {};
-
-    for (let id in mapping) {
-        const el = document.getElementById(id);
-        colors[id] = window.getComputedStyle(el).backgroundColor;
-        textColors[id] = window.getComputedStyle(el).color;
-    }
-
-    for (let id in mapping) {
-        const target = mapping[id];
-        document.getElementById(target).style.backgroundColor = colors[id];
-        document.getElementById(target).style.color = textColors[id];
-    }
-}
-
-/* ======================================================
-   AUDIO CORE
-====================================================== */
-
-function ensureAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === "suspended") {
-        audioCtx.resume();
-    }
-}
-
-/* ---------- GENERIC TONE ---------- */
-function playTone(freq, dur) {
-
-    ensureAudio();
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = "sawtooth";
-    osc.frequency.value = freq;
-
-    // 🔥 prevent speaker clipping
-    gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioCtx.currentTime + dur
-    );
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-    osc.stop(audioCtx.currentTime + dur);
-}
-
-/* ---------- AIR HORN ---------- */
-function playHorn() {
-
-    ensureAudio();
-
-    const duration = 2.5;
-
-    const osc1 = audioCtx.createOscillator();
-    const osc2 = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc1.type = "sawtooth";
-    osc2.type = "square";
-
-    osc1.frequency.value = 180;
-    osc2.frequency.value = 220;
-
-    // 🔥 cleaner envelope (less pop)
-    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.9, audioCtx.currentTime + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
-    osc1.connect(gain);
-    osc2.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc1.start();
-    osc2.start();
-
-    osc1.stop(audioCtx.currentTime + duration);
-    osc2.stop(audioCtx.currentTime + duration);
-}
-
+  
 /* ======================================================
    SPEECH ENGINE (shared helper)
 ====================================================== */
@@ -1538,47 +1839,56 @@ function speak(text, rate = 1, pitch = 1) {
     utter.rate = rate;
     utter.pitch = pitch;
 
-    speechSynthesis.speak(utter);
+    // ✅ slight delay prevents overlap glitches
+    setTimeout(() => speechSynthesis.speak(utter), 50);
 }
+
 
 /* ---------- COUNTDOWN ---------- */
 function speakNumber(num) {
     speak(num.toString(), 1, 1);
 }
 
+
 /* ---------- ROTATE ---------- */
 function speakRotate() {
     speak("Rotate!", 1.6, 1.5);
 }
+
 
 /* ---------- DRESS WARNING ---------- */
 function speakDressWarning() {
     speak("Two minute warning", 1, 1);
 }
 
+
 /* ---------- LIFT ---------- */
 function speakLift() {
     speak("Lift!", 1.6, 1.3);
 }
+
 
 /* ---------- STRETCH ---------- */
 function speakStretch() {
     speak("Dynamic Stretch!", 1.3, 1.2);
 }
 
+
 /* ---------- BREAK PREP ---------- */
 function speakBreakPrep() {
     speak("Break! Prep next lift!", 1.2, 1.1);
 }
 
+
 /* ======================================================
    REST DURATION (seconds)
 ====================================================== */
+
 function getRestDuration() {
 
     // 1️⃣ per-set override
-    const currentItem = workoutData[currentSet - 1];
-    if (currentItem?.rotateSec) {
+    const currentItem = workoutData[currentSet - 1] || {}; // ✅ safer
+    if (currentItem.rotateSec) {
         console.log("⏱ Using per-set rotate:", currentItem.rotateSec);
         return currentItem.rotateSec;
     }
@@ -1596,6 +1906,7 @@ function getRestDuration() {
     console.log("⏱ Using UI rotate:", safe);
     return safe;
 }
+
 
 function syncTime() {
 
@@ -1616,6 +1927,7 @@ function syncTime() {
     }
 }
 
+
 /* ======================================================
    RESET CENTER CLOCK
 ====================================================== */
@@ -1624,7 +1936,14 @@ function resetCenterClock() {
 
     const center = document.getElementById("center");
 
-    center.classList.remove("workMode", "rotateMode");
+    center.classList.remove(
+        "workMode",
+        "rotateMode",
+        "breakMode",
+        "dressMode",
+        "stretchMode"
+    );
+
     center.classList.add("workMode");
 
     document.getElementById("clock").innerText =
@@ -1632,6 +1951,7 @@ function resetCenterClock() {
 
     document.getElementById("phase").innerText = "WORK";
 }
+
 
 /* ======================================================
    LOAD SET INTO QUADRANTS
@@ -1667,17 +1987,16 @@ function loadSetData(setNumber) {
     }
 }
 
+
 /* ======================================================
    SPACEBAR CONTROL
 ====================================================== */
 
 window.addEventListener("keydown", (e) => {
 
-    // 🔒 Ignore if user is typing in an input/field
     const tag = document.activeElement?.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA") return;
 
-    // 🔒 Prevent key repeat when holding space
     if (e.repeat) return;
 
     if (e.code === "Space") {
@@ -1686,7 +2005,6 @@ window.addEventListener("keydown", (e) => {
     }
 });
 
-document.getElementById("schoolLogo")?.classList.add("logoDefault");
 
 /* ======================================================
    INITIAL PAGE LOAD
@@ -1706,16 +2024,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     loadWorkout();
 
+    // auto detect if class already started
     setTimeout(autoDetectActiveClass, 2000);
 
-    // 🔥 APPLY THEME
-    if (typeof loadTheme === "function") {
-        loadTheme();
-    }
-
-    // ✅ RIGHT HERE (THIS IS THE CORRECT SPOT)
-    const logo = document.getElementById("schoolLogo");
-
-    });
-
-      
+});
