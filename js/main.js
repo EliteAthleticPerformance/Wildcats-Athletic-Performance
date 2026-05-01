@@ -18,7 +18,7 @@ let nextTickTime = null;
 
 /* ===================== SETS ===================== */
 
-let currentSet = 0'
+let currentSet = 0;
 let maxSets = 1;
 let rotationCount = 0;
 const maxRotations = 4;
