@@ -1044,8 +1044,13 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
 
         await loadWorkout();
-      loadSetData(0);
-      setTimeout(autoDetectActiveClass, 2000);
+loadSetData(0);
+
+// 🔥 START TIMER AUTOMATICALLY
+startTimer();
+
+// optional: keep this if using schedules
+setTimeout(autoDetectActiveClass, 2000);
 
     } catch (err) {
         console.error("🔥 CRITICAL INIT ERROR:", err);
