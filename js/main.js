@@ -115,8 +115,8 @@ function applyDaySpecificClassLength() {
 
     if (day === 1) minutes = summonMinutes;
     else if (day === 2) minutes = sumtueMinutes;
-    else if (day === 3) minutes = sumthurMinutes;
-    else if (day === 4) minutes = sumfriMinutes;
+    else if (day === 4) minutes = sumthurMinutes;
+    else if (day === 5) minutes = sumfriMinutes;
 
     classBlockLength = minutes * 60;
 
@@ -327,8 +327,8 @@ function autoDetectActiveClass() {
 
     if (day === 1) minutes = summonMinutes;
     else if (day === 2) minutes = sumtueMinutes;
-    else if (day === 3) minutes = sumthurMinutes;
-    else if (day === 4) minutes = sumfriMinutes;
+    else if (day === 4) minutes = sumthurMinutes;
+    else if (day === 5) minutes = sumfriMinutes;
 
     for (const timeStr of todaySchedule) {
 
@@ -379,8 +379,8 @@ function startAutoScheduler() {
 
         if (day === 1) minutes = summonMinutes;
     else if (day === 2) minutes = sumtueMinutes;
-    else if (day === 3) minutes = sumthurMinutes;
-    else if (day === 4) minutes = sumfriMinutes;
+    else if (day === 4) minutes = sumthurMinutes;
+    else if (day === 5) minutes = sumfriMinutes;
         else return;
 
         const currentTotalSeconds =
@@ -1047,7 +1047,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 loadSetData(0);
 
 // 🔥 START TIMER AUTOMATICALLY
-startTimer();
+startAutoScheduler();
 
 // optional: keep this if using schedules
 setTimeout(autoDetectActiveClass, 2000);
