@@ -1795,12 +1795,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
 
         await loadWorkout();
-      
-      // 🔥 START WORKOUT ENGINE
-      loadSetData(0);
-      updatePhaseDisplay();
-      updateClock();
-
       setTimeout(autoDetectActiveClass, 2000);
 
     } catch (err) {
