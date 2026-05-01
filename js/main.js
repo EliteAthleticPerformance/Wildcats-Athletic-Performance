@@ -58,6 +58,100 @@ let dynamicStretchDuration = 0;
 let breakDuration = 120;
 let cooldownDuration = 0;
 
+/* ===================== TIMELINE ===================== */
+
+let timelineData = [];
+
+function buildSegmentTimeline() {
+    if (!window.workoutData?.length) return;
+
+    timelineData = [];
+
+    // DRESS
+    timelineData.push({ phase: "dress", duration: dressOutDuration });
+
+    // STRETCH
+    if (dynamicStretchDuration > 0) {
+        timelineData.push({ phase: "stretch", duration: dynamicStretchDuration });
+    }
+
+    // WORKOUT
+    window.workoutData.forEach((item, index) => {
+
+        if (item.type === "set") {
+            for (let r = 0; r < maxRotations; r++) {
+
+                timelineData.push({
+                    phase: "work",
+                    duration: item.workSec || parseInt(document.getElementById("workTime").value, 10) || 0
+                });
+
+                if (r < maxRotations - 1) {
+                    timelineData.push({
+                        phase: "rotate",
+                        duration: item.rotateSec || parseInt(document.getElementById("rotate").value, 10) || 0
+                    });
+                }
+            }
+        }
+
+        if (item.type === "break") {
+            timelineData.push({
+                phase: "break",
+                duration: item.breakSec || breakDuration
+            });
+        }
+
+    });
+
+    renderTimeline(); // ✅ correct place
+}
+
+
+/* ===== MUST BE OUTSIDE (GLOBAL) ===== */
+
+function renderTimeline() {
+    const container = document.getElementById("timelineSegments");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const total = timelineData.reduce((sum, seg) => sum + seg.duration, 0);
+
+    timelineData.forEach((seg, index) => {
+        const div = document.createElement("div");
+
+        div.classList.add("timeline-segment", `seg-${seg.phase}`);
+
+        const percent = (seg.duration / total) * 100;
+        div.style.width = percent + "%";
+
+        div.dataset.index = index;
+
+        container.appendChild(div);
+    });
+}
+
+function updateSegmentHighlight() {
+    if (!window.classStartTime) return;
+
+    const now = getEffectiveNow().getTime();
+    let elapsed = (now - window.classStartTime) / 1000;
+
+    let currentIndex = 0;
+
+    for (let i = 0; i < timelineData.length; i++) {
+        if (elapsed < timelineData[i].duration) {
+            currentIndex = i;
+            break;
+        }
+        elapsed -= timelineData[i].duration;
+    }
+
+    document.querySelectorAll(".timeline-segment").forEach((el, i) => {
+        el.classList.toggle("active", i === currentIndex);
+    });
+}
 
 /* ===================== FLAGS ===================== */
 
@@ -229,7 +323,7 @@ function preciseTick() {
     const delay = Math.max(0, nextTickTime - now);
     timer = setTimeout(preciseTick, delay);
 
-}
+ }
 
 function applyCoachControl() {
 
@@ -748,6 +842,8 @@ applyCoachControl();
 
     phaseJustChanged = false;
 
+   updateSegmentHighlight();
+
   
     /* ======================================================
        1️⃣ MASTER CLASS TIMER (authoritative)
@@ -1117,6 +1213,7 @@ setInterval(async () => {
 
     try {
         await loadWorkout();
+      buildSegmentTimeline();
     } catch (e) {
         console.error("Polling error:", e);
     }
@@ -1134,6 +1231,7 @@ setInterval(async () => {
         }
 
         await loadWorkout();
+      buildSegmentTimeline();
 
 // 🔥 sync clocks BEFORE scheduler starts
 syncClockOffset();
