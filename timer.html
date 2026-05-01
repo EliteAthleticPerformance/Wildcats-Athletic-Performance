@@ -543,7 +543,7 @@ let cooldownDuration = 0;
 let dressWarningSpoken = false;
 let onBreak = false;
 let selectedVoice = null;
-let displaySetNumber = 1;
+let displaySetNumber = 0;
 
   
 
@@ -571,9 +571,9 @@ function getTotalSets() {
 ====================================================== */
 
 function resetWorkoutState() {
-    displaySetNumber = 1;
+    displaySetNumber = 0;
     rotationCount = 0;
-    currentSet = 1;
+    currentSet = 0;
 }
 
 
@@ -715,9 +715,9 @@ updateTotalDisplay();
 document.getElementById("startBtn").innerText = "STOP";
 
     // FULL RESET
-    displaySetNumber = 1;
+    displaySetNumber = 0;
     rotationCount = 0;
-    currentSet = 1;
+    currentSet = 0;
     dressWarningSpoken = false;
     lastAutoStartMinute = null;
 
@@ -914,10 +914,11 @@ function preloadFirstSet() {
 function previewNextSet() {
     if (!window.workoutData || !window.workoutData.length) return;
 
-    const nextItem = window.workoutData[currentSet + 1] || null;
+    const nextIndex = currentSet + 1;
+    const nextItem = window.workoutData[nextIndex];
 
     if (nextItem && nextItem.type === "set") {
-        loadSetData(currentSet);
+        loadSetData(nextIndex);
     }
 }
  
