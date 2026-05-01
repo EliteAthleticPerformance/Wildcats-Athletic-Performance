@@ -74,6 +74,13 @@ let displaySetNumber = 0;
         String(seconds).padStart(2, "0");
 } 
 
+function updateClock() {
+    const el = document.getElementById("clock");
+    if (!el) return;
+
+    el.textContent = timeLeft;
+}
+
 /* ===================== UTIL ===================== */
 
 function goFullscreen() {
