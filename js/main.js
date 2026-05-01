@@ -973,6 +973,7 @@ rotationCount = state.rotation || 0;
   updateClock();
 
   updatePhaseDisplay();
+  updateQuadrantHighlight();
     
   if (timeLeft > 0) return;
 
@@ -1064,6 +1065,34 @@ function updatePhaseDisplay() {
     }
 }
 
+function updateQuadrantHighlight() {
+    const quads = [
+        document.querySelector(".quad1"),
+        document.querySelector(".quad2"),
+        document.querySelector(".quad3"),
+        document.querySelector(".quad4")
+    ];
+
+    if (!quads.every(q => q)) return;
+
+    // 🔥 RESET ALL
+    quads.forEach(q => {
+        q.classList.remove("activeQuad", "inactiveQuad");
+    });
+
+    // Only during WORK
+    if (currentPhase === "work") {
+        const activeIndex = rotationCount % quads.length;
+
+        quads.forEach((q, i) => {
+            if (i === activeIndex) {
+                q.classList.add("activeQuad");
+            } else {
+                q.classList.add("inactiveQuad");
+            }
+        });
+    }
+}
   
 /* ======================================================
    SPEECH ENGINE (shared helper)
