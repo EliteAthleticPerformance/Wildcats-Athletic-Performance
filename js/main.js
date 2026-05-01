@@ -27,10 +27,11 @@ const maxRotations = 4;
 /* ===================== PERIOD AUTO START ===================== */
 
 let autoStartEnabled = false;
-let summonTimes = [];
-let sumtueTimes = [];
-let sumthurTimes = [];
-let sumfriTimes = [];
+let monTimes = [];
+let tueTimes = [];
+let wedTimes = [];
+let thurTimes = [];
+let friTimes = [];
 let autoStartTimer = null;
 let lastAutoStartMinute = null;
 let todayOnlyMode = false;
@@ -42,10 +43,11 @@ let manualWorkoutOverride = null;
 
 /* ===================== DURATIONS ===================== */
 
-let summonMinutes = 45;
-let sumtueMinutes = 45;
-let sumthurMinutes = 45;
-let sumfriMinutes = 45
+let monMinutes = 45;
+let tueMinutes = 45;
+let wedMinutes = 45;
+let thurMinutes = 45;
+let friMinutes = 45
 let classBlockLength = 45 * 60;
 let dressOutDuration = 180;
 let dynamicStretchDuration = 0;
@@ -111,20 +113,22 @@ function applyDaySpecificClassLength() {
     const now = new Date();
     const day = now.getDay(); // 0=Sun
 
-    let minutes = summonMinutes; // safe default
+    let minutes = monMinutes; // safe default
 
-    if (day === 1) minutes = summonMinutes;
-    else if (day === 2) minutes = sumtueMinutes;
-    else if (day === 4) minutes = sumthurMinutes;
-    else if (day === 5) minutes = sumfriMinutes;
+    if (day === 1) minutes = monMinutes;
+else if (day === 2) minutes = tueMinutes;
+else if (day === 3) minutes = wedMinutes;
+else if (day === 4) minutes = thurMinutes;
+else if (day === 5) minutes = friMinutes;
 
     classBlockLength = minutes * 60;
 
     console.log("📅 Using class length:", minutes, "minutes");
-    console.log("📊 SumMon minutes:", summonMinutes);
-    console.log("📊 SumTue minutes:", sumtueMinutes);
-    console.log("📊 SumThur minutes:", sumthurMinutes);
-    console.log("📊 SumFri minutes:", sumfriMinutes);
+    console.log("📊 Mon minutes:", monMinutes);
+    console.log("📊 Tue minutes:", tueMinutes);
+    console.log("📊 Wed minutes:", wedMinutes);
+    console.log("📊 Thur minutes:", thurMinutes);
+    console.log("📊 Fri minutes:", friMinutes);
 }
 
   
@@ -325,10 +329,12 @@ function autoDetectActiveClass() {
 
     let todaySchedule = [];
 
-    if (day === 1) minutes = summonMinutes;
-    else if (day === 2) minutes = sumtueMinutes;
-    else if (day === 4) minutes = sumthurMinutes;
-    else if (day === 5) minutes = sumfriMinutes;
+if (day === 1) todaySchedule = monTimes;
+else if (day === 2) todaySchedule = tueTimes;
+else if (day === 3) todaySchedule = wedTimes;
+else if (day === 4) todaySchedule = thurTimes;
+else if (day === 5) todaySchedule = friTimes;
+else return;
 
     for (const timeStr of todaySchedule) {
 
@@ -377,11 +383,12 @@ function startAutoScheduler() {
 
         let todaySchedule = [];
 
-        if (day === 1) minutes = summonMinutes;
-    else if (day === 2) minutes = sumtueMinutes;
-    else if (day === 4) minutes = sumthurMinutes;
-    else if (day === 5) minutes = sumfriMinutes;
-        else return;
+        if (day === 1) todaySchedule = monTimes;
+else if (day === 2) todaySchedule = tueTimes;
+else if (day === 3) todaySchedule = wedTimes;
+else if (day === 4) todaySchedule = thurTimes;
+else if (day === 5) todaySchedule = friTimes;
+else return;
 
         const currentTotalSeconds =
             now.getHours() * 3600 +
@@ -394,6 +401,9 @@ function startAutoScheduler() {
             const times = raw.split(",").map(t => t.trim());
 
             for (const timeStr of times) {
+
+              console.log("⏱ NOW:", now.toTimeString());
+        console.log("🎯 TARGET:", timeStr);
 
                 if (!timeStr.includes(":")) continue;
 
@@ -493,11 +503,13 @@ function getSheetGid() {
     // Auto by day only
     const today = new Date().getDay();
 
-    if (today === 1) return "1830705073";
-    if (today === 2 || today === 3) return "313721530";
-    if (today === 4 || today === 5) return "1752992010";
+    if (today === 1) return "MON_GID";
+if (today === 2) return "TUE_GID";
+if (today === 3) return "WED_GID";
+if (today === 4) return "THUR_GID";
+if (today === 5) return "FRI_GID";
 
-    return "1830705073";
+    return "MON_GID";
 }
 
   
