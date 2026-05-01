@@ -622,12 +622,15 @@ else return;
                 const work = item.workSec || getWorkDuration();
 
                 if (elapsed < work) {
-                    return {
-                        phase: "work",
-                        setIndex: i,
-                        rotation: r,
-                        timeLeft: work - elapsed
-                    };
+                   return {
+    phase: "work",
+    setIndex: i,
+    setNumber: window.workoutData
+        .slice(0, i + 1)
+        .filter(x => x.type === "set").length,
+    rotation: r,
+    timeLeft: work - elapsed
+};
                 }
 
                 elapsed -= work;
@@ -931,7 +934,7 @@ timeLeft = state.timeLeft;
 
 if (state.setIndex !== undefined && state.setIndex !== currentSet) {
     currentSet = state.setIndex;
-  displaySetNumber = currentSet + 1;
+  displaySetNumber = state.setNumber;
     loadSetData(currentSet);
 }
 
