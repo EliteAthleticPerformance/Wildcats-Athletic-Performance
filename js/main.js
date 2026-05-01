@@ -27,9 +27,10 @@ const maxRotations = 4;
 /* ===================== PERIOD AUTO START ===================== */
 
 let autoStartEnabled = false;
-let mondayTimes = [];
-let tueWedTimes = [];
-let thuFriTimes = [];
+let summonTimes = [];
+let sumtueTimes = [];
+let sumthurTimes = [];
+let sumfriTimes = [];
 let autoStartTimer = null;
 let lastAutoStartMinute = null;
 let todayOnlyMode = false;
@@ -41,12 +42,13 @@ let manualWorkoutOverride = null;
 
 /* ===================== DURATIONS ===================== */
 
-let mondayMinutes = 45;
-let tueWedMinutes = 90;
-let thuFriMinutes = 90;
-let classBlockLength = 90 * 60;
-let dressOutDuration = 600;
-let dynamicStretchDuration = 600;
+let summonMinutes = 45;
+let sumtueMinutes = 45;
+let sumthurMinutes = 45;
+let sumfriMinutes = 45
+let classBlockLength = 45 * 60;
+let dressOutDuration = 180;
+let dynamicStretchDuration = 0;
 let breakDuration = 120;
 let cooldownDuration = 0;
 
@@ -109,18 +111,20 @@ function applyDaySpecificClassLength() {
     const now = getEffectiveNow();
     const day = now.getDay(); // 0=Sun
 
-    let minutes = mondayMinutes; // safe default
+    let minutes = summonMinutes; // safe default
 
-    if (day === 1) minutes = mondayMinutes;
-    else if (day === 2 || day === 3) minutes = tueWedMinutes;
-    else if (day === 4 || day === 5) minutes = thuFriMinutes;
+    if (day === 1) minutes = summonMinutes;
+    else if (day === 2) minutes = sumtueMinutes;
+    else if (day === 3) minutes = sumthurMinutes;
+    else if (day === 4) minutes = sumfriMinutes;
 
     classBlockLength = minutes * 60;
 
     console.log("📅 Using class length:", minutes, "minutes");
-    console.log("📊 Monday minutes:", mondayMinutes);
-    console.log("📊 Tue/Wed minutes:", tueWedMinutes);
-    console.log("📊 Thu/Fri minutes:", thuFriMinutes);
+    console.log("📊 SumMon minutes:", summonMinutes);
+    console.log("📊 SumTue minutes:", sumtueMinutes);
+    console.log("📊 SumThur minutes:", sumthurMinutes);
+    console.log("📊 SumFri minutes:", sumfriMinutes);
 }
 
   
@@ -321,9 +325,10 @@ function autoDetectActiveClass() {
 
     let todaySchedule = [];
 
-    if (day === 1) todaySchedule = mondayTimes;
-    else if (day === 2 || day === 3) todaySchedule = tueWedTimes;
-    else if (day === 4 || day === 5) todaySchedule = thuFriTimes;
+    if (day === 1) minutes = summonMinutes;
+    else if (day === 2) minutes = sumtueMinutes;
+    else if (day === 3) minutes = sumthurMinutes;
+    else if (day === 4) minutes = sumfriMinutes;
 
     for (const timeStr of todaySchedule) {
 
@@ -372,9 +377,10 @@ function startAutoScheduler() {
 
         let todaySchedule = [];
 
-        if (day === 1) todaySchedule = mondayTimes;
-        else if (day === 2 || day === 3) todaySchedule = tueWedTimes;
-        else if (day === 4 || day === 5) todaySchedule = thuFriTimes;
+        if (day === 1) minutes = summonMinutes;
+    else if (day === 2) minutes = sumtueMinutes;
+    else if (day === 3) minutes = sumthurMinutes;
+    else if (day === 4) minutes = sumfriMinutes;
         else return;
 
         const currentTotalSeconds =
