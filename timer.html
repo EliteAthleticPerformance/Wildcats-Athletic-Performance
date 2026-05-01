@@ -11,12 +11,13 @@
 <title>Harrisonville Wildcats | 4 Quadrant Training Timer</title>
 
 <script>
-let window.workoutData = [];
+let workoutData = [];
 
-Object.defineProperty(window, "window.workoutData", {
-    get: () => window.workoutData,
-    set: (val) => { window.workoutData = val; }
+Object.defineProperty(window, "workoutData", {
+    get: () => workoutData,
+    set: (val) => { workoutData = val; }
 });
+  
 </script>
 
 <script src="js/themeLoader.js"></script>
