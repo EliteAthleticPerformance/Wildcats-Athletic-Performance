@@ -89,7 +89,7 @@ function buildSegmentTimeline() {
                 if (r < maxRotations - 1) {
                     timelineData.push({
                         phase: "rotate",
-                        duration: item.rotateSec || parseInt(document.getElementById("rotate").value, 10) || 0
+                        duration: item.rotateSec || parseInt(document.getElementById("restTime").value, 10) || 0
                     });
                 }
             }
@@ -231,11 +231,6 @@ function resetWorkoutState() {
 
 
   
-/* ======================================================
-   APPLY DAY-SPECIFIC CLASS LENGTH
-====================================================== */
-
-
 
 /* ======================================================
    CALCULATE TOTAL CLASS TIME
@@ -926,10 +921,7 @@ rotationCount = state.rotation || 0;
     
   updateClock();
 
-  
-    /* ======================================================
-       6️⃣ EXIT IF TIME REMAINS
-    ====================================================== */
+  updatePhaseDisplay();
     
   if (timeLeft > 0) return;
 
@@ -937,18 +929,7 @@ rotationCount = state.rotation || 0;
 
     console.log("Set:", currentSet, "Rotation:", rotationCount);
 
-  
-        /* ======================================================
-       FINAL UI UPDATE
-    ====================================================== */
     
-  if (phaseJustChanged) {
-    lastCountdownSpoken = null;
-    updatePhaseDisplay();
-}
-}
-
-  
 /* ======================================================
    PHASE DISPLAY + CENTER MODES
 ====================================================== */
