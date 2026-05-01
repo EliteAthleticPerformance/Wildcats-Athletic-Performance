@@ -337,7 +337,7 @@ if (window.classStartTime && isRunning) {
 
         if (state.setIndex !== undefined) {
             currentSet = state.setIndex;
-            displaySetNumber = currentSet + 1;
+            displaySetNumber = state.setNumber;
             loadSetData(currentSet);
         }
 
@@ -384,7 +384,7 @@ if (window.classStartTime && isRunning) {
 
         if (state.setIndex !== undefined) {
             currentSet = state.setIndex;
-            displaySetNumber = currentSet + 1;
+            displaySetNumber = state.setNumber;
             loadSetData(currentSet);
         }
 
