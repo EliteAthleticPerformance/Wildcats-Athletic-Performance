@@ -326,6 +326,29 @@ function applyCoachControl() {
     window.classStartTime = new Date(window.controlTimestamp).getTime();
 }
 
+  // 🔥 FORCE SYNC FOR LATE JOIN (even without new START command)
+if (window.classStartTime && isRunning) {
+    const now = getEffectiveNow().getTime();
+    const state = computeWorkoutState(now);
+
+    if (state) {
+        currentPhase = state.phase;
+        timeLeft = state.timeLeft;
+
+        if (state.setIndex !== undefined) {
+            currentSet = state.setIndex;
+            displaySetNumber = currentSet + 1;
+            loadSetData(currentSet);
+        }
+
+        rotationCount = state.rotation || 0;
+
+        updateClock();
+        updatePhaseDisplay();
+        updateTotalDisplay();
+    }
+}
+
     if (!window.controlAction) return;
 
     const signature = [
@@ -352,7 +375,7 @@ function applyCoachControl() {
     isRunning = true;
 
     // 🔥 FORCE SYNC TO CORRECT PHASE (late join fix)
-    const now = getEffectiveNow().getTime();
+   
     const state = computeWorkoutState(now);
 
     if (state) {
@@ -1186,10 +1209,6 @@ window.addEventListener("keydown", (e) => {
 });
 
 
-/* ======================================================
-   INITIAL PAGE LOAD
-====================================================== */
-
 window.addEventListener("DOMContentLoaded", async () => {
 
     try {
@@ -1208,51 +1227,47 @@ window.addEventListener("DOMContentLoaded", async () => {
 
         console.log("✅ SCHOOL CONFIG READY:", config);
 
-let isPolling = false;
+        let isPolling = false;
 
-setInterval(async () => {
-    if (isPolling) return;
+        setInterval(async () => {
+            if (isPolling) return;
 
-    isPolling = true;
+            isPolling = true;
 
-    try {
-        await loadWorkout();
-      buildSegmentTimeline();
-    } catch (e) {
-        console.error("Polling error:", e);
-    }
+            try {
+                await loadWorkout();
+                buildSegmentTimeline();
+                applyCoachControl(); // 🔥 keep UI synced
+            } catch (e) {
+                console.error("Polling error:", e);
+            }
 
-    isPolling = false;
-}, 3000);
-      
-        
+            isPolling = false;
+        }, 3000);
+
         updateTotalDisplay();
 
-        // 🔥 IMPORTANT: ensure function exists BEFORE calling
         if (typeof loadWorkout !== "function") {
             console.error("❌ loadWorkout is NOT defined");
             return;
         }
 
         await loadWorkout();
-      buildSegmentTimeline();
+        buildSegmentTimeline();
 
-// 🔥 sync clocks BEFORE scheduler starts
-syncClockOffset();
+        // 🔥 sync clocks BEFORE scheduler starts
+        syncClockOffset();
 
-loadSetData(0);
+        // 🔥 immediate late-join sync
+        applyCoachControl();
 
-// 🔥 START TIMER AUTOMATICALLY
-startAutoScheduler();
+        // 🔥 START TIMER AUTOMATICALLY
+        startAutoScheduler();
 
-// optional: keep this if using schedules
-setTimeout(autoDetectActiveClass, 2000);
+        setTimeout(autoDetectActiveClass, 2000);
 
     } catch (err) {
         console.error("🔥 CRITICAL INIT ERROR:", err);
     }
 
 });
-
-  
-
