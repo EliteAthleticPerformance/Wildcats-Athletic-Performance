@@ -1044,6 +1044,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
 
         await loadWorkout();
+      loadSetData(0);
       setTimeout(autoDetectActiveClass, 2000);
 
     } catch (err) {
