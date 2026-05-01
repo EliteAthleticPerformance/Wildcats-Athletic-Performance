@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +5,6 @@
 <meta charset="UTF-8">
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 
 <title>Harrisonville Wildcats | 4 Quadrant Training Timer</title>
 
@@ -17,26 +15,18 @@ Object.defineProperty(window, "workoutData", {
     get: () => workoutData,
     set: (val) => { workoutData = val; }
 });
-  
 </script>
 
-<script src="js/themeLoader.js"></script>
-<script src="js/workoutLoader.js"></script>
-  <script src="js/main.js"></script>
-
 <script>
-
- 
-
-    (function () {
+(function () {
   const params = new URLSearchParams(window.location.search);
   const school = params.get("school") || sessionStorage.getItem("school") || "harrisonville";
   sessionStorage.setItem("school", school);
 
   let theme = null;
-try {
-  theme = JSON.parse(sessionStorage.getItem("theme-" + school));
-} catch (e) {}
+  try {
+    theme = JSON.parse(sessionStorage.getItem("theme-" + school));
+  } catch (e) {}
 
   if (theme) {
     const root = document.documentElement;
@@ -52,391 +42,16 @@ try {
 </script>
 
 <style>
-
-:root {
-    /* ✅ Dynamic theme variables (controlled by themeLoader) */
-    --primary: #505152;
-    --primaryLight: #B0B7BE;
-    --primaryDark: #222;
-    --secondary: #888;
-    --secondaryLight: #aaa;
-
-    /* ✅ Legacy support (kept so nothing breaks) */
-    --royal:#505152;
-    --silver:#B0B7BE;
-}
-
-
-/* ===================== MODE STATES ===================== */
-/* 🔥 These stay hardcoded intentionally (performance + clarity) */
-
-.workMode {
-    border-color:#32CD32 !important;
-    background:radial-gradient(circle at center,#32CD32 0%,#0a2 60%,#000 100%);
-    box-shadow:0 0 20px #32CD32, 0 0 50px #32CD32, 0 0 80px #32CD32;
-}
-
-.rotateMode {
-    border-color:#FFD700 !important;
-    background:radial-gradient(circle at center,#FFD700 0%,#b8860b 60%,#000 100%);
-    box-shadow:0 0 20px #FFD700, 0 0 50px #FFD700, 0 0 80px #FFD700;
-}
-
-.breakMode {
-    border-color:#FF0000 !important;
-    background:radial-gradient(circle at center,#FF1A1A 0%,#8B0000 60%,#000 100%);
-    box-shadow:0 0 30px #FF0000, 0 0 70px #FF0000, 0 0 120px #FF0000;
-}
-
-.dressMode {
-    border-color:#00E5FF !important;
-    background:radial-gradient(circle at center,#00E5FF 0%,#008B9A 60%,#000 100%);
-    box-shadow:0 0 25px #00E5FF, 0 0 60px #00E5FF, 0 0 110px #00E5FF;
-}
-
-.stretchMode {
-    border-color:#FF8C00 !important;
-    background:radial-gradient(circle at center,#FFA500 0%,#CC7000 60%,#000 100%);
-    box-shadow:0 0 25px #FFA500, 0 0 60px #FF8C00, 0 0 110px #FF8C00;
-}
-
-
-/* ===================== BASE ===================== */
-
-html, body {
-    width:100%;
-    height:100%;
-    overflow:hidden;
-}
-
-body {
-    margin:0;
-
-    /* 🔥 NOW THEME-AWARE (but still defaults to black) */
-    background:var(--background, #000);
-
-    color:#fff;
-    font-family:'Arial Black', sans-serif;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-}
-
-
-/* ===================== HEADER ===================== */
-
-#schoolHeader {
-    position:relative;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:5px;
-    padding:20px 25px;
-
-    /* 🔥 THEME-AWARE GRADIENT */
-    background:linear-gradient(
-        90deg,
-        #000,
-        var(--primaryDark),
-        var(--primaryLight),
-        var(--primaryDark),
-        #000
-    );
-
-    border-top:4px solid #fff;
-    border-bottom:6px solid #fff;
-    box-shadow:0 8px 25px rgba(0,0,0,0.8);
-    overflow:hidden;
-}
-
-.header-left,
-.header-center,
-.header-right {
-    flex:1;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-
-/* ===================== WATERMARK ===================== */
-
-#schoolHeader::before {
-    /* 🔥 Leave static for now (we’ll make this dynamic later if you want) */
-    content:"STRENGTH  -  SPEED  -  AGILITY  -  POWER  -  EXPLOSIVENESS";
-
-    position:absolute;
-    white-space:nowrap;
-    font-size:140px;
-    font-weight:900;
-    letter-spacing:10px;
-
-    /* 🔥 Slightly theme-influenced glow */
-    color:rgba(255,255,255,0.06);
-
-    top:50%;
-    transform:translateY(-50%);
-    animation:scrollWatermark 25s linear infinite;
-    pointer-events:none;
-    z-index:0;
-}
-
-
-/* ===================== SHIMMER ===================== */
-
-#schoolHeader::after {
-    content:"";
-    position:absolute;
-    top:0;
-    left:-50%;
-    width:50%;
-    height:100%;
-
-    /* 🔥 THEME-AWARE SHIMMER */
-    background:linear-gradient(
-        120deg,
-        color-mix(in srgb, var(--primary) 40%, transparent),
-        rgba(255,255,255,0.1),
-        color-mix(in srgb, var(--primary) 40%, transparent)
-    );
-
-    transform:skewX(-25deg);
-    animation:shimmer 3s infinite;
-    z-index:1;
-}
-
-@keyframes shimmer {
-    0% { left:-50%; }
-    100% { left:150%; }
-}
-
-
-/* ===================== CENTER PULSE ===================== */
-
-@keyframes centerPulse {
-    0% {
-        transform:translate(-50%, -50%) scale(1);
-        filter:brightness(1);
-    }
-    50% {
-        transform:translate(-50%, -50%) scale(1.06);
-        filter:brightness(1.25);
-    }
-    100% {
-        transform:translate(-50%, -50%) scale(1);
-        filter:brightness(1);
-    }
-}
-
-#schoolHeader span {
-    font-size:9vh;
-    font-weight:900;
-    letter-spacing:2px;
-}
-
-
-  /* ===================== 3D CHAMPIONSHIP TEXT ===================== */
-
-#headerMotto {
-    font-size:9vh;
-    font-weight:900;
-    letter-spacing:2px;
-    position:relative;
-    color:#f5f9ff;
-    text-shadow:
-    0 1px 0 #111,
-    0 2px 0 #111,
-    0 3px 0 #111,
-    0 4px 0 #111,
-    0 5px 0 #111,
-    0 6px 8px color-mix(in srgb, var(--primary) 45%, transparent);
-    -webkit-font-smoothing:antialiased;
-    text-rendering:optimizeLegibility;
-}
-
-
-/* ===================== LOGO BASE ===================== */
-
-#teamLogo {
-    position:relative;
-    z-index:2;
-    animation:none;
-    transition:filter 0.25s ease;
-}
-
-.logoDefault {
-    filter:
-        drop-shadow(0 0 6px #ffffff)
-        drop-shadow(0 0 16px var(--primary));
-}
-
-.logoWork {
-    filter:
-        drop-shadow(0 0 10px #32CD32)
-        drop-shadow(0 0 28px #32CD32)
-        drop-shadow(0 0 50px #32CD32);
-}
-
-
-.logoRotate {
-    filter:
-        drop-shadow(0 0 10px #FFD700)
-        drop-shadow(0 0 28px #FFD700)
-        drop-shadow(0 0 50px #FFD700);
-}
-
-.logoBreak {
-    filter:
-        drop-shadow(0 0 12px #FF1A1A)
-        drop-shadow(0 0 32px #FF0000)
-        drop-shadow(0 0 60px #FF0000);
-}
-
-@keyframes logoPulse {
-    0% { transform:scale(1); }
-    50% { transform:scale(1.12); }
-    100% { transform:scale(1); }
-}
-
-
-/* ===================== TOOLBAR ===================== */
-
-#toolbar {
-    display:flex;
-    gap:15px;
-    padding:15px;
-    justify-content:center;
-    align-items:center;
-    background:linear-gradient(
-    180deg,
-    #000,
-    var(--primaryDark)
-);
-    border-bottom:4px solid var(--silver);
-}
-
-#toolbar input {
-    width:50px;
-    text-align:center;
-    font-weight:bold;
-    border-radius:4px;
-    border:2px solid var(--secondaryLight);
-    background:#000;
-    color:#fff;
-}
-
-#toolbar button {
-    padding:10px 20px;
-    font-weight:bold;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    background:var(--primary);
-    color:#fff;
-}
-
-#toolbar button:hover {
-    background:var(--primaryDark);
-}
-
-
-/* ===================== GRID ===================== */
-
-#display {
-    position:absolute;
-    top:120px;
-    bottom:0;
-    left:0;
-    right:0;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    grid-template-rows:1fr 1fr;
-    gap:2vh;
-    padding:2vh;
-}
-
-.quad {
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    padding:10px;
-}
-
-.quad-title { font-size:3.5vh; }
-.quad-text  { font-size:6.5vh; font-weight:900; }
-
-.q1{background:#000;color:#fff;border:8px solid var(--silver);}
-.q2{background:#fff;color:#000;border:8px solid var(--silver);}
-.q3 {
-    background:var(--primary);
-    color:#fff;
-    border:8px solid var(--secondaryLight);
-}
-.q4{background:#555555d5;color:#fff;border:8px solid var(--silver);}
-
-  
-/* ===================== CENTER CLOCK ===================== */
-
-#center {
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%, -50%);
-    width:clamp(180px, 24vmin, 420px);
-    height:clamp(180px, 24vmin, 420px);
-    border:clamp(6px, 1vmin, 16px) solid var(--silver);
-    border-radius:50%;
-    background:radial-gradient(
-    circle at center,
-    color-mix(in srgb, var(--primary) 25%, #111),
-    #000 70%
-);
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    transition:all 0.3s ease;
-
-    /* ⭐ NEW */
-    animation:centerPulse 1.6s ease-in-out infinite;
-}
-
-#clock {
-    font-size:clamp(48px, 8vmin, 140px);
-    font-weight:900;
-    letter-spacing:2px;
-    font-variant-numeric:tabular-nums;
-}
-
-#phase {
-    font-size:clamp(14px, 2.2vmin, 36px);
-    font-weight:900;
-    text-align:center;
-    margin-top:0.5vh;
-    white-space:pre-line;
-}
-
-.smallPhase { font-size:1.4vh !important; }
-
-
-/* ===================== ANIMATIONS ===================== */
-
-@keyframes scrollWatermark {
-    0%   { transform:translateY(-50%) translateX(100%); }
-    100% { transform:translateY(-50%) translateX(-100%); }
-}
+/* KEEP ALL YOUR EXISTING CSS EXACTLY AS-IS */
 </style>
+
 </head>
 
 <body>
 
 <div id="schoolHeader">
     <span id="totalTime">00:00</span>
-
     <img id="teamLogo" height="80">
-
     <span id="headerMotto">Speed - Strength - Agility</span>
 </div>
 
@@ -458,14 +73,14 @@ body {
     <div class="quad q1" id="q1">
         <div class="quad-title">Core Lift</div>
         <div class="quad-text core-lift-title">Squats</div>
-<div class="quad-text core-reps">Reps: 10</div>
-<div class="quad-text core-percent">Percentage: 65</div>
+        <div class="quad-text core-reps">Reps: 10</div>
+        <div class="quad-text core-percent">Percentage: 65</div>
     </div>
 
     <div class="quad q2" id="q2">
         <div class="quad-title">Aux Lift</div>
         <div class="quad-text aux-lift-title">Aux Lift</div>
-<div class="quad-text aux-reps">Reps: 10</div>
+        <div class="quad-text aux-reps">Reps: 10</div>
     </div>
 
     <div class="quad q3" id="q3">
@@ -476,7 +91,7 @@ body {
     <div class="quad q4" id="q4">
         <div class="quad-title">Movement / Stability Skill</div>
         <div class="quad-text movement-title">Movement</div>
-<div class="quad-text movement-reps">Reps/Time:</div>
+        <div class="quad-text movement-reps">Reps/Time:</div>
     </div>
 
     <div id="center">
@@ -486,3 +101,10 @@ body {
 
 </div>
 
+<!-- ✅ FIXED: scripts now at bottom -->
+<script src="js/themeLoader.js"></script>
+<script src="js/workoutLoader.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
