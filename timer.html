@@ -42,7 +42,165 @@ Object.defineProperty(window, "workoutData", {
 </script>
 
 <style>
-/* KEEP ALL YOUR EXISTING CSS EXACTLY AS-IS */
+:root {
+    --primary: #505152;
+    --primaryLight: #B0B7BE;
+    --primaryDark: #222;
+    --secondary: #888;
+    --secondaryLight: #aaa;
+    --royal:#505152;
+    --silver:#B0B7BE;
+}
+
+/* ===================== MODE STATES ===================== */
+
+.workMode {
+    border-color:#32CD32 !important;
+    background:radial-gradient(circle at center,#32CD32 0%,#0a2 60%,#000 100%);
+    box-shadow:0 0 20px #32CD32, 0 0 50px #32CD32, 0 0 80px #32CD32;
+}
+
+.rotateMode {
+    border-color:#FFD700 !important;
+    background:radial-gradient(circle at center,#FFD700 0%,#b8860b 60%,#000 100%);
+    box-shadow:0 0 20px #FFD700, 0 0 50px #FFD700, 0 0 80px #FFD700;
+}
+
+.breakMode {
+    border-color:#FF0000 !important;
+    background:radial-gradient(circle at center,#FF1A1A 0%,#8B0000 60%,#000 100%);
+    box-shadow:0 0 30px #FF0000, 0 0 70px #FF0000, 0 0 120px #FF0000;
+}
+
+.dressMode {
+    border-color:#00E5FF !important;
+    background:radial-gradient(circle at center,#00E5FF 0%,#008B9A 60%,#000 100%);
+    box-shadow:0 0 25px #00E5FF, 0 0 60px #00E5FF, 0 0 110px #00E5FF;
+}
+
+.stretchMode {
+    border-color:#FF8C00 !important;
+    background:radial-gradient(circle at center,#FFA500 0%,#CC7000 60%,#000 100%);
+    box-shadow:0 0 25px #FFA500, 0 0 60px #FF8C00, 0 0 110px #FF8C00;
+}
+
+/* ===================== BASE ===================== */
+
+html, body {
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+body {
+    margin:0;
+    background:var(--background, #000);
+    color:#fff;
+    font-family:'Arial Black', sans-serif;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+/* ===================== HEADER ===================== */
+
+#schoolHeader {
+    position:relative;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:5px;
+    padding:20px 25px;
+    background:linear-gradient(
+        90deg,
+        #000,
+        var(--primaryDark),
+        var(--primaryLight),
+        var(--primaryDark),
+        #000
+    );
+    border-top:4px solid #fff;
+    border-bottom:6px solid #fff;
+    box-shadow:0 8px 25px rgba(0,0,0,0.8);
+}
+
+#schoolHeader span {
+    font-size:9vh;
+    font-weight:900;
+    letter-spacing:2px;
+}
+
+/* ===================== GRID ===================== */
+
+#display {
+    position:absolute;
+    top:120px;
+    bottom:0;
+    left:0;
+    right:0;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:2vh;
+    padding:2vh;
+}
+
+.quad {
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:10px;
+}
+
+.quad-title { font-size:3.5vh; }
+.quad-text  { font-size:6.5vh; font-weight:900; }
+
+.q1{background:#000;color:#fff;border:8px solid var(--silver);}
+.q2{background:#fff;color:#000;border:8px solid var(--silver);}
+.q3{background:var(--primary);color:#fff;border:8px solid var(--secondaryLight);}
+.q4{background:#555555d5;color:#fff;border:8px solid var(--silver);}
+
+/* ===================== CENTER CLOCK ===================== */
+
+#center {
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    width:clamp(180px, 24vmin, 420px);
+    height:clamp(180px, 24vmin, 420px);
+    border:clamp(6px, 1vmin, 16px) solid var(--silver);
+    border-radius:50%;
+    background:radial-gradient(
+        circle at center,
+        color-mix(in srgb, var(--primary) 25%, #111),
+        #000 70%
+    );
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    animation:centerPulse 1.6s ease-in-out infinite;
+}
+
+#clock {
+    font-size:clamp(48px, 8vmin, 140px);
+    font-weight:900;
+}
+
+#phase {
+    font-size:clamp(14px, 2.2vmin, 36px);
+    font-weight:900;
+    text-align:center;
+}
+
+@keyframes centerPulse {
+    0% { transform:translate(-50%, -50%) scale(1); }
+    50% { transform:translate(-50%, -50%) scale(1.06); }
+    100% { transform:translate(-50%, -50%) scale(1); }
+}
 </style>
 
 </head>
