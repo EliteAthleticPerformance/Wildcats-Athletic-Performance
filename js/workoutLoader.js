@@ -34,52 +34,95 @@ window.loadWorkout = async function loadWorkout() {
 
     const rows = parseCSV(text);
 
-    // ✅ CLEAR DATA (correct way)
-    window.workoutData.length = 0;
+   // =============================
+// LOAD CONFIG VALUES (FIRST PASS)
+// =============================
+for (const r of rows) {
 
-    for (const r of rows) {
+    const key = String(r[0] || "").trim().toUpperCase();
 
-        const firstCell = String(r[0] || "")
-            .replace(/"/g, "")
-            .trim()
-            .toLowerCase();
+    if (key === "AUTO_START") {
+        autoStartEnabled = String(r[1]).toUpperCase() === "TRUE";
+    }
 
-        // skip headers / config rows
-        if (!firstCell || firstCell === "set") continue;
+    if (key === "MON_TIMES") {
+        monTimes = r.slice(1).filter(v => v).map(v => v.trim());
+    }
 
-        // SET rows
-        if (!isNaN(parseInt(firstCell))) {
+    if (key === "TUE_TIMES") {
+        tueTimes = r.slice(1).filter(v => v).map(v => v.trim());
+    }
 
-            const workSec = Number(r[8]) || 30;
-            const rotateSec = Number(r[9]) || 30;
-            const breakSec = Number(r[10]) || 90;
+    if (key === "WED_TIMES") {
+        wedTimes = r.slice(1).filter(v => v).map(v => v.trim());
+    }
 
-            window.workoutData.push({
-                type: "set",
+    if (key === "THUR_TIMES") {
+        thurTimes = r.slice(1).filter(v => v).map(v => v.trim());
+    }
 
-                coreLift: r[1],
-                percentage: r[2],
-                coreReps: r[3],
+    if (key === "FRI_TIMES") {
+        friTimes = r.slice(1).filter(v => v).map(v => v.trim());
+    }
+}
 
-                auxLift: r[4],
-                auxReps: r[5],
+// 🧪 DEBUG (optional but recommended)
+console.log("📅 SCHEDULE LOADED:");
+console.log("Mon:", monTimes);
+console.log("Tue:", tueTimes);
+console.log("Wed:", wedTimes);
+console.log("Thu:", thurTimes);
+console.log("Fri:", friTimes);
+console.log("AutoStart:", autoStartEnabled);
 
-                movement: r[6],
-                movementReps: r[7],
+// =============================
+// BUILD WORKOUT DATA (SECOND PASS)
+// =============================
+window.workoutData.length = 0;
 
-                workSec,
-                rotateSec,
-                breakSec
-            });
-        }
+for (const r of rows) {
 
-        // BREAK rows
-        if (firstCell === "break") {
-            window.workoutData.push({
-                type: "break",
-                breakSec: Number(r[10]) || 90
-            });
-        }
+    const firstCell = String(r[0] || "")
+        .replace(/"/g, "")
+        .trim()
+        .toLowerCase();
+
+    // skip headers / config rows
+    if (!firstCell || firstCell === "set") continue;
+
+    // SET rows
+    if (!isNaN(parseInt(firstCell))) {
+
+        const workSec = Number(r[8]) || 30;
+        const rotateSec = Number(r[9]) || 30;
+        const breakSec = Number(r[10]) || 90;
+
+        window.workoutData.push({
+            type: "set",
+
+            coreLift: r[1],
+            percentage: r[2],
+            coreReps: r[3],
+
+            auxLift: r[4],
+            auxReps: r[5],
+
+            movement: r[6],
+            movementReps: r[7],
+
+            workSec,
+            rotateSec,
+            breakSec
+        });
+    }
+
+    // BREAK rows
+    if (firstCell === "break") {
+        window.workoutData.push({
+            type: "break",
+            breakSec: Number(r[10]) || 90
+        });
+    }
     }
 
     console.log("✅ Parsed workoutData:", window.workoutData.length);
