@@ -957,6 +957,9 @@ if (!state) {
 const prevPhase = currentPhase;
 const prevTime = timeLeft;
 
+  // 🔍 DEBUG — ADD THIS LINE RIGHT HERE
+console.log("DEBUG:", prevPhase, prevTime, "→", state.phase);
+
 // 🔥 ROTATE EXACTLY WHEN WORK ENDS (bulletproof)
 if (prevPhase === "work" && prevTime <= 1 && state.phase === "rotate") {
     console.log("🔁 ROTATING QUADRANTS");
