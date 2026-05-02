@@ -945,40 +945,41 @@ function tick() {
        2️⃣ PHASE TIMER
     ====================================================== */
 
-    const nowMs = getEffectiveNow().getTime();
-    const state = computeWorkoutState(nowMs);
+   const nowMs = getEffectiveNow().getTime();
+const state = computeWorkoutState(nowMs);
 
-    if (!state) {
-        console.warn("⚠️ No workout state yet (waiting for classStartTime)");
-        return;
-    }
+if (!state) {
+    console.warn("⚠️ No workout state yet (waiting for classStartTime)");
+    return;
+}
 
-    // 🔥 CAPTURE PREVIOUS PHASE (CRITICAL FIX)
-    const prevPhase = currentPhase;
+// 🔥 CAPTURE PREVIOUS STATE
+const prevPhase = currentPhase;
+const prevTime = timeLeft;
 
-    if (prevPhase !== state.phase) {
+// 🔥 ROTATE EXACTLY WHEN WORK ENDS (bulletproof)
+if (prevPhase === "work" && prevTime <= 1 && state.phase === "rotate") {
+    console.log("🔁 ROTATING QUADRANTS");
+    rotateQuadrantColors();
+}
 
-        console.log("PHASE CHANGE:", prevPhase, "→", state.phase);
+// Phase change tracking (for UI only)
+if (prevPhase !== state.phase) {
+    console.log("PHASE CHANGE:", prevPhase, "→", state.phase);
+    phaseJustChanged = true;
+}
 
-        // 🔥 WORK → ROTATE transition (THIS FIXES YOUR ISSUE)
-        if (prevPhase === "work" && state.phase === "rotate") {
-            console.log("🔁 ROTATING QUADRANTS");
-            rotateQuadrantColors();
-        }
+// 🔥 UPDATE CURRENT STATE AFTER CHECKS
+currentPhase = state.phase;
+timeLeft = state.timeLeft;
 
-        phaseJustChanged = true;
-    }
+if (state.setIndex !== undefined && state.setIndex !== currentSet) {
+    currentSet = state.setIndex;
+    displaySetNumber = state.setNumber;
+    loadSetData(currentSet);
+}
 
-    currentPhase = state.phase;
-    timeLeft = state.timeLeft;
-
-    if (state.setIndex !== undefined && state.setIndex !== currentSet) {
-        currentSet = state.setIndex;
-        displaySetNumber = state.setNumber;
-        loadSetData(currentSet);
-    }
-
-    rotationCount = state.rotation || 0;
+rotationCount = state.rotation || 0;
 
     /* ======================================================
        3️⃣ DRESS WARNING
