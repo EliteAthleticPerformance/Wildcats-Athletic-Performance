@@ -1302,6 +1302,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 
         console.log("✅ SCHOOL CONFIG READY:", config);
 
+      document.documentElement.style.setProperty('--primary-color', config.theme.primary);
+document.documentElement.style.setProperty('--secondary-color', config.theme.secondary);
+
         applyQuadrantColors();
 
         let isPolling = false;
