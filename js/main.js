@@ -371,37 +371,34 @@ if (window.classStartTime && isRunning) {
 
     switch (window.controlAction) {
 
-        case "START":
+       case "START":
     window.classStartTime = new Date(window.controlTimestamp).getTime();
     isRunning = true;
 
-    // 🔥 FORCE SYNC TO CORRECT PHASE (late join fix)
-   
+    // 🔥 FIXED — DEFINE nowMs FIRST
+    const nowMs = getEffectiveNow().getTime();
     const state = computeWorkoutState(nowMs);
 
-if (!state) return;
+    if (!state) return;
 
-// 🔥 ROTATE HERE
-if (
-    state.phase === "rotate" &&
-    state.rotation !== rotationCount
-) {
-    console.log("🔁 ROTATING QUADRANTS (NEW ROTATION)");
-    rotateQuadrantColors();
-}
-
-// THEN update state
-currentPhase = state.phase;
-timeLeft = state.timeLeft;
-
-rotationCount = state.rotation || 0;
-
-        updateClock();
-        updatePhaseDisplay();
-        updateTotalDisplay();
+    // 🔥 ROTATE CHECK (optional but good)
+    if (
+        state.phase === "rotate" &&
+        state.rotation !== rotationCount
+    ) {
+        console.log("🔁 ROTATING QUADRANTS (COACH SYNC)");
+        rotateQuadrantColors();
     }
 
-    break;
+    currentPhase = state.phase;
+    timeLeft = state.timeLeft;
+
+    rotationCount = state.rotation || 0;
+
+    updateClock();
+    updatePhaseDisplay();
+    updateTotalDisplay();
+break;
 
         case "STOP":
     stopAllTimers();
@@ -962,9 +959,12 @@ const prevTime = timeLeft;
   // 🔍 DEBUG — ADD THIS LINE RIGHT HERE
 console.log("DEBUG:", prevPhase, prevTime, "→", state.phase);
 
-// 🔥 ROTATE EXACTLY WHEN WORK ENDS (bulletproof)
-if (prevPhase === "work" && prevTime <= 1 && state.phase === "rotate") {
-    console.log("🔁 ROTATING QUADRANTS");
+// 🔥 ROTATE ON NEW ROTATION INDEX (REAL FIX)
+if (
+    state.phase === "rotate" &&
+    state.rotation !== rotationCount
+) {
+    console.log("🔁 ROTATING QUADRANTS (NEW ROTATION)", state.rotation);
     rotateQuadrantColors();
 }
 
