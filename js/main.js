@@ -26,7 +26,7 @@ let currentSet = 0;
 let maxSets = 1;
 let rotationCount = 0;
 const maxRotations = 4;
-let previousPhase = null;
+
 
 
 /* ===================== PERIOD AUTO START ===================== */
@@ -956,7 +956,12 @@ if (!state) {
 if (currentPhase !== state.phase) {
 
     // 🔥 DETECT WORK → ROTATE transition RELIABLY
-    if (previousPhase === "work" && state.phase === "rotate") {
+    if (currentPhase !== state.phase) {
+
+    console.log("PHASE CHANGE:", currentPhase, "→", state.phase);
+
+    // 🔥 WORK → ROTATE transition (CORRECT)
+    if (currentPhase === "work" && state.phase === "rotate") {
         console.log("🔁 ROTATING QUADRANTS");
         rotateQuadrantColors();
     }
