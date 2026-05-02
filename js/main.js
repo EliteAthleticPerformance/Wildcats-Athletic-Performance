@@ -590,6 +590,8 @@ else return;
     }
 }
 
+
+
 function rotateQuadrantColors() {
     const q1 = document.getElementById("q1");
     const q2 = document.getElementById("q2");
@@ -620,6 +622,27 @@ function rotateQuadrantColors() {
     q4.classList.add(c2); // q2 → q4
     q3.classList.add(c4); // q4 → q3
     q1.classList.add(c3); // q3 → q1
+}
+
+function applyQuadrantColors() {
+    const config = window.SCHOOL_CONFIG;
+    if (!config || !config.theme) return;
+
+    const primary = config.theme.primary;
+    const secondary = config.theme.secondary;
+
+    const q2 = document.getElementById("q2");
+    const q3 = document.getElementById("q3");
+
+    if (q2) {
+        q2.style.backgroundColor = secondary;
+        q2.style.color = "#000";
+    }
+
+    if (q3) {
+        q3.style.backgroundColor = primary;
+        q3.style.color = "#fff";
+    }
 }
 
 function computeWorkoutState(nowMs) {
@@ -1270,6 +1293,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
 
         const config = await window.APP_READY;
+        
 
         if (!config) {
             console.error("❌ Config failed to load");
@@ -1277,6 +1301,8 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
 
         console.log("✅ SCHOOL CONFIG READY:", config);
+
+        applyQuadrantColors();
 
         let isPolling = false;
 
