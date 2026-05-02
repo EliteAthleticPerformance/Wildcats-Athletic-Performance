@@ -955,12 +955,9 @@ if (!state) {
 
 if (currentPhase !== state.phase) {
 
-    // 🔥 DETECT WORK → ROTATE transition RELIABLY
-    if (currentPhase !== state.phase) {
-
     console.log("PHASE CHANGE:", currentPhase, "→", state.phase);
 
-    // 🔥 WORK → ROTATE transition (CORRECT)
+    // 🔥 WORK → ROTATE transition
     if (currentPhase === "work" && state.phase === "rotate") {
         console.log("🔁 ROTATING QUADRANTS");
         rotateQuadrantColors();
@@ -968,7 +965,7 @@ if (currentPhase !== state.phase) {
 
     phaseJustChanged = true;
 }
-      
+
 currentPhase = state.phase;
 timeLeft = state.timeLeft;
 
