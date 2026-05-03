@@ -1,4 +1,4 @@
-<div id="schoolHeader">
+<div id="headerContainer"></div>
 
   <!-- LEFT -->
   <div class="header-left">
@@ -18,10 +18,15 @@
 </div>
 
   <!-- RIGHT -->
-  <div class="header-right">
+ <div class="header-right">
+
+  <!-- 🔥 TIMER (only shows on timer page) -->
+  <div id="headerTimer" style="display:none;">00:00</div>
+
+  <!-- NORMAL NAV -->
+  <div id="headerMenu">
     <button class="logout-btn" onclick="logout()">Logout</button>
 
-    <!-- MENU WRAPPER -->
     <div class="menu-wrapper">
       <div id="menuToggle" class="menu-toggle">☰</div>
 
@@ -36,5 +41,3 @@
       </div>
     </div>
   </div>
-
-</div>
