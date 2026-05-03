@@ -205,10 +205,10 @@ box-shadow: 0 10px 25px var(--primaryLight)
 /* ===================== ELITE HEADERS ===================== */
 
 #schoolHeader {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: relative;
     height: var(--header-height);
     padding: 0 20px;
 }
@@ -220,6 +220,8 @@ box-shadow: 0 10px 25px var(--primaryLight)
 }
 
 .school-name {
+  margin-top: 6px;
+  margin-bottom: 2px;
   color: var(--primary);
 
   text-shadow:
@@ -309,6 +311,7 @@ box-shadow: 0 10px 25px var(--primaryLight)
 
  .title {
     max-width:100%;
+   margin: 0;
 }
 
 #schoolHeader::before {
@@ -368,16 +371,16 @@ box-shadow: 0 10px 25px var(--primaryLight)
     100% { left:150%; }
 }
 
-.header-left,
+
 .header-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
-    margin: 0 auto;
+    width: 100%;
+    pointer-events: none;
 }
+.header-left,
 .header-right {
     position:relative;
     z-index:2;
