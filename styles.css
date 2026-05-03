@@ -713,7 +713,7 @@ h1 {
   background: #111;
   border-radius: var(--radius);
   overflow: hidden;
-  table-layout: fixed;
+  table-layout: collapse;
 }
 
 /* ===== TABLE WRAPPER FIX ===== */
@@ -736,13 +736,14 @@ h1 {
 }
 
 .table td {
-  font-size: 18px;
+  font-size: 16px;
 }
 
-.table th,
-.table td {
-padding: 26px;
-text-align: center;
+th, td {
+    padding: 6px 8px;
+    font-size: 13px;
+    text-align: center;
+    white-space: nowrap;
 }
 
 th.sort-asc::after {
