@@ -69,30 +69,6 @@ text-align: center;
   transition: transform 0.2s ease;
 }
 
-.school-name {
-    padding: 4px 14px;
-    border-radius: 6px;
-
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255,255,255,0.1);
-
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-
-    margin-bottom: 8px;
-
-    /* 🔥 ADD THIS ↓ */
-    color: var(--primary);
-
-    text-shadow:
-        0 0 2px var(--primary);
-
-    -webkit-text-stroke: 0.6px rgba(0,0,0,0.7);
-}
-
 /* Buttons */
 
 .logout-btn {
@@ -204,7 +180,7 @@ box-shadow: 0 10px 25px var(--primaryLight)
 
 #schoolHeader {
     display: grid;
-    grid-template-columns: 120px 1fr 120px; /* left | center | right */
+    grid-template-columns: 120px 1fr 120px;
 
     align-items: center;
 
@@ -212,6 +188,11 @@ box-shadow: 0 10px 25px var(--primaryLight)
     height: 100px;
 
     position: relative;
+
+    /* 🔥 ADD THESE */
+    background: #000;
+    border-bottom: 3px solid var(--primary);
+    overflow: hidden;
 }
 
 .header-left {
@@ -229,12 +210,24 @@ box-shadow: 0 10px 25px var(--primaryLight)
 }
 
 .school-name {
-  color: var(--primary);
+    padding: 4px 14px;
+    border-radius: 6px;
 
-  text-shadow:
-    0 0 1px var(--primary);
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.1);
 
-  -webkit-text-stroke: 0.6px rgba(0,0,0,0.7);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+
+    margin-bottom: 8px;
+
+    color: var(--primary);
+
+    text-shadow: 0 0 2px var(--primary);
+    -webkit-text-stroke: 0.6px rgba(0,0,0,0.7);
 }
 
 .glow-title {
@@ -672,10 +665,8 @@ h1 {
 
 .stat-box {
   background: linear-gradient(145deg, #1a1a1a, #111);
- .stat-box {
   padding: 8px;
   border-radius: 10px;
-}
   text-align: center;
 
   box-shadow:
