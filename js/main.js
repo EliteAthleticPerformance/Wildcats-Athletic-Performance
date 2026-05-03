@@ -215,12 +215,21 @@ async function loadHeader() {
 
     container.innerHTML = html;
 
-    // 🔥 TIMER MODE
+    // ✅ ONLY modify AFTER it's inserted
     const timer = document.getElementById("headerTimer");
     const menu = document.getElementById("headerMenu");
 
-    if (timer) timer.style.display = "block";
-    if (menu) menu.style.display = "none";
+    // 🔥 Only switch to timer mode IF we're on timer page
+    if (window.location.pathname.includes("timer")) {
+        if (timer) timer.style.display = "block";
+        if (menu) menu.style.display = "none";
+    }
+
+    // 🔥 Ensure header styling applies correctly
+    const header = document.getElementById("schoolHeader");
+    if (header) {
+        header.classList.add("loaded");
+    }
 }
 
 
