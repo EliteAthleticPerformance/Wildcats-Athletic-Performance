@@ -222,7 +222,12 @@ async function loadHeader() {
     // 🔥 Only switch to timer mode IF we're on timer page
     if (window.location.pathname.includes("timer")) {
         if (timer) timer.style.display = "block";
-        if (menu) menu.style.display = "none";
+        // ✅ KEEP MENU VISIBLE
+if (menu) menu.style.display = "flex";
+
+// 🔥 OPTIONAL: hide only logout button on timer page
+const logoutBtn = document.querySelector(".logout-btn");
+if (logoutBtn) logoutBtn.style.display = "none";
     }
 
     // 🔥 Ensure header styling applies correctly
@@ -1301,6 +1306,19 @@ window.addEventListener("keydown", (e) => {
     if (e.code === "Space") {
         e.preventDefault();
         startTimer();
+    }
+});
+
+document.addEventListener("click", function (e) {
+    const toggle = document.getElementById("menuToggle");
+    const menu = document.getElementById("dropdownMenu");
+
+    if (!toggle || !menu) return;
+
+    if (toggle.contains(e.target)) {
+        menu.classList.toggle("show");
+    } else {
+        menu.classList.remove("show");
     }
 });
 
