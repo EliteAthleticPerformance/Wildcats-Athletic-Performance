@@ -4,6 +4,7 @@
 
 /* ===== 1. VARIABLES ===== */
 :root {
+  --header-height: 95px; 
   --background: #000;
   --card: #1a1a1a;
   --text: #ffffff;
@@ -45,6 +46,10 @@ main {
   padding: 20px;
 }
 
+main {
+  height: calc(100vh - var(--header-height));
+}
+
 .section {
 margin: 40px auto;
 text-align: center;
@@ -55,7 +60,7 @@ text-align: center;
 ======================================== */
 
 .logo {
-  height: 60px;   /* 🔥 THIS fixes vertical alignment */
+  height: 70px;   /* 🔥 THIS fixes vertical alignment */
   width: auto;
   object-fit: contain;
 }
@@ -184,7 +189,7 @@ box-shadow: 0 10px 25px var(--primaryLight)
     align-items: center;
     justify-items: center; /* 🔥 ADD THIS */
 
-    padding: 10px 30px;   /* 🔥 reduce padding */
+    padding: 14px 30px;   /* 🔥 reduce padding */
     height: var(--header-height);
 
     position: relative;
@@ -192,6 +197,11 @@ box-shadow: 0 10px 25px var(--primaryLight)
     background: #000;
     border-bottom: 3px solid var(--primary);
     overflow: hidden;
+}
+
+.header-left,
+.header-right {
+    height: 100%;
 }
 
 .header-left {
@@ -379,7 +389,7 @@ box-shadow: 0 10px 25px var(--primaryLight)
 }
 
 #schoolLogo {
-  height: 75px;
+  height: 70px;
   width: auto;
 
   opacity: 0;                /* start hidden */
