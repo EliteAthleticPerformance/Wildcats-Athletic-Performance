@@ -28,8 +28,9 @@
 
 html, body {
     margin:0;
-    background:#000; /* 🔥 FORCE BLACK */
-    color:#fff;
+    padding:  0;
+    background: var(--background);
+    color: var(--text);
     font-family:'Arial Black', sans-serif;
 }
 
@@ -57,7 +58,7 @@ text-align: center;
 ======================================== */
 
 .logo {
-  height: 70px;   /* 🔥 THIS fixes vertical alignment */
+  height: 100px;   
   width: auto;
   object-fit: contain;
 }
@@ -68,6 +69,30 @@ text-align: center;
   font-weight: 700;
   white-space: nowrap;
   transition: transform 0.2s ease;
+}
+
+.school-name {
+    padding: 4px 14px;
+    border-radius: 6px;
+
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.1);
+
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+
+    margin-bottom: 8px;
+
+    /* 🔥 ADD THIS ↓ */
+    color: var(--primary);
+
+    text-shadow:
+        0 0 2px var(--primary);
+
+    -webkit-text-stroke: 0.6px rgba(0,0,0,0.7);
 }
 
 /* Buttons */
@@ -184,58 +209,26 @@ box-shadow: 0 10px 25px var(--primaryLight)
     grid-template-columns: 120px 1fr 120px;
 
     align-items: center;
-    justify-items: center; /* 🔥 ADD THIS */
-
-    padding: 14px 30px;   /* 🔥 reduce padding */
-    height: var(--header-height);
+    
+    padding: 18px 40px;
+    height: 100px;
 
     position: relative;
-
-    background: #000;
-    border-bottom: 3px solid var(--primary);
-    overflow: hidden;
-}
-
-.header-left,
-.header-right {
-    height: 100%;
 }
 
 .header-left {
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* 🔥 ADD */
-}
-
-.header-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    text-align: center;
-
-    line-height: 1.1; /* 🔥 tighter spacing */
 }
 
 .school-name {
-    padding: 4px 14px;
-    border-radius: 6px;
+  color: var(--primary);
 
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255,255,255,0.1);
+  text-shadow:
+    0 0 1px var(--primary);
 
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-
-    margin-bottom: 8px;
-
-    color: var(--primary);
-
-    text-shadow: 0 0 2px var(--primary);
-    -webkit-text-stroke: 0.6px rgba(0,0,0,0.7);
+  -webkit-text-stroke: 0.6px rgba(0,0,0,0.7);
 }
 
 .glow-title {
@@ -386,7 +379,7 @@ box-shadow: 0 10px 25px var(--primaryLight)
 }
 
 #schoolLogo {
-  height: 70px;
+  height: 75px;
   width: auto;
 
   opacity: 0;                /* start hidden */
