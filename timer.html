@@ -43,6 +43,7 @@ Object.defineProperty(window, "workoutData", {
 
 <style>
 :root {
+  --header-height: 90px;  
     --primary: #505152;
     --primaryLight: #B0B7BE;
     --primaryDark: #222;
@@ -116,7 +117,7 @@ body {
 
 #display {
     position:absolute;
-    top:calc(100px + 2vh);
+    top:var(--header-height, 90px);
     bottom:0;
     left:0;
     right:0;
