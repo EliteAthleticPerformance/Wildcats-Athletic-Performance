@@ -46,9 +46,6 @@ main {
   padding: 20px;
 }
 
-main {
-  height: calc(100vh - var(--header-height));
-}
 
 .section {
 margin: 40px auto;
