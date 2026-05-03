@@ -207,7 +207,7 @@ function syncClockOffset() {
 /* ===================== UTIL ===================== */
 
 async function loadHeader() {
-    const res = await fetch("header.html");
+    const res = await fetch("components/header.html");
     const html = await res.text();
 
     const container = document.getElementById("headerContainer");
