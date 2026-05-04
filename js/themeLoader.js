@@ -77,7 +77,8 @@ const CONFIG_MAP = (() => {
       }
     },
 
-    springhill: {
+
+springhill: {
       key: "springhill",
       name: "Spring Hill Broncos",
       logo: base + "images/broncos-logo.png", 
@@ -87,6 +88,20 @@ const CONFIG_MAP = (() => {
         primaryDark: "#3F166",
         secondary: "#FDBB30",
         secondaryLight: "#FFD166"
+      }
+    },
+     
+     
+     warrensburg: {
+      key: "warrensburg",
+      name: "Warrensburg Tigers",
+      logo: base + "images/tigers-logo.png", 
+       theme: {
+        primary: "#C8102E",
+        primaryLight: "#E03A4F",
+        primaryDark: "#8B0E22",
+        secondary: "#111111",
+        secondaryLight: "#2A2A2A"
       }
     }
 
