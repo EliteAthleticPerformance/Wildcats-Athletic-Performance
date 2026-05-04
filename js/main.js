@@ -23,7 +23,7 @@ let lastRotationIndex = -1;
 
 /* ===================== SETS ===================== */
 
-let currentSet = 0;
+let currentSet = -1;
 let maxSets = 1;
 let rotationCount = 0;
 const maxRotations = 4;
@@ -1068,6 +1068,7 @@ rotationCount = state.rotation || 0;
 
     updateClock();
     updatePhaseDisplay();
+    updateCenterVisuals();
 
     if (timeLeft > 0) return;
 
@@ -1151,15 +1152,27 @@ function updatePhaseDisplay() {
     };
 
     /* ---------- WORK SPECIAL LABEL ---------- */
-    if (currentPhase === "work") {
-        phaseEl.innerText =
-`WORK\nSet ${displaySetNumber} of ${getTotalSets()}\nRotation ${rotationCount + 1} of ${maxRotations}`;
-    } else {
-        phaseEl.innerText = labels[currentPhase] || "";
-    }
+   if (currentPhase === "work") {
+    phaseEl.innerHTML = `
+        <div>WORK</div>
+        <div style="font-size:0.7em; margin-top:6px;">
+            Set ${displaySetNumber} of ${getTotalSets()}
+        </div>
+        <div style="font-size:0.65em; opacity:0.85;">
+            Rotation ${rotationCount + 1} of ${maxRotations}
+        </div>
+    `;
+} else {
+    phaseEl.innerText = labels[currentPhase] || "";
 }
 
+function updateCenterVisuals() {
+    const center = document.getElementById("center");
+    if (!center) return;
 
+    // 🔥 force repaint (fixes rare stuck glow issue)
+    center.style.transform = center.style.transform;
+}
   
 /* ======================================================
    SPEECH ENGINE (shared helper)
