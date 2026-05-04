@@ -1165,6 +1165,7 @@ function updatePhaseDisplay() {
 } else {
     phaseEl.innerText = labels[currentPhase] || "";
 }
+}
 
 function updateCenterVisuals() {
     const center = document.getElementById("center");
