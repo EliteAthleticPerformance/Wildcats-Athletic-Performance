@@ -52,10 +52,10 @@ let manualWorkoutOverride = null;
 
 
 let classBlockLength = 45 * 60;
-let dressOutDuration = [];
-let dynamicStretchDuration = [];
-let breakDuration = [];
-let cooldownDuration = [];
+let dressOutDuration = 0;
+let dynamicStretchDuration = 0;
+let breakDuration = 0;
+let cooldownDuration = 0;
 
 /* ===================== FLAGS ===================== */
 
@@ -475,9 +475,11 @@ const response = await fetch(
         ============================= */
         workoutData.length = 0;
         autoStartEnabled = false;
-        mondayTimes = [];
-        tueWedTimes = [];
-        thuFriTimes = [];
+        monTimes = [];
+tueTimes = [];
+wedTimes = [];
+thurTimes = [];
+friTimes = [];
 
         const clean = v =>
             String(v || "")
@@ -1431,7 +1433,7 @@ function tick() {
             break;
 
         case "work": {
-            rotateQuadrantcolors();
+            rotateQuadrantColors();
             rotationCount++;
 
             currentPhase = "rotate";
@@ -1621,25 +1623,6 @@ function updatePhaseDisplay() {
     }
 
     phaseEl.innerHTML = `<div>${currentPhase}</div>`;
-}
-
-    /* ---------- LABEL MAP ---------- */
-    const labels = {
-        dress: "DRESS OUT & ATTENDANCE",
-        stretch: "DYNAMIC STRETCH",
-        work: "WORK",
-        rotate: "ROTATE",
-        break: "BREAK",
-        cooldown: "COOL DOWN / CLEAN-UP / DRESS"
-    };
-
-    /* ---------- WORK SPECIAL LABEL ---------- */
-    if (currentPhase === "work") {
-        phaseEl.innerText =
-`WORK\nSet ${displaySetNumber} of ${getTotalSets()}\nRotation ${rotationCount + 1} of ${maxRotations}`;
-    } else {
-        phaseEl.innerText = labels[currentPhase] || "";
-    }
 }
 
   
