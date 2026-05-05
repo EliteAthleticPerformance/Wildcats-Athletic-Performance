@@ -798,15 +798,36 @@ if (today === 5) return "1799243756";
     return "MON_GID";
 }
 
-console.log("💥 MAIN SCRIPT RUNNING");    
+/* ===================== SCHOOL DATA SOURCES ===================== */
+
+const SHEET_URLS = {
+    harrisonville: "https://docs.google.com/spreadsheets/d/e/2PACX-1vToY3ergZlbG9lSEUTygnBxjjVkR5qPPmR4THLxMYgCgilFaK_7-hmm7OdM_F-e62z5ZsSFf0zB-JO-/pub",
+
+    // future schools
+    liberty: "https://docs.google.com/spreadsheets/d/e/2PACX-LIBERTY_ID/pub",
+    bluevalley: "https://docs.google.com/spreadsheets/d/e/2PACX-BV_ID/pub"
+};
+
+console.log("💥 MAIN SCRIPT RUNNING");  
+
+      
 async function loadWorkout() {
     console.log("🚀 loadWorkout started");
 
     try {
         const gid = getSheetGid();
 
+const params = new URLSearchParams(window.location.search);
+const school = params.get("school") || "harrisonville";
+
+const baseUrl = SHEET_URLS[school];
+
+if (!baseUrl) {
+    throw new Error("❌ No sheet URL configured for school: " + school);
+}
+
 const response = await fetch(
-`https://docs.google.com/spreadsheets/d/e/2PACX-1vToY3ergZlbG9lSEUTygnBxjjVkR5qPPmR4THLxMYgCgilFaK_7-hmm7OdM_F-e62z5ZsSFf0zB-JO-/pub?gid=${gid}&single=true&output=csv`
+`${baseUrl}?gid=${gid}&single=true&output=csv`
 );
 
         if (!response.ok) {
