@@ -164,7 +164,6 @@ main {
     border:clamp(6px, 1vmin, 16px) solid var(--silver);
     border-radius:50%;
 
-    /* 🔥 BASE (IDLE LOOK) */
     background:radial-gradient(
         circle at center,
         color-mix(in srgb, var(--primary) 25%, #111),
@@ -177,24 +176,24 @@ main {
     align-items:center;
 
     text-align:center;
-    overflow:hidden; /* 🔥 prevents clipping issues */
+
+    /* 🔥 KEY FIX */
+    overflow:visible;
 
     transition: all 0.35s ease;
-
-    /* subtle base pulse */
     animation:centerPulse 1.6s ease-in-out infinite;
 }
 
-/* ===================== CLOCK TEXT ===================== */
+/* ===================== CLOCK ===================== */
 
 #clock {
-    font-size:clamp(48px, 8vmin, 140px);
+    font-size:clamp(42px, 7vmin, 120px); /* 🔥 slightly smaller */
     font-weight:900;
     letter-spacing:2px;
     line-height:1;
 }
 
-/* ===================== PHASE TEXT (FIXED STRUCTURE) ===================== */
+/* ===================== PHASE ===================== */
 
 #phase {
     display:flex;
@@ -203,20 +202,20 @@ main {
     justify-content:center;
 
     font-weight:900;
-    margin-top:6px;
+    margin-top:8px;
 
-    font-size:clamp(12px, 2vmin, 28px);
-    line-height:1.2;
+    font-size:clamp(12px, 2vmin, 26px);
+    line-height:1.25;
 }
 
-/* 🔥 Sub-lines (Set / Rotation) */
+/* 🔥 Sub text (Set / Rotation) */
 #phase div:nth-child(2),
 #phase div:nth-child(3) {
     font-size:0.65em;
     opacity:0.85;
 }
 
-/* Optional: slightly emphasize main phase label */
+/* Main label */
 #phase div:first-child {
     font-size:1em;
 }
