@@ -642,7 +642,7 @@ else if (day === 5) todaySchedule = friTimes;
 
             if (
                 currentTotalSeconds >= targetTotalSeconds &&
-                currentTotalSeconds < targetTotalSeconds + 5 &&
+                currentTotalSeconds < targetTotalSeconds + 60 &&
                 lastAutoStartMinute !== currentMinuteStamp
             ) {
                 lastAutoStartMinute = currentMinuteStamp;
@@ -1924,7 +1924,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     loadWorkout();
 
-    setTimeout(autoDetectActiveClass, 2000);
+    setInterval(autoDetectActiveClass, 5000);
 
     // 🔥 APPLY THEME
     if (typeof loadTheme === "function") {
