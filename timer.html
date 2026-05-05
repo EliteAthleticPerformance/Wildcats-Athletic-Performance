@@ -569,10 +569,10 @@ function autoDetectActiveClass() {
     let todaySchedule = [];
 
     if (day === 1) todaySchedule = monTimes;
-else if (day === 2) todaySchedule = tueTimes;
-else if (day === 3) todaySchedule = wedTimes;
-else if (day === 4) todaySchedule = thuTimes;
-else if (day === 5) todaySchedule = friTimes;
+    else if (day === 2) todaySchedule = tueTimes;
+    else if (day === 3) todaySchedule = wedTimes;
+    else if (day === 4) todaySchedule = thuTimes;
+    else if (day === 5) todaySchedule = friTimes;
 
     for (const timeStr of todaySchedule) {
 
@@ -587,8 +587,10 @@ else if (day === 5) todaySchedule = friTimes;
 
             console.log("⚡ Class already in progress. Auto syncing timer.");
 
+            // Start system
             startTimer();
 
+            // Calculate elapsed time
             const elapsed = Math.floor((now - start) / 1000);
 
             totalSeconds = Math.max(classBlockLength - elapsed, 1);
@@ -596,11 +598,35 @@ else if (day === 5) todaySchedule = friTimes;
 
             updateTotalDisplay();
 
+            /* ===================== 🔥 PHASE SYNC (NEW) ===================== */
+
+            const state = computeWorkoutState(start.getTime() + (elapsed * 1000));
+
+            if (state) {
+
+                currentPhase = state.phase;
+                timeLeft = state.timeLeft;
+
+                if (state.setIndex !== undefined) {
+                    currentSet = state.setIndex;
+                    displaySetNumber = state.setNumber;
+                    loadSetData(currentSet);
+                }
+
+                rotationCount = state.rotation || 0;
+
+                updateClock();
+                updatePhaseDisplay();
+
+                console.log("🔄 Synced to phase:", currentPhase, "| time left:", timeLeft);
+            }
+
+            /* ============================================================= */
+
             break;
         }
     }
 }
-
 
 function startAutoScheduler() {
 
