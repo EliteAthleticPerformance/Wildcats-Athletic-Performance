@@ -176,6 +176,9 @@ main {
     justify-content:center;
     align-items:center;
 
+    text-align:center;
+    overflow:hidden; /* 🔥 prevents clipping issues */
+
     transition: all 0.35s ease;
 
     /* subtle base pulse */
@@ -188,16 +191,34 @@ main {
     font-size:clamp(48px, 8vmin, 140px);
     font-weight:900;
     letter-spacing:2px;
+    line-height:1;
 }
 
-/* ===================== PHASE TEXT ===================== */
+/* ===================== PHASE TEXT (FIXED STRUCTURE) ===================== */
 
 #phase {
-    font-size:clamp(14px, 2.2vmin, 32px);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
     font-weight:900;
-    text-align:center;
-    line-height:1.2;
     margin-top:6px;
+
+    font-size:clamp(12px, 2vmin, 28px);
+    line-height:1.2;
+}
+
+/* 🔥 Sub-lines (Set / Rotation) */
+#phase div:nth-child(2),
+#phase div:nth-child(3) {
+    font-size:0.65em;
+    opacity:0.85;
+}
+
+/* Optional: slightly emphasize main phase label */
+#phase div:first-child {
+    font-size:1em;
 }
 
 /* ===================== WORK MODE (GREEN) ===================== */
@@ -351,9 +372,9 @@ main {
     </div>
 
     <div id="center">
-        <div id="clock">30</div>
-        <div id="phase">WORK</div>
-    </div>
+    <div id="clock">30</div>
+    <div id="phase"></div>
+</div>
 
   <div id="timelineContainer">
   <div id="timelineSegments"></div>
