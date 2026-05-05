@@ -239,6 +239,8 @@ body {
     opacity:0.8;
 }
 
+
+      
 </style>
 </head>
 
@@ -283,6 +285,14 @@ body {
 
 </div>
 
+      <!-- SYSTEM INPUTS (hidden controls) -->
+<div id="systemControls" style="display:none;">
+  <input id="workTime" value="30">
+  <input id="restTime" value="10">
+  <button id="startBtn" onclick="startTimer()">START</button>
+  <div id="timelineSegments"></div>
+</div>
+
 <script>
 
   
@@ -293,7 +303,7 @@ let timer = null;
 let timeLeft = 0;
 let totalSeconds = 0;
 let originalTotalSeconds = 0;
-
+let classBlockLength = 3600; // default = 60 minutes
 let isRunning = false;
 let currentPhase = "idle";
 let audioCtx = null;
@@ -316,7 +326,7 @@ let autoStartEnabled = true;
 let monTimes = [];
 let tueTimes = [];
 let wedTimes = [];
-let thurTimes = [];
+let thuTimes = [];
 let friTimes = [];
 let autoStartTimer = null;
 let lastAutoStartMinute = null;
@@ -349,6 +359,11 @@ function goFullscreen() {
    START / STOP + TOTAL TIME CALCULATION
 ====================================================== */
 
+function safeGet(id, fallback = 0) {
+    const el = document.getElementById(id);
+    return el ? parseInt(el.value, 10) || fallback : fallback;
+}
+      
 /* ---------- COUNT TOTAL SETS ---------- */
 function getTotalSets() {
     return workoutData.filter(item => item.type === "set").length;
@@ -373,8 +388,8 @@ function calculateTotalTime() {
         return;
     }
 
-    const work = parseInt(document.getElementById("workTime").value, 10) || 0;
-    const rest = parseInt(document.getElementById("restTime").value, 10) || 0;
+    const work = sheetWorkDuration ?? safeGet("workTime", 30);
+const rest = sheetRotateDuration ?? safeGet("restTime", 10);
 
     let prepTotal = 0;
     let workoutTotal = 0;
@@ -538,7 +553,7 @@ function autoDetectActiveClass() {
     if (day === 1) todaySchedule = monTimes;
 else if (day === 2) todaySchedule = tueTimes;
 else if (day === 3) todaySchedule = wedTimes;
-else if (day === 4) todaySchedule = thurTimes;
+else if (day === 4) todaySchedule = thuTimes;
 else if (day === 5) todaySchedule = friTimes;
 
     for (const timeStr of todaySchedule) {
@@ -595,7 +610,7 @@ function startAutoScheduler() {
         if (day === 1) todaySchedule = monTimes;
 else if (day === 2) todaySchedule = tueTimes;
 else if (day === 3) todaySchedule = wedTimes;
-else if (day === 4) todaySchedule = thurTimes;
+else if (day === 4) todaySchedule = thuTimes;
 else if (day === 5) todaySchedule = friTimes;
         else return; // weekend
 
@@ -797,9 +812,11 @@ const response = await fetch(
         ============================= */
         workoutData.length = 0;
         autoStartEnabled = false;
-        mondayTimes = [];
-        tueWedTimes = [];
-        thuFriTimes = [];
+        monTimes = [];
+tueTimes = [];
+wedTimes = [];
+thuTimes = [];
+friTimes = [];
 
         const clean = v =>
             String(v || "")
@@ -945,6 +962,24 @@ if (isEffectivelyBlankRow(r)) {
                 continue;
             }
 
+              if (firstCell === "work_seconds" || firstCell === "work") {
+    const v = parseSheetNumber(r[1]);
+    if (v !== null) {
+        sheetWorkDuration = v;
+        console.log("📥 Global work time:", sheetWorkDuration);
+    }
+    continue;
+}
+
+if (firstCell === "rotate_seconds" || firstCell === "rest") {
+    const v = parseSheetNumber(r[1]);
+    if (v !== null) {
+        sheetRotateDuration = v;
+        console.log("📥 Global rotate time:", sheetRotateDuration);
+    }
+    continue;
+}
+
             /* =================================================
                FLEXIBLE SET DETECTION
             ================================================= */
@@ -990,6 +1025,7 @@ if (isEffectivelyBlankRow(r)) {
 
         preloadFirstSet();
 startAutoScheduler();
+          buildSegmentTimeline();
 
 
 // ⭐ Recalculate preview total
@@ -1055,7 +1091,7 @@ function getWorkDuration() {
     }
 
     // 2️⃣ sheet global override
-    if (sheetWorkDuration) {
+    if (sheetWorkDuration !== null) {
         console.log("⏱ Work time (sheet global):", sheetWorkDuration);
         return sheetWorkDuration;
     }
@@ -1394,13 +1430,13 @@ function buildSegmentTimeline() {
 
                 timelineData.push({
                     phase: "work",
-                    duration: item.workSec || parseInt(document.getElementById("workTime").value, 10) || 0
+                    duration: item.workSec || sheetWorkDuration || safeGet("workTime", 30)
                 });
 
                 if (r < maxRotations - 1) {
                     timelineData.push({
                         phase: "rotate",
-                        duration: item.rotateSec || parseInt(document.getElementById("restTime").value, 10) || 0
+                        duration: item.rotateSec || sheetRotateDuration || safeGet("restTime", 10)
                     });
                 }
             }
@@ -1465,13 +1501,7 @@ function updateSegmentHighlight() {
 }
 
 
-      function workoutFinishScreen() {
-    stopAllTimers();
-    document.getElementById("phase").innerText = "WORKOUT COMPLETE";
-}
-
-
-
+      
 function applyCoachControl() {
 
   if (!window.classStartTime && window.controlTimestamp) {
@@ -1770,7 +1800,7 @@ function getRestDuration() {
     }
 
     // 2️⃣ sheet override
-    if (sheetRotateDuration) {
+    if (sheetRotateDuration !== null) {
         console.log("⏱ Using sheet rotate:", sheetRotateDuration);
         return sheetRotateDuration;
     }
