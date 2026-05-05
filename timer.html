@@ -559,6 +559,114 @@ function getEffectiveNow() {
 }
 
 
+      function computeWorkoutState(nowMs) {
+
+    const startTime = window.classStartTime;
+    if (!startTime) return null;
+
+    let elapsed = Math.floor((nowMs - startTime) / 1000);
+
+    /* ===================== DRESS ===================== */
+    if (elapsed < dressOutDuration) {
+        return {
+            phase: "dress",
+            timeLeft: Math.max(dressOutDuration - elapsed, 0),
+            originalDuration: dressOutDuration
+        };
+    }
+
+    elapsed -= dressOutDuration;
+
+    /* ===================== STRETCH ===================== */
+    if (elapsed < dynamicStretchDuration) {
+        return {
+            phase: "stretch",
+            timeLeft: Math.max(dynamicStretchDuration - elapsed, 0),
+            originalDuration: dynamicStretchDuration
+        };
+    }
+
+    elapsed -= dynamicStretchDuration;
+
+    /* ===================== WORK / ROTATIONS ===================== */
+
+    let setIndex = 0;
+
+    while (setIndex < workoutData.length) {
+
+        const item = workoutData[setIndex];
+
+        /* ---------- BREAK ---------- */
+        if (item.type === "break") {
+
+            const breakTime = item.breakSec || breakDuration;
+
+            if (elapsed < breakTime) {
+                return {
+                    phase: "break",
+                    timeLeft: Math.max(breakTime - elapsed, 0),
+                    originalDuration: breakTime
+                };
+            }
+
+            elapsed -= breakTime;
+            setIndex++;
+            continue;
+        }
+
+        /* ---------- SET ---------- */
+        if (item.type === "set") {
+
+            const workTime = item.workSec || sheetWorkDuration || safeGet("workTime", 30);
+            const rotateTime = item.rotateSec || sheetRotateDuration || safeGet("restTime", 10);
+
+            for (let rotation = 0; rotation < maxRotations; rotation++) {
+
+                // 🟥 WORK
+                if (elapsed < workTime) {
+                    return {
+                        phase: "work",
+                        timeLeft: Math.max(workTime - elapsed, 0),
+                        originalDuration: workTime,
+                        setIndex: setIndex + 1,
+                        setNumber: setIndex + 1,
+                        rotation: rotation
+                    };
+                }
+
+                elapsed -= workTime;
+
+                // 🟪 ROTATE
+                if (rotation < maxRotations - 1) {
+                    if (elapsed < rotateTime) {
+                        return {
+                            phase: "rotate",
+                            timeLeft: Math.max(rotateTime - elapsed, 0),
+                            originalDuration: rotateTime,
+                            setIndex: setIndex + 1,
+                            setNumber: setIndex + 1,
+                            rotation: rotation
+                        };
+                    }
+
+                    elapsed -= rotateTime;
+                }
+            }
+
+            setIndex++;
+        }
+    }
+
+    /* ===================== DONE ===================== */
+    return {
+        phase: "done",
+        timeLeft: 0,
+        originalDuration: 0
+    };
+}
+
+      
+
 function autoDetectActiveClass() {
 
     if (!autoStartEnabled || isRunning) return;
@@ -600,26 +708,33 @@ function autoDetectActiveClass() {
 
             /* ===================== 🔥 PHASE SYNC (NEW) ===================== */
 
-            const state = computeWorkoutState(start.getTime() + (elapsed * 1000));
+            /* ===================== 🔥 PHASE SYNC (FIXED) ===================== */
 
-            if (state) {
+const state = computeWorkoutState(start.getTime() + (elapsed * 1000));
 
-                currentPhase = state.phase;
-                timeLeft = state.timeLeft;
+if (state) {
 
-                if (state.setIndex !== undefined) {
-                    currentSet = state.setIndex;
-                    displaySetNumber = state.setNumber;
-                    loadSetData(currentSet);
-                }
+    console.log("🔄 Applying synced state:", state);
 
-                rotationCount = state.rotation || 0;
+    // ✅ HARD override ALL runtime values
+    currentPhase = state.phase;
+    timeLeft = state.timeLeft;
 
-                updateClock();
-                updatePhaseDisplay();
+    if (state.setIndex !== undefined) {
+        currentSet = state.setIndex;
+        displaySetNumber = state.setNumber;
+        loadSetData(currentSet);
+    }
 
-                console.log("🔄 Synced to phase:", currentPhase, "| time left:", timeLeft);
-            }
+    rotationCount = state.rotation || 0;
+
+    // ✅ CRITICAL: reset phase timing reference
+    phaseStartTime = Date.now() - ((state.originalDuration - state.timeLeft) * 1000);
+
+    // ✅ Force UI refresh
+    updateClock();
+    updatePhaseDisplay();
+}
 
             /* ============================================================= */
 
