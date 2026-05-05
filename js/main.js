@@ -1085,11 +1085,11 @@ function updatePhaseDisplay() {
 
     const logo = document.getElementById("teamLogo");
     const center = document.getElementById("center");
+    const phaseEl = document.getElementById("phase");
 
-    // ✅ safety check (prevents crashes if DOM changes)
-    if (!center || !logo) return;
+    if (!center || !logo || !phaseEl) return;
 
-    // 🔥 CLEAR ALL CENTER MODES FIRST (CRITICAL)
+    // RESET
     center.classList.remove(
         "workMode",
         "rotateMode",
@@ -1105,76 +1105,70 @@ function updatePhaseDisplay() {
         "logoBreak"
     );
 
-    const phaseEl = document.getElementById("phase");
-
-    switch (currentPhase) {
-
-        case "dress":
-            center.classList.add("dressMode");
-            logo.classList.add("logoDefault");
-            break;
-
-        case "stretch":
-            center.classList.add("stretchMode");
-            logo.classList.add("logoDefault");
-            break;
-
-        case "cooldown":
-            center.classList.add("dressMode");
-            logo.classList.add("logoDefault");
-            break;
-
-        case "work":
-            center.classList.add("workMode");
-            logo.classList.add("logoWork"); // ✅ FIXED
-            break;
-
-        case "rotate":
-            center.classList.add("rotateMode");
-            logo.classList.add("logoRotate"); // ✅ FIXED
-            break;
-
-        case "break":
-            center.classList.add("breakMode");
-            logo.classList.add("logoBreak"); // ✅ consistency improvement
-            phaseEl.innerText = "BREAK\nPREP NEXT LIFT";
-            return;
-    }
-
-    /* ---------- LABEL MAP ---------- */
+    // DEFAULT LABELS
     const labels = {
         dress: "DRESS OUT & ATTENDANCE",
         stretch: "DYNAMIC STRETCH",
-        work: "WORK",
         rotate: "ROTATE",
         break: "BREAK",
         cooldown: "COOL DOWN / CLEAN-UP / DRESS"
     };
 
-    /* ---------- WORK SPECIAL LABEL ---------- */
-   if (currentPhase === "work") {
-    phaseEl.innerHTML = `
-        <div>WORK</div>
-        <div style="font-size:0.7em; margin-top:6px;">
-            Set ${displaySetNumber} of ${getTotalSets()}
-        </div> 
-        <div style="font-size:0.65em; opacity:0.85;">
-            Rotation ${rotationCount + 1} of ${maxRotations}
-        </div>
-    `;
-} else {
+    /* ===================== PHASE HANDLING ===================== */
+
+    if (currentPhase === "work") {
+
+        center.classList.add("workMode");
+        logo.classList.add("logoWork");
+
+        // 🔥 FORCE UPDATE EVERY TIME
+        phaseEl.innerHTML = `
+            <div>WORK</div>
+            <div>Set ${displaySetNumber} of ${getTotalSets()}</div>
+            <div>Rotation ${rotationCount + 1} of ${maxRotations}</div>
+        `;
+
+        return; // 🚨 prevents overwrite
+
+    }
+
+    if (currentPhase === "rotate") {
+        center.classList.add("rotateMode");
+        logo.classList.add("logoRotate");
+    }
+
+    if (currentPhase === "break") {
+        center.classList.add("breakMode");
+        logo.classList.add("logoBreak");
+
+        phaseEl.innerHTML = `
+            <div>BREAK</div>
+            <div>PREP NEXT LIFT</div>
+        `;
+        return;
+    }
+
+    if (currentPhase === "dress") {
+        center.classList.add("dressMode");
+        logo.classList.add("logoDefault");
+    }
+
+    if (currentPhase === "stretch") {
+        center.classList.add("stretchMode");
+        logo.classList.add("logoDefault");
+    }
+
+    if (currentPhase === "cooldown") {
+        center.classList.add("dressMode");
+        logo.classList.add("logoDefault");
+    }
+
+    // DEFAULT FALLBACK
     phaseEl.innerText = labels[currentPhase] || "";
 }
-}
 
-function updateCenterVisuals() {
-    const center = document.getElementById("center");
-    if (!center) return;
+console.log("PHASE DISPLAY:", currentPhase, displaySetNumber, rotationCount);
 
-    // 🔥 force repaint (fixes rare stuck glow issue)
-    center.style.transform = center.style.transform;
-}
-  
 /* ======================================================
    SPEECH ENGINE (shared helper)
 ====================================================== */
