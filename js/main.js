@@ -15,15 +15,16 @@ let audioCtx = null;
 let lastCountdownSpoken = null;
 let phaseJustChanged = false;
 let nextTickTime = null;
-let timeOffset = 0;
-let lastControlSignature = null;
-let lastRotationIndex = -1;
+let workoutData = [];
 
-
+/* ✅ safer global access (no desync risk) */
+Object.defineProperty(window, "workoutData", {
+    get: () => workoutData
+});
 
 /* ===================== SETS ===================== */
 
-let currentSet = -1;
+let currentSet = 1;
 let maxSets = 1;
 let rotationCount = 0;
 const maxRotations = 4;
@@ -49,16 +50,716 @@ let manualWorkoutOverride = null;
 
 /* ===================== DURATIONS ===================== */
 
-let monMinutes = 45;
-let tueMinutes = 45;
-let wedMinutes = 45;
-let thurMinutes = 45;
-let friMinutes = 45
+
 let classBlockLength = 45 * 60;
-let dressOutDuration = 180;
-let dynamicStretchDuration = 0;
-let breakDuration = 120;
-let cooldownDuration = 0;
+let dressOutDuration = [];
+let dynamicStretchDuration = [];
+let breakDuration = [];
+let cooldownDuration = [];
+
+/* ===================== FLAGS ===================== */
+
+let dressWarningSpoken = false;
+let onBreak = false;
+let selectedVoice = null;
+let displaySetNumber = 1;
+
+function goFullscreen() {
+    document.documentElement.requestFullscreen();
+}
+
+/* ======================================================
+   START / STOP + TOTAL TIME CALCULATION
+====================================================== */
+
+/* ---------- COUNT TOTAL SETS ---------- */
+function getTotalSets() {
+    return window.workoutData.filter(item => item.type === "set").length;
+}
+
+/* ======================================================
+   RESET STATE (NEW - SAFE INITIALIZATION)
+====================================================== */
+
+function resetWorkoutState() {
+    displaySetNumber = 1;
+    rotationCount = 0;
+    currentSet = 1;
+}
+
+/* ======================================================
+   CALCULATE TOTAL CLASS TIME
+====================================================== */
+function calculateTotalTime() {
+
+    if (!workoutData.length) {
+        console.warn("Workout still loading...");
+        return;
+    }
+
+    const work = parseInt(document.getElementById("workTime").value, 10) || 0;
+    const rest = parseInt(document.getElementById("restTime").value, 10) || 0;
+
+    let prepTotal = 0;
+    let workoutTotal = 0;
+    let breakTotal = 0;
+
+    /* ---------- PREP ---------- */
+    prepTotal += Number(dressOutDuration) || 0;
+prepTotal += Number(dynamicStretchDuration) || 0;
+
+    /* ---------- WORKOUT ---------- */
+    window.workoutData.forEach(item => {
+
+        if (item.type === "set") {
+
+            for (let i = 0; i < maxRotations; i++) {
+                workoutTotal += work;
+
+                if (i < maxRotations - 1) {
+                    workoutTotal += rest;
+                }
+            }
+        }
+
+        if (item.type === "break") {
+            breakTotal += item.breakSec || breakDuration;
+        }
+
+    });
+
+   /* ---------- TOTAL WORKOUT BEFORE COOLDOWN ---------- */
+    const workoutBlock = prepTotal + workoutTotal + breakTotal;
+
+   /* ---------- COOLDOWN CALCULATION ---------- */
+    cooldownDuration = Math.max(
+        classBlockLength - workoutBlock,
+        0
+    );
+
+    console.log("Cooldown calculated:", cooldownDuration);
+
+   /* ---------- FINAL TOTAL (ALWAYS CLASS LENGTH) ---------- */
+    return classBlockLength;
+}
+
+function preciseTick() {
+
+    if (!isRunning) return;
+
+    const now = Date.now();
+
+    if (!nextTickTime) {
+        nextTickTime = now + 1000;
+    }
+
+    // catch up if browser slept
+    while (nextTickTime <= now) {
+        tick();
+        nextTickTime += 1000;
+    }
+
+    const delay = Math.max(0, nextTickTime - now);
+    timer = setTimeout(preciseTick, delay);
+
+ }
+
+function startTimer() {
+
+  stopAllTimers();
+  
+    // Safety: require workout
+    if (!workoutData.length) {
+        console.warn("Workout not loaded yet.");
+        return;
+    }
+
+    // Initialize audio once
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    // Toggle stop if already running
+    if (isRunning) {
+        stopAllTimers();
+        return;
+    }
+
+/* ---------- START STATE ---------- */
+    isRunning = true;
+    
+
+classBlockLength = calculateTotalTime(); // 🔥 NOW DYNAMIC
+
+totalSeconds = classBlockLength;
+originalTotalSeconds = classBlockLength;
+updateTotalDisplay();
+
+document.getElementById("startBtn").innerText = "STOP";
+
+    // FULL RESET
+    displaySetNumber = 1;
+    rotationCount = 0;
+    currentSet = 1;
+    dressWarningSpoken = false;
+    lastAutoStartMinute = null;
+
+    preloadFirstSet();
+
+    /* ---------- START WITH DRESS PHASE ---------- */
+    currentPhase = "dress";
+    timeLeft = dressOutDuration;
+      
+    updatePhaseDisplay();
+    updateClock();
+    updateTotalDisplay();
+
+    nextTickTime = Date.now() + 1000;
+    timer = setTimeout(preciseTick, 1000);
+}
+
+
+/* ---------- AUTO START ---------- */
+
+function getEffectiveNow() {
+
+    // ⭐ FORCE_DATE override (LOCAL TIME SAFE)
+    if (forceDateString) {
+        const parts = forceDateString.split(/[T:\-]/);
+
+        if (parts.length >= 6) {
+            const forced = new Date(
+                Number(parts[0]),     // year
+                Number(parts[1]) - 1, // month
+                Number(parts[2]),     // day
+                Number(parts[3]),     // hour
+                Number(parts[4]),     // minute
+                Number(parts[5])      // second
+            );
+
+            // ✅ FIXED (proper Date validation)
+            if (!isNaN(forced.getTime())) return forced;
+        }
+    }
+
+    return new Date();
+}
+
+
+function autoDetectActiveClass() {
+
+    // ✅ FIXED (allow sync even if already running)
+    if (!autoStartEnabled) return;
+
+    const now = getEffectiveNow();
+    const day = now.getDay();
+
+    let todaySchedule = [];
+
+if (day === 1) todaySchedule = monTimes;
+else if (day === 2) todaySchedule = tueTimes;
+else if (day === 3) todaySchedule = wedTimes;
+else if (day === 4) todaySchedule = thurTimes;
+else if (day === 5) todaySchedule = friTimes;
+else return;
+
+    for (const timeStr of todaySchedule) {
+
+        if (!timeStr || !timeStr.includes(":")) continue;
+
+        const [h, m] = timeStr.split(":").map(Number);
+
+        const start = new Date(now);
+        start.setHours(h, m, 0, 0);
+
+        const end = new Date(start.getTime() + classBlockLength * 1000);
+
+        if (now >= start && now < end) {
+
+            console.log("⚡ Class already in progress. Auto syncing timer.");
+
+            startTimer();
+
+            const elapsed = Math.floor((now - start) / 1000);
+            
+            totalSeconds = Math.max(classBlockLength - elapsed, 1);
+            originalTotalSeconds = totalSeconds;
+
+            updateTotalDisplay();
+
+            break;
+        }
+    }
+}
+
+
+function startAutoScheduler() {
+
+    if (autoStartTimer) {
+        clearInterval(autoStartTimer);
+    }
+
+    autoStartTimer = setInterval(() => {
+
+        if (!autoStartEnabled) return;
+
+        const now = getEffectiveNow();
+        const day = now.getDay(); // 0=Sun, 1=Mon...
+
+        if (todayOnlyMode) {
+            const today = now.getDay();
+            if (today === 0 || today === 6) return; // block weekends
+        }
+
+        if (isRunning) return;
+
+        let todaySchedule = [];
+
+        if (day === 1) todaySchedule = monTimes;
+else if (day === 2) todaySchedule = tueTimes;
+else if (day === 3) todaySchedule = wedTimes;
+else if (day === 4) todaySchedule = thurTimes;
+else if (day === 5) todaySchedule = friTimes;
+
+        for (const timeStr of todaySchedule) {
+
+            const parts = timeStr.split(":");
+            if (parts.length !== 2) continue;
+
+            const targetHour = parseInt(parts[0], 10);
+            const targetMinute = parseInt(parts[1], 10);
+
+            if (isNaN(targetHour) || isNaN(targetMinute)) continue;
+
+            // start within first 5 seconds of the minute
+            const currentMinuteStamp =
+                String(now.getHours()).padStart(2, "0") + ":" +
+                String(now.getMinutes()).padStart(2, "0");
+
+            const currentTotalSeconds =
+                now.getHours() * 3600 +
+                now.getMinutes() * 60 +
+                now.getSeconds();
+
+            const targetTotalSeconds =
+                targetHour * 3600 +
+                targetMinute * 60;
+
+            if (
+                currentTotalSeconds >= targetTotalSeconds &&
+                currentTotalSeconds < targetTotalSeconds + 5 &&
+                lastAutoStartMinute !== currentMinuteStamp
+            ) {
+                lastAutoStartMinute = currentMinuteStamp;
+
+                console.log("🔔 Auto starting:", timeStr);
+                startTimer();
+                break;
+            }
+        }
+
+    }, 1000);
+}
+
+
+/* ======================================================
+   LOAD WORKOUT FROM GOOGLE SHEETS — CLEAN + BULLETPROOF
+====================================================== */
+
+function preloadFirstSet() {
+    if (!workoutData.length) return;
+    loadSetData(1);
+}
+
+function previewNextSet() {
+    if (!workoutData.length) return;
+
+    const nextItem = workoutData[currentSet] ?? null;
+
+    if (nextItem && nextItem.type === "set") {
+        loadSetData(currentSet + 1); // loadSetData is 1-based
+    }
+}
+
+
+/* ======================================================
+   SAFE NUMBER PARSER
+====================================================== */
+function parseSheetNumber(val, fallback = null) {
+    if (val === undefined || val === null) return fallback;
+
+    const cleaned = String(val)
+        .replace(/\r/g, "")
+        .trim();
+
+    if (!cleaned) return fallback;
+
+    const num = Number(cleaned);
+    return isNaN(num) ? fallback : num;
+}
+
+  setInterval(checkAutoStart, 1000);
+
+
+/* ======================================================
+   MAIN LOADER
+====================================================== */
+console.log("STEP 3");
+function isEffectivelyBlankRow(row) {
+    if (!row || row.length === 0) return true;
+
+    return row.every(cell =>
+        String(cell || "")
+            .replace(/\u00A0/g, "") // non-breaking space
+            .replace(/\s/g, "")
+            .trim() === ""
+    );
+}
+
+
+function getSheetGid() {
+    const params = new URLSearchParams(window.location.search);
+
+    // URL override still allowed
+    const urlGid = params.get("gid");
+    if (urlGid) return urlGid;
+
+    // Auto by day only
+    const today = new Date().getDay();
+
+    if (today === 1) return "MON_GID";
+if (today === 2) return "TUE_GID";
+if (today === 3) return "WED_GID";
+if (today === 4) return "THUR_GID";
+if (today === 5) return "FRI_GID";
+
+    return "MON_GID";
+}
+
+    console.log("STEP 4 — BEFORE LOADWORKOUT");
+
+
+async function loadWorkout() {
+    console.log("🚀 loadWorkout started");
+
+    try {
+        const gid = getSheetGid();
+
+const response = await fetch(
+`https://docs.google.com/spreadsheets/d/e/2PACX-1vRjAVNz1buONnBF0Fkqse6QQwdpcreJdvdQGWiVNWp6UGewHgd-4f5uC0ZcyHhfRZxTU7BDC3_AjQA1/pub?gid=${gid}&single=true&output=csv`
+);
+
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+
+        const text = await response.text();
+
+        console.log("CSV length:", text.length);
+
+        const rows = parseCSV(text);
+
+        const DEBUG = true;
+
+        if (DEBUG) {
+        console.log("CSV preview:", text.slice(0,200));
+        console.log("First rows:", rows.slice(0,10));
+        }
+        console.log("Rows parsed:", rows.length);
+        
+
+        console.log("First 10 rows:", rows.slice(0, 10));
+
+        /* =============================
+           RESET GLOBALS
+        ============================= */
+        workoutData.length = 0;
+        autoStartEnabled = false;
+        mondayTimes = [];
+        tueWedTimes = [];
+        thuFriTimes = [];
+
+        const clean = v =>
+            String(v || "")
+                .replace(/\u00A0/g, "")
+                .replace(/\r/g, "")
+                .trim();
+
+      
+       /* =============================
+   PROCESS ROWS
+============================= */
+for (const r of rows) {
+
+    // ---------- TRUE EMPTY ROW ----------
+    if (!r || r.length === 0) {
+        workoutData.push({
+            type: "break",
+            breakSec: breakDuration
+        });
+        console.log("📥 Empty CSV row → break inserted");
+        continue;
+    }
+
+    const firstRaw = clean(r[0] ?? "");
+    const firstCell = firstRaw.toLowerCase();
+
+    // ---------- BULLETPROOF BLANK ROW ----------
+    if (isEffectivelyBlankRow(r)) {
+        workoutData.push({
+            type: "break",
+            breakSec: breakDuration
+        });
+        continue;
+    }
+
+    // ---------- EXPLICIT BREAK ----------
+    if (firstCell.replace(/\s+/g, "") === "break") {
+        const breakSec = parseSheetNumber(r[10], breakDuration);
+
+        workoutData.push({
+            type: "break",
+            breakSec
+        });
+
+        console.log("📥 Explicit break parsed:", breakSec);
+        continue;
+    }
+
+    // ---------- HEADER SKIP ----------
+    if (firstCell === "set" || firstCell === "sets") continue;
+
+    /* =================================================
+       CONFIG FLAGS
+    ================================================= */
+
+    if (firstCell === "auto_start") {
+        autoStartEnabled = clean(r[1]).toLowerCase() === "true";
+        continue;
+    }
+
+    if (firstCell === "today_only") {
+        todayOnlyMode = clean(r[1]).toLowerCase() === "true";
+        continue;
+    }
+
+    if (firstCell === "force_date") {
+        forceDateString = clean(r[1]) || null;
+        continue;
+    }
+
+    /* ---------- CLASS LENGTH BY DAY ---------- */
+
+    if (firstCell === "monday_minutes") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) mondayMinutes = v;
+        continue;
+    }
+
+    if (firstCell === "tuewed_minutes") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) tueWedMinutes = v;
+        continue;
+    }
+
+    if (firstCell === "thufri_minutes") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) thuFriMinutes = v;
+        continue;
+    }
+
+    /* ---------- SCHEDULE TIMES ---------- */
+
+    if (firstCell === "monday_times") {
+        mondayTimes = clean(r[1] || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean);
+        continue;
+    }
+
+    if (firstCell === "tuewed_times") {
+        tueWedTimes = clean(r[1] || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean);
+        continue;
+    }
+
+    if (firstCell === "thufri_times") {
+        thuFriTimes = clean(r[1] || "")
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean);
+        continue;
+    }
+
+    /* ---------- GLOBAL TIMINGS ---------- */
+
+    if (
+        firstCell === "dress_seconds" ||
+        firstCell === "dress" ||
+        firstCell === "get_dressed" ||
+        firstCell === "get_dress"
+    ) {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) {
+            dressOutDuration = v;
+            console.log("📥 Dress time:", dressOutDuration);
+        }
+        continue;
+    }
+
+    if (firstCell === "stretch_seconds") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) {
+            dynamicStretchDuration = v;
+            console.log("📥 Stretch time:", dynamicStretchDuration);
+        }
+        continue;
+    }
+
+    if (firstCell === "break_seconds") {
+        const v = parseSheetNumber(r[1]);
+        if (v !== null) breakDuration = v;
+        continue;
+    }
+}
+
+          
+            /* =================================================
+               FLEXIBLE SET DETECTION
+            ================================================= */
+
+            const looksLikeSetNumber =
+                /^\d+$/.test(firstCell) ||
+                /^\d+\.$/.test(firstCell) ||
+                /^set\s*\d*$/i.test(firstRaw);
+
+            if (looksLikeSetNumber) {
+
+                const workSec = parseSheetNumber(r[8]);
+                const rotateSec = parseSheetNumber(r[9]);
+                const breakSec = parseSheetNumber(r[10], breakDuration);
+
+                workoutData.push({
+                    type: "set",
+                    core: clean(r[1]),
+                    percent: clean(r[2]),
+                    reps: clean(r[3]),
+                    aux: clean(r[4]),
+                    auxReps: clean(r[5]),
+                    move: clean(r[6]),
+                    moveReps: clean(r[7]),
+                    workSec,
+                    rotateSec,
+                    breakSec
+                });
+
+                console.log("📥 Set parsed:", {
+                    set: firstRaw,
+                    workSec,
+                    rotateSec,
+                    breakSec
+                });
+
+                continue;
+            }
+        }
+
+        console.log("✅ Workout rows:", workoutData.length);
+        console.log("✅ Auto start:", autoStartEnabled);
+
+        preloadFirstSet();
+startAutoScheduler();
+
+// ⭐ Apply class minutes from worksheet
+applyDaySpecificClassLength();
+
+// ⭐ Recalculate preview total
+const planned = calculateTotalTime();
+const finalTotal = Math.min(planned, classBlockLength);
+
+totalSeconds = finalTotal;
+originalTotalSeconds = finalTotal;
+
+updateTotalDisplay();
+
+    } catch (err) {
+        console.error("❌ Failed to load workout:", err);
+    }
+}
+
+
+/* ======================================================
+   SPEECH ENGINE (shared helper)
+====================================================== */
+
+function speak(text, rate = 1, pitch = 1) {
+
+    // Prevent queue pile-up
+    speechSynthesis.cancel();
+
+    const utter = new SpeechSynthesisUtterance(text);
+
+    if (selectedVoice) utter.voice = selectedVoice;
+
+    utter.volume = 1;
+    utter.rate = rate;
+    utter.pitch = pitch;
+
+    // ✅ slight delay prevents overlap glitches
+    setTimeout(() => speechSynthesis.speak(utter), 50);
+}
+
+
+/* ---------- COUNTDOWN ---------- */
+function speakNumber(num) {
+    speak(num.toString(), 1, 1);
+}
+
+
+/* ---------- ROTATE ---------- */
+function speakRotate() {
+    speak("Rotate!", 1.6, 1.5);
+}
+
+
+/* ---------- DRESS WARNING ---------- */
+function speakDressWarning() {
+    speak("Two minute warning", 1, 1);
+}
+
+
+/* ---------- LIFT ---------- */
+function speakLift() {
+    speak("Lift!", 1.6, 1.3);
+}
+
+
+/* ---------- STRETCH ---------- */
+function speakStretch() {
+    speak("Dynamic Stretch!", 1.3, 1.2);
+}
+
+
+/* ---------- BREAK PREP ---------- */
+function speakBreakPrep() {
+    speak("Break! Prep next lift!", 1.2, 1.1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ===================== TIMELINE ===================== */
 
@@ -155,12 +856,7 @@ function updateSegmentHighlight() {
     });
 }
 
-/* ===================== FLAGS ===================== */
 
-let dressWarningSpoken = false;
-let onBreak = false;
-let selectedVoice = null;
-let displaySetNumber = 0;
 
  function updateTotalDisplay() {
     const el = document.getElementById("headerTimer"); // 🔥 NEW TARGET
@@ -238,80 +934,6 @@ if (logoutBtn) logoutBtn.style.display = "none";
 }
 
 
-function goFullscreen() {
-    document.documentElement.requestFullscreen();
-}
-
-/* ======================================================
-   START / STOP + TOTAL TIME CALCULATION
-====================================================== */
-
-/* ---------- COUNT TOTAL SETS ---------- */
-function getTotalSets() {
-    return window.workoutData.filter(item => item.type === "set").length;
-}
-
-  
-
-/* ======================================================
-   RESET STATE (NEW - SAFE INITIALIZATION)
-====================================================== */
-
-function resetWorkoutState() {
-    displaySetNumber = 0;
-    rotationCount = 0;
-    currentSet = 0;
-}
-
-
-  
-
-/* ======================================================
-   CALCULATE TOTAL CLASS TIME
-====================================================== */
-function calculateTotalTime() {
-
-    if (!window.workoutData || !window.workoutData.length) {
-        console.warn("Workout still loading...");
-        return 0;
-    }
-
-    const work = parseInt(document.getElementById("workTime").value, 10) || 0;
-    const rest = parseInt(document.getElementById("restTime").value, 10) || 0;
-
-    let total = 0;
-
-    /* ---------- PREP ---------- */
-    total += dressOutDuration;
-    total += dynamicStretchDuration;
-
-    /* ---------- WORKOUT ---------- */
-    window.workoutData.forEach(item => {
-
-        if (item.type === "set") {
-
-            for (let i = 0; i < maxRotations; i++) {
-                total += item.workSec || work;
-
-                if (i < maxRotations - 1) {
-                    total += item.rotateSec || rest;
-                }
-            }
-        }
-
-        if (item.type === "break") {
-            total += item.breakSec || breakDuration;
-        }
-
-    });
-
-    /* ---------- COOLDOWN ---------- */
-    total += cooldownDuration; // optional if you want manual cooldown
-
-    console.log("🧮 Calculated class length (sec):", total);
-
-    return total;
-}
 
 function parseTimeToToday(timeStr) {
     const [h, m] = timeStr.split(":").map(Number);
@@ -333,26 +955,7 @@ function workoutFinishScreen() {
     document.getElementById("phase").innerText = "WORKOUT COMPLETE";
 }
 
-function preciseTick() {
 
-    if (!isRunning) return;
-
-    const now = Date.now();
-
-    if (!nextTickTime) {
-        nextTickTime = now + 1000;
-    }
-
-    // catch up if browser slept
-    while (nextTickTime <= now) {
-        tick();
-        nextTickTime += 1000;
-    }
-
-    const delay = Math.max(0, nextTickTime - now);
-    timer = setTimeout(preciseTick, delay);
-
- }
 
 function applyCoachControl() {
 
@@ -470,157 +1073,6 @@ updateTotalDisplay();
             break;
     }
 } 
-
-function startTimer() {
-
-  stopAllTimers();
-  
-if (!window.classStartTime) {
-    window.classStartTime = getEffectiveNow().getTime();
-}
-  
-    // Safety: require workout
-    if (!window.workoutData || !window.workoutData.length) {
-        console.warn("Workout not loaded yet.");
-        return;
-    }
-
-    // Initialize audio once
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    // Toggle stop if already running
-    if (isRunning) {
-        stopAllTimers();
-        return;
-    }
-
-  
-  
-    /* ---------- START STATE ---------- */
-    isRunning = true;
-    
-
-classBlockLength = calculateTotalTime(); // 🔥 NOW DYNAMIC
-
-totalSeconds = classBlockLength;
-originalTotalSeconds = classBlockLength;
-updateTotalDisplay();
-
-document.getElementById("startBtn").innerText = "STOP";
-
-    // FULL RESET
-    displaySetNumber = 0;
-    rotationCount = 0;
-    currentSet = 0;
-    dressWarningSpoken = false;
-    lastAutoStartMinute = null;
-
-    preloadFirstSet();
-
-    /* ---------- START WITH DRESS PHASE ---------- */
-    
-
-      
-    updatePhaseDisplay();
-    updateClock();
-    updateTotalDisplay();
-
-    nextTickTime = Date.now() + 1000;
-    timer = setTimeout(preciseTick, 1000);
-}
-
-window.loadSetData = function(index) {
-    const set = window.workoutData[index];
-
-    if (!set) {
-        console.error("❌ No set found at index", index);
-        return;
-    }
-
-    console.log("🎯 Loading set:", set);
-
-  // CORE
-const map = {
-    ".core-lift-title": set.coreLift,
-    ".core-reps": "Reps: " + set.coreReps,
-    ".core-percent": "Percentage: " + set.percentage,
-    ".aux-lift-title": set.auxLift,
-    ".aux-reps": "Reps: " + set.auxReps,
-    ".movement-title": set.movement,
-    ".movement-reps": "Reps/Time: " + set.movementReps
-};
-
-Object.entries(map).forEach(([selector, value]) => {
-    const el = document.querySelector(selector);
-    if (el) el.textContent = value;
-});
-  }; 
-
-/* ---------- AUTO START ---------- */
-
-function getEffectiveNow() {
-
-    // use server-synced time if available
-    if (window.serverTime) {
-        return getSyncedNow();
-    }
-
-    return new Date();
-}
-
- 
-
-function autoDetectActiveClass() {
-
-  if (window.workoutData?.length) {
-    classBlockLength = calculateTotalTime();
-}
-
-    // ✅ FIXED (allow sync even if already running)
-    if (!autoStartEnabled) return;
-
-    const now = getEffectiveNow();
-    const day = now.getDay();
-
-    let todaySchedule = [];
-
-if (day === 1) todaySchedule = monTimes;
-else if (day === 2) todaySchedule = tueTimes;
-else if (day === 3) todaySchedule = wedTimes;
-else if (day === 4) todaySchedule = thurTimes;
-else if (day === 5) todaySchedule = friTimes;
-else return;
-
-    for (const timeStr of todaySchedule) {
-
-        if (!timeStr || !timeStr.includes(":")) continue;
-
-        const [h, m] = timeStr.split(":").map(Number);
-
-        const start = new Date(now);
-        start.setHours(h, m, 0, 0);
-
-        const end = new Date(start.getTime() + classBlockLength * 1000);
-
-        if (now >= start && now < end) {
-
-            console.log("⚡ Class already in progress. Auto syncing timer.");
-
-            startTimer();
-
-            const elapsed = Math.floor((now - start) / 1000);
-            window.classStartTime = start.getTime();
-            totalSeconds = Math.max(classBlockLength - elapsed, 1);
-            originalTotalSeconds = totalSeconds;
-
-            updateTotalDisplay();
-
-            break;
-        }
-    }
-}
 
 
 
@@ -808,88 +1260,7 @@ function checkAutoStart() {
     startTimer();
 }
   
-  
-/* ======================================================
-   LOAD WORKOUT FROM GOOGLE SHEETS — CLEAN + BULLETPROOF
-====================================================== */
-
-function preloadFirstSet() {
-    if (!window.workoutData || !window.workoutData.length) return;
-    loadSetData(0);
-}
-
-function previewNextSet() {
-    if (!window.workoutData || !window.workoutData.length) return;
-
-    const nextIndex = currentSet + 1;
-    const nextItem = window.workoutData[nextIndex];
-
-    if (nextItem && nextItem.type === "set") {
-        loadSetData(nextIndex);
-    }
-}
- 
-  
-/* ======================================================
-   SAFE NUMBER PARSER
-====================================================== */
-function parseSheetNumber(val, fallback = null) {
-    if (val === undefined || val === null) return fallback;
-
-    const cleaned = String(val)
-        .replace(/\r/g, "")
-        .trim();
-
-    if (!cleaned) return fallback;
-
-    const num = Number(cleaned);
-    return isNaN(num) ? fallback : num;
-}
-
-  setInterval(checkAutoStart, 1000);
-  
-/* ======================================================
-   MAIN LOADER
-====================================================== */
-console.log("STEP 3");
-function isEffectivelyBlankRow(row) {
-    if (!row || row.length === 0) return true;
-
-    return row.every(cell =>
-        String(cell || "")
-            .replace(/\u00A0/g, "") // non-breaking space
-            .replace(/\s/g, "")
-            .trim() === ""
-    );
-}
-
-  
-/* ======================================================
-   AUTO-DETECT WORKOUT BY DAY (ELITE)
-====================================================== */
-function getSheetGid() {
-    const params = new URLSearchParams(window.location.search);
-
-    // URL override still allowed
-    const urlGid = params.get("gid");
-    if (urlGid) return urlGid;
-
-    // Auto by day only
-    const today = new Date().getDay();
-
-    if (today === 1) return "MON_GID";
-if (today === 2) return "TUE_GID";
-if (today === 3) return "WED_GID";
-if (today === 4) return "THUR_GID";
-if (today === 5) return "FRI_GID";
-
-    return "MON_GID";
-}
-
-  
-  console.log("STEP 4 — BEFORE LOADWORKOUT");
-
-  
+    
 /* ======================================================
    STOP ALL TIMERS
 ====================================================== */
@@ -914,8 +1285,8 @@ if (today === 5) return "FRI_GID";
   function getNextSetIndex() {
 
     // Start searching AFTER currentSet
-    for (let i = currentSet + 1; i < window.workoutData.length; i++) {
-        if (window.workoutData[i].type === "set") {
+    for (let i = currentSet; i < workoutData.length; i++) {
+        if (workoutData[i].type === "set") {
             return i + 1; // convert to 1-based index
         }
     }
@@ -931,7 +1302,7 @@ if (today === 5) return "FRI_GID";
 
   function getWorkDuration() {
 
-    const currentItem = window.workoutData[currentSet - 1] || {};
+    const currentItem = workoutData[currentSet - 1] || {};
 
     // 1️⃣ per-set override
     if (currentItem?.workSec) {
@@ -964,85 +1335,35 @@ if (today === 5) return "FRI_GID";
 
 function tick() {
 
-    if (!window.workoutData?.length) return;
-
-    applyCoachControl();
-
     if (!isRunning) return;
 
     phaseJustChanged = false;
 
-    updateSegmentHighlight();
-
+  
     /* ======================================================
-       1️⃣ MASTER CLASS TIMER
+       1️⃣ MASTER CLASS TIMER (authoritative)
     ====================================================== */
-
     if (totalSeconds <= 0) {
         workoutFinishScreen();
         return;
     }
 
-    if (window.classStartTime) {
-        const now = getEffectiveNow().getTime();
-        const elapsed = Math.floor((now - window.classStartTime) / 1000);
-        totalSeconds = Math.max(classBlockLength - elapsed, 0);
-    }
-
+    totalSeconds = Math.max(0, totalSeconds - 1);
     updateTotalDisplay();
 
+  
     /* ======================================================
        2️⃣ PHASE TIMER
     ====================================================== */
+   
+  timeLeft = Math.max(0, timeLeft - 1);
 
-   const nowMs = getEffectiveNow().getTime();
-const state = computeWorkoutState(nowMs);
-
-if (!state) {
-    console.warn("⚠️ No workout state yet (waiting for classStartTime)");
-    return;
-}
-
-// 🔥 CAPTURE PREVIOUS STATE
-const prevPhase = currentPhase;
-const prevTime = timeLeft;
-
-  // 🔍 DEBUG — ADD THIS LINE RIGHT HERE
-console.log("DEBUG:", prevPhase, prevTime, "→", state.phase);
-
-// 🔥 STABLE ROTATION DETECTION (FINAL FIX)
-if (
-    state.phase === "rotate" &&
-    state.rotation !== lastRotationIndex
-) {
-    console.log("🔁 ROTATING QUADRANTS (NEW ROTATION)", state.rotation);
-    rotateQuadrantColors();
-    lastRotationIndex = state.rotation;
-}
-
-// Phase change tracking (for UI only)
-if (prevPhase !== state.phase) {
-    console.log("PHASE CHANGE:", prevPhase, "→", state.phase);
-    phaseJustChanged = true;
-}
-
-// 🔥 UPDATE CURRENT STATE AFTER CHECKS
-currentPhase = state.phase;
-timeLeft = state.timeLeft;
-
-if (state.setIndex !== undefined && state.setIndex !== currentSet) {
-    currentSet = state.setIndex;
-    displaySetNumber = state.setNumber;
-    loadSetData(currentSet);
-}
-
-rotationCount = state.rotation || 0;
-
+  
     /* ======================================================
-       3️⃣ DRESS WARNING
+       3️⃣ DRESS WARNING (exact trigger)
     ====================================================== */
-
-    if (
+  
+  if (
         currentPhase === "dress" &&
         timeLeft === 120 &&
         !dressWarningSpoken
@@ -1051,32 +1372,167 @@ rotationCount = state.rotation || 0;
         dressWarningSpoken = true;
     }
 
+    
     /* ======================================================
-       4️⃣ FINAL COUNTDOWN
+       4️⃣ FINAL COUNTDOWN (no repeats)
     ====================================================== */
-
-    if (timeLeft >= 1 && timeLeft <= 5) {
+    
+  if (timeLeft >= 1 && timeLeft <= 5) {
         if (lastCountdownSpoken !== timeLeft) {
             speakNumber(timeLeft);
             lastCountdownSpoken = timeLeft;
         }
     }
 
+    
     /* ======================================================
-       5️⃣ UPDATE UI
+       5️⃣ UPDATE CLOCK
     ====================================================== */
+    
+  updateClock();
 
-    updateClock();
-    updatePhaseDisplay();
-    updateCenterVisuals();
-
-    if (timeLeft > 0) return;
+  
+    /* ======================================================
+       6️⃣ EXIT IF TIME REMAINS
+    ====================================================== */
+    
+  if (timeLeft > 0) return;
 
     lastCountdownSpoken = null;
 
     console.log("Set:", currentSet, "Rotation:", rotationCount);
+
+  
+    /* ======================================================
+       PHASE TRANSITIONS (STATE MACHINE)
+    ====================================================== */
+   
+  switch (currentPhase) {
+
+        case "dress":
+            currentPhase = "stretch";
+            timeLeft = dynamicStretchDuration;
+            dressWarningSpoken = false;
+            phaseJustChanged = true;
+            speakStretch();
+            break;
+
+        case "stretch":
+            currentPhase = "work";
+            rotationCount = 0;
+            currentSet = 1;
+            displaySetNumber = 1;
+
+            loadSetData(1);
+
+            timeLeft = getWorkDuration();
+            phaseJustChanged = true;
+            speakLift();
+            break;
+
+        case "work": {
+            rotateQuadrantcolors();
+            rotationCount++;
+
+            currentPhase = "rotate";
+            timeLeft = getRestDuration();
+            phaseJustChanged = true;
+            speakRotate();
+            break;
+        }
+
+      
+        /* ---------- ROTATE → NEXT ---------- */
+      
+    case "rotate": {
+
+    const finishedRotations = rotationCount >= maxRotations;
+
+    if (finishedRotations) {
+
+        rotationCount = 0;
+
+        const nextItem = workoutData[currentSet] ?? null;
+
+        // 🔴 no more items
+        if (!nextItem) {
+            workoutComplete();
+            return;
+        }
+
+
+        // 🟡 break row
+        if (nextItem.type === "break") {
+
+            // advance pointer onto the break row
+            currentSet++;
+
+            currentPhase = "break";
+
+            timeLeft = Math.max(
+                1,
+                nextItem.breakSec || breakDuration
+            );
+
+            phaseJustChanged = true;
+            speakBreakPrep();
+
+            previewNextSet();
+            break;
+        }
+
+
+        // ✅ next is real set
+        currentSet++;
+        displaySetNumber++;
+        loadSetData(currentSet);
+    }
+
+    currentPhase = "work";
+    timeLeft = getWorkDuration();
+    phaseJustChanged = true;
+    speakLift();
+    break;
 }
+
+        case "break": {
+
+            const nextItem = workoutData[currentSet] ?? null;
+
+            if (!nextItem) {
+                workoutComplete();
+                return;
+            }
+
+          
+            // ✅ ONLY advance when next is a set
+            if (nextItem.type === "set") {
+                currentSet++;
+                displaySetNumber++;
+                loadSetData(currentSet);
+            }
+
+            currentPhase = "work";
+            timeLeft = getWorkDuration();
+            phaseJustChanged = true;
+            speakLift();
+            break;
+        }
+
+    } // ✅ CLOSES switch(currentPhase)
+
+  
+    /* ======================================================
+       FINAL UI UPDATE
+    ====================================================== */
     
+  if (phaseJustChanged) {
+    lastCountdownSpoken = null;
+    updatePhaseDisplay();
+}
+}
+
+  
 /* ======================================================
    PHASE DISPLAY + CENTER MODES
 ====================================================== */
@@ -1105,36 +1561,28 @@ function updatePhaseDisplay() {
         "logoBreak"
     );
 
-    // DEFAULT LABELS
-    const labels = {
-        dress: "DRESS OUT & ATTENDANCE",
-        stretch: "DYNAMIC STRETCH",
-        rotate: "ROTATE",
-        break: "BREAK",
-        cooldown: "COOL DOWN / CLEAN-UP / DRESS"
-    };
-
-    /* ===================== PHASE HANDLING ===================== */
+    /* ===================== PHASES ===================== */
 
     if (currentPhase === "work") {
 
         center.classList.add("workMode");
         logo.classList.add("logoWork");
 
-        // 🔥 FORCE UPDATE EVERY TIME
         phaseEl.innerHTML = `
             <div>WORK</div>
             <div>Set ${displaySetNumber} of ${getTotalSets()}</div>
             <div>Rotation ${rotationCount + 1} of ${maxRotations}</div>
         `;
 
-        return; // 🚨 prevents overwrite
-
+        return;
     }
 
     if (currentPhase === "rotate") {
         center.classList.add("rotateMode");
         logo.classList.add("logoRotate");
+
+        phaseEl.innerHTML = `<div>ROTATE</div>`;
+        return;
     }
 
     if (currentPhase === "break") {
@@ -1151,24 +1599,50 @@ function updatePhaseDisplay() {
     if (currentPhase === "dress") {
         center.classList.add("dressMode");
         logo.classList.add("logoDefault");
+
+        phaseEl.innerHTML = `<div>DRESS OUT & ATTENDANCE</div>`;
+        return;
     }
 
     if (currentPhase === "stretch") {
         center.classList.add("stretchMode");
         logo.classList.add("logoDefault");
+
+        phaseEl.innerHTML = `<div>DYNAMIC STRETCH</div>`;
+        return;
     }
 
     if (currentPhase === "cooldown") {
         center.classList.add("dressMode");
         logo.classList.add("logoDefault");
+
+        phaseEl.innerHTML = `<div>COOL DOWN / CLEAN-UP / DRESS</div>`;
+        return;
     }
 
-    // DEFAULT FALLBACK
-    phaseEl.innerText = labels[currentPhase] || "";
+    phaseEl.innerHTML = `<div>${currentPhase}</div>`;
 }
 
-console.log("PHASE DISPLAY:", currentPhase, displaySetNumber, rotationCount);
+    /* ---------- LABEL MAP ---------- */
+    const labels = {
+        dress: "DRESS OUT & ATTENDANCE",
+        stretch: "DYNAMIC STRETCH",
+        work: "WORK",
+        rotate: "ROTATE",
+        break: "BREAK",
+        cooldown: "COOL DOWN / CLEAN-UP / DRESS"
+    };
 
+    /* ---------- WORK SPECIAL LABEL ---------- */
+    if (currentPhase === "work") {
+        phaseEl.innerText =
+`WORK\nSet ${displaySetNumber} of ${getTotalSets()}\nRotation ${rotationCount + 1} of ${maxRotations}`;
+    } else {
+        phaseEl.innerText = labels[currentPhase] || "";
+    }
+}
+
+  
 /* ======================================================
    SPEECH ENGINE (shared helper)
 ====================================================== */
@@ -1234,7 +1708,7 @@ function speakBreakPrep() {
 function getRestDuration() {
 
     // 1️⃣ per-set override
-    const currentItem = window.workoutData[currentSet - 1] || {}; // ✅ safer
+    const currentItem = workoutData[currentSet - 1] || {}; // ✅ safer
     if (currentItem.rotateSec) {
         console.log("⏱ Using per-set rotate:", currentItem.rotateSec);
         return currentItem.rotateSec;
@@ -1298,6 +1772,83 @@ function resetCenterClock() {
 
     document.getElementById("phase").innerText = "WORK";
 }
+
+
+/* ======================================================
+   LOAD SET INTO QUADRANTS
+====================================================== */
+
+function loadSetData(setNumber) {
+
+    const workout = workoutData[setNumber - 1];
+
+    if (!workout || workout.type !== "set") return;
+
+    /* ---------- CORE ---------- */
+    const q1Texts = document.querySelectorAll("#q1 .quad-text");
+    if (q1Texts.length >= 3) {
+        q1Texts[0].innerText = workout.core;
+        q1Texts[1].innerText = "Reps: " + workout.reps;
+        q1Texts[2].innerText =
+            "Percentage: " + (workout.percent ? workout.percent + "%" : "");
+    }
+
+    /* ---------- AUX ---------- */
+    const q2Texts = document.querySelectorAll("#q2 .quad-text");
+    if (q2Texts.length >= 2) {
+        q2Texts[0].innerText = workout.aux;
+        q2Texts[1].innerText = "Reps: " + workout.auxReps;
+    }
+
+    /* ---------- MOVEMENT ---------- */
+    const q4Texts = document.querySelectorAll("#q4 .quad-text");
+    if (q4Texts.length >= 2) {
+        q4Texts[0].innerText = workout.move;
+        q4Texts[1].innerText = "Reps/Time: " + workout.moveReps;
+    }
+}
+
+
+/* ======================================================
+   SPACEBAR CONTROL
+====================================================== */
+
+window.addEventListener("keydown", (e) => {
+
+    const tag = document.activeElement?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+    if (e.repeat) return;
+
+    if (e.code === "Space") {
+        e.preventDefault();
+        startTimer();
+    }
+});
+
+
+/* ======================================================
+   INITIAL PAGE LOAD
+====================================================== */
+
+window.addEventListener("unhandledrejection", e => {
+    console.warn("Unhandled promise:", e.reason);
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+
+    applyDaySpecificClassLength();
+
+    totalSeconds = classBlockLength;
+    originalTotalSeconds = classBlockLength;
+    updateTotalDisplay();
+
+    loadWorkout();
+
+    // auto detect if class already started
+    setTimeout(autoDetectActiveClass, 2000);
+
+});
 
 
 /* ======================================================
