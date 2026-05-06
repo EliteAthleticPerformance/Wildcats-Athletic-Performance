@@ -973,7 +973,16 @@ const rest = sheetRotateDuration ?? safeGet("restTime", 10);
     /* ---------- TOTAL WORKOUT BEFORE COOLDOWN ---------- */
     const workoutBlock = prepTotal + workoutTotal + breakTotal;
 
-   
+   /* ---------- FINAL TOTAL ---------- */
+
+const total =
+    workoutBlock + cooldownDuration;
+
+console.log("🧮 Total workout time:", total);
+
+return total;
+}
+      
 
 function preciseTick() {
 
