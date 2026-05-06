@@ -331,6 +331,15 @@ body {
     z-index:2;
 }
 
+      #centerInner {
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    width:100%;
+    height:100%;
+}
+
 #clock {
     font-size:80px;
     font-weight:900;
@@ -433,9 +442,7 @@ body {
     100% { box-shadow: 0 0 10px red; }
 }
 
-      /* ===================== CLOCK PULSE ===================== */
-
-.pulse {
+.pulse #centerInner {
     animation: clockPulse 1s infinite;
 }
 
@@ -445,7 +452,7 @@ body {
     100% { transform: scale(1); }
 }
 
-
+      
       /* ===================== TIMELINE ===================== */
 
 #timelineContainer {
@@ -589,10 +596,12 @@ body {
     </div>
 
     <div id="center">
-    <div id="clock">30</div>
+    <div id="centerInner">
+        <div id="clock">30</div>
 
-    <div id="phaseContainer">
-        <div id="phase">WORK</div>
+        <div id="phaseContainer">
+            <div id="phase">WORK</div>
+        </div>
     </div>
 </div>
 
