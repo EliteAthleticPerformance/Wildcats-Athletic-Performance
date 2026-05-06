@@ -156,7 +156,12 @@ body {
 }
 
 /* ===================== GRID ===================== */
-#display {
+
+      <div id="timelineContainer">
+    <div id="timelineSegments"></div>
+</div>
+      
+      #display {
     position:absolute;
     top:200px;
     bottom:0;
@@ -192,6 +197,8 @@ body {
     top:50%;
     transform:translateY(-50%);
 }
+
+      
 
 /* ===================== QUADS ===================== */
 .quad {
@@ -256,6 +263,73 @@ body {
 }
 
 
+      /* ===================== TIMELINE ===================== */
+
+#timelineContainer {
+    position:absolute;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    width:80%;
+    height:18px;
+    background:rgba(255,255,255,0.1);
+    border-radius:12px;
+    overflow:hidden;
+    z-index:3;
+}
+
+#timelineSegments {
+    display:flex;
+    height:100%;
+    width:100%;
+}
+
+/* segments */
+.timeline-segment {
+    height:100%;
+    opacity:0.4;
+    transition:opacity 0.3s ease;
+}
+
+/* ACTIVE segment */
+.timeline-segment.active {
+    opacity:1;
+    box-shadow:0 0 10px #fff;
+}
+
+/* phase colors */
+.seg-dress    { background:#666; }
+.seg-stretch  { background:#3498db; }
+.seg-work     { background:var(--primary); }
+.seg-rotate   { background:orange; }
+.seg-break    { background:red; }
+.seg-cooldown { background:#888; }
+
+
+      /* segment container */
+.timeline-segment {
+    position:relative;
+    height:100%;
+    opacity:0.4;
+    overflow:hidden;
+}
+
+/* animated fill */
+.segment-fill {
+    position:absolute;
+    left:0;
+    top:0;
+    height:100%;
+    width:0%;
+    background:rgba(255,255,255,0.6);
+    transition:width 0.2s linear;
+}
+
+/* active segment */
+.timeline-segment.active {
+    opacity:1;
+}
+
       
 </style>
 </head>
@@ -306,8 +380,7 @@ body {
   <input id="workTime" value="30">
   <input id="restTime" value="10">
   <button id="startBtn" onclick="startTimer()">START</button>
-  <div id="timelineSegments"></div>
-</div>
+  
 
 <script>
 
@@ -328,6 +401,9 @@ let phaseJustChanged = false;
 let nextTickTime = null;
 let workoutData = [];
 window.workoutData = workoutData;
+window.classStartTime = null;
+let phaseStartTime = null;
+      
 
 /* ===================== SETS ===================== */
 
@@ -493,6 +569,7 @@ function startTimer() {
 
     /* ---------- START STATE ---------- */
     isRunning = true;
+      window.classStartTime = getEffectiveNow().getTime();
     
 
 // ⭐ Force fresh class time calculation
@@ -528,6 +605,7 @@ originalTotalSeconds = finalTotal;
     updatePhaseDisplay();
     updateClock();
     updateTotalDisplay();
+      updateSegmentHighlight();
 
     nextTickTime = Date.now() + 1000;
     timer = setTimeout(preciseTick, 1000);
@@ -657,13 +735,23 @@ function getEffectiveNow() {
         }
     }
 
-    /* ===================== DONE ===================== */
+    /* ===================== COOLDOWN ===================== */
+if (elapsed < cooldownDuration) {
     return {
-        phase: "done",
-        timeLeft: 0,
-        originalDuration: 0
+        phase: "cooldown",
+        timeLeft: Math.max(cooldownDuration - elapsed, 0),
+        originalDuration: cooldownDuration
     };
 }
+
+elapsed -= cooldownDuration;
+
+/* ===================== DONE ===================== */
+return {
+    phase: "done",
+    timeLeft: 0,
+    originalDuration: 0
+};
 
       
 
@@ -697,6 +785,7 @@ function autoDetectActiveClass() {
 
             // Start system
             startTimer();
+              window.classStartTime = start.getTime();
 
             // Calculate elapsed time
             const elapsed = Math.floor((now - start) / 1000);
@@ -708,9 +797,7 @@ function autoDetectActiveClass() {
 
             /* ===================== 🔥 PHASE SYNC (NEW) ===================== */
 
-            /* ===================== 🔥 PHASE SYNC (FIXED) ===================== */
-
-const state = computeWorkoutState(start.getTime() + (elapsed * 1000));
+            const state = computeWorkoutState(start.getTime() + (elapsed * 1000));
 
 if (state) {
 
@@ -728,8 +815,7 @@ if (state) {
 
     rotationCount = state.rotation || 0;
 
-    // ✅ CRITICAL: reset phase timing reference
-    phaseStartTime = Date.now() - ((state.originalDuration - state.timeLeft) * 1000);
+    
 
     // ✅ Force UI refresh
     updateClock();
@@ -1295,31 +1381,67 @@ function getWorkDuration() {
    MAIN TICK
 ====================================================== */
 
+/* ======================================================
+   MAIN TICK (TIME-BASED ENGINE)
+====================================================== */
+
 function tick() {
 
-    if (!isRunning) return;
+    if (!isRunning || !window.classStartTime) return;
 
-    phaseJustChanged = false;
+    const now = getEffectiveNow().getTime();
 
-    /* ======================================================
-       1️⃣ MASTER CLASS TIMER (authoritative)
-    ====================================================== */
-    if (totalSeconds <= 0) {
-        workoutFinishScreen();
-        return;
+    /* ===================== MASTER STATE ===================== */
+    const state = computeWorkoutState(now);
+    if (!state) return;
+
+    const prevPhase = currentPhase;
+
+    /* ===================== APPLY STATE ===================== */
+    currentPhase = state.phase;
+    timeLeft = state.timeLeft;
+
+    if (state.setIndex !== undefined) {
+        if (currentSet !== state.setIndex) {
+            currentSet = state.setIndex;
+            displaySetNumber = state.setNumber;
+            loadSetData(currentSet);
+        }
     }
 
-    totalSeconds = Math.max(0, totalSeconds - 1);
-    updateTotalDisplay();
+    if (state.rotation !== undefined) {
+        rotationCount = state.rotation;
+    }
 
-    /* ======================================================
-       2️⃣ PHASE TIMER
-    ====================================================== */
-    timeLeft = Math.max(0, timeLeft - 1);
+    /* ===================== TOTAL TIMER ===================== */
+    const elapsed = Math.floor((now - window.classStartTime) / 1000);
+    totalSeconds = Math.max(classBlockLength - elapsed, 0);
 
-    /* ======================================================
-       3️⃣ DRESS WARNING (exact trigger)
-    ====================================================== */
+    /* ===================== AUDIO ===================== */
+
+    // Phase change triggers
+    if (currentPhase !== prevPhase) {
+
+        lastCountdownSpoken = null;
+
+        switch (currentPhase) {
+            case "stretch":
+                speakStretch();
+                break;
+            case "work":
+                speakLift();
+                break;
+            case "rotate":
+                speakRotate();
+                break;
+            case "break":
+                speakBreakPrep();
+                previewNextSet();
+                break;
+        }
+    }
+
+    // Dress warning
     if (
         currentPhase === "dress" &&
         timeLeft === 120 &&
@@ -1329,9 +1451,7 @@ function tick() {
         dressWarningSpoken = true;
     }
 
-    /* ======================================================
-       4️⃣ FINAL COUNTDOWN (no repeats)
-    ====================================================== */
+    // Countdown 3-2-1
     if (timeLeft >= 1 && timeLeft <= 3) {
         if (lastCountdownSpoken !== timeLeft) {
             speakNumber(timeLeft);
@@ -1339,255 +1459,14 @@ function tick() {
         }
     }
 
-    /* ======================================================
-       5️⃣ UPDATE CLOCK
-    ====================================================== */
+    /* ===================== UI ===================== */
     updateClock();
-
-    /* ======================================================
-       6️⃣ EXIT IF TIME REMAINS
-    ====================================================== */
-    if (timeLeft > 0) return;
-
-    lastCountdownSpoken = null;
-
-    console.log("Set:", currentSet, "Rotation:", rotationCount);
-
-    /* ======================================================
-       PHASE TRANSITIONS (STATE MACHINE)
-    ====================================================== */
-    switch (currentPhase) {
-
-        case "dress":
-            currentPhase = "stretch";
-            timeLeft = dynamicStretchDuration;
-            dressWarningSpoken = false;
-            phaseJustChanged = true;
-            speakStretch();
-            break;
-
-        case "stretch":
-            currentPhase = "work";
-            rotationCount = 0;
-            currentSet = 1;
-            displaySetNumber = 1;
-
-            loadSetData(1);
-
-            timeLeft = getWorkDuration();
-            phaseJustChanged = true;
-            speakLift();
-            break;
-
-        case "work": {
-            rotateQuadrants();
-            rotationCount++;
-
-            currentPhase = "rotate";
-            timeLeft = getRestDuration();
-            phaseJustChanged = true;
-            speakRotate();
-            break;
-        }
-
-        /* ---------- ROTATE → NEXT ---------- */
-        case "rotate": {
-
-    const finishedRotations = rotationCount >= maxRotations;
-
-    if (finishedRotations) {
-
-        rotationCount = 0;
-
-        const nextItem = workoutData[currentSet]; // look ahead
-
-        // 🔴 no more items
-        if (!nextItem) {
-            workoutComplete();
-            return;
-        }
-
-
-        // 🟡 break row
-        if (nextItem.type === "break") {
-
-
-            // advance pointer onto the break row
-            currentSet++;
-
-            currentPhase = "break";
-
-            timeLeft = Math.max(
-                1,
-                nextItem.breakSec || breakDuration
-            );
-
-
-            phaseJustChanged = true;
-            speakBreakPrep();
-
-            previewNextSet();
-            break;
-        }
-
-
-        // ✅ next is real set
-        currentSet++;
-        displaySetNumber++;
-        loadSetData(currentSet);
-    }
-
-    currentPhase = "work";
-    timeLeft = getWorkDuration();
-    phaseJustChanged = true;
-    speakLift();
-    break;
-}
-
-        case "break": {
-
-            const nextItem = workoutData[currentSet];
-
-            if (!nextItem) {
-                workoutComplete();
-                return;
-            }
-
-            // ✅ ONLY advance when next is a set
-            if (nextItem.type === "set") {
-                currentSet++;
-                displaySetNumber++;
-                loadSetData(currentSet);
-            }
-
-            currentPhase = "work";
-            timeLeft = getWorkDuration();
-            phaseJustChanged = true;
-            speakLift();
-            break;
-        }
-
-    } // ✅ CLOSES switch(currentPhase)
-
-    /* ======================================================
-       FINAL UI UPDATE
-    ====================================================== */
-    if (phaseJustChanged) {
-        updatePhaseDisplay();
-    }
-}
-
-/* ======================================================
-   WORKOUT COMPLETE
-====================================================== */
-function workoutComplete() {
-
-    if (currentPhase === "cooldown") return;
-
-    currentPhase = "cooldown";
-
-    timeLeft = Math.max(cooldownDuration, 1);
-
     updatePhaseDisplay();
-    updateClock();
-}
+    updateTotalDisplay();
 
-/* ======================================================
-   FINAL FINISH SCREEN
-====================================================== */
-function workoutFinishScreen() {
-    stopAllTimers();
-    playHorn(); // optional — keeps your finish horn
-}
-
-/* ======================================================
-   CLOCK DISPLAY
-====================================================== */
-function updateClock() {
-
-    const safeTime = Math.max(0, timeLeft);
-
-    const minutes = Math.floor(safeTime / 60);
-    const seconds = safeTime % 60;
-
-    document.getElementById("clock").innerText =
-        `${minutes}:${seconds.toString().padStart(2, "0")}`;
-}
-
-/* ======================================================
-   PHASE DISPLAY + CENTER MODES
-====================================================== */
-function updatePhaseDisplay() {
-
-    const logo = document.getElementById("schoolLogo");
-if (!logo) return;
-    const center = document.getElementById("center");
-
-    // 🔥 CLEAR ALL CENTER MODES FIRST (CRITICAL)
-    center.classList.remove(
-        "workMode",
-        "rotateMode",
-        "breakMode",
-        "dressMode",
-        "stretchMode"
-    );
-
-    logo.classList.remove(
-        "logoDefault",
-        "logoWork",
-        "logoRotate",
-        "logoBreak"
-    );
-
-    const phaseEl = document.getElementById("phase");
-
-    switch (currentPhase) {
-
-        case "dress":
-            center.classList.add("dressMode");
-            logo.classList.add("logoDefault");
-            break;
-
-        case "stretch":
-            center.classList.add("stretchMode");
-            logo.classList.add("logoDefault");
-            break;
-
-        case "cooldown":
-            center.classList.add("dressMode");
-            logo.classList.add("logoDefault");
-            break;
-
-        case "work":
-            center.classList.add("workMode");
-            break;
-
-        case "rotate":
-            center.classList.add("rotateMode");
-            break;
-
-        case "break":
-            center.classList.add("breakMode");
-            phaseEl.innerText = "BREAK\nPREP NEXT LIFT";
-            return;
-    }
-
-    /* ---------- LABEL MAP ---------- */
-    const labels = {
-        dress: "DRESS OUT & ATTENDANCE",
-        stretch: "DYNAMIC STRETCH",
-        work: "WORK",
-        rotate: "ROTATE",
-        break: "BREAK",
-        cooldown: "COOL DOWN / CLEAN-UP / DRESS"
-    };
-
-    /* ---------- WORK SPECIAL LABEL ---------- */
-    if (currentPhase === "work") {
-        phaseEl.innerText =
-`WORK\nSet ${displaySetNumber} of ${getTotalSets()}\nRotation ${rotationCount + 1} of ${maxRotations}`;
-    } else {
-        phaseEl.innerText = labels[currentPhase] || "";
+    /* ===================== END ===================== */
+    if (totalSeconds <= 0) {
+        workoutFinishScreen();
     }
 }
 
@@ -1653,8 +1532,13 @@ function renderTimeline() {
 
     timelineData.forEach((seg, index) => {
         const div = document.createElement("div");
+div.classList.add("timeline-segment", `seg-${seg.phase}`);
 
-        div.classList.add("timeline-segment", `seg-${seg.phase}`);
+// 🔥 inner fill element
+const fill = document.createElement("div");
+fill.classList.add("segment-fill");
+
+div.appendChild(fill);
 
         const percent = (seg.duration / total) * 100;
         div.style.width = percent + "%";
@@ -1666,23 +1550,59 @@ function renderTimeline() {
 }
 
 function updateSegmentHighlight() {
+
     if (!window.classStartTime) return;
 
     const now = getEffectiveNow().getTime();
     let elapsed = (now - window.classStartTime) / 1000;
 
     let currentIndex = 0;
+    let segmentElapsed = 0;
 
+    // find current segment
     for (let i = 0; i < timelineData.length; i++) {
-        if (elapsed < timelineData[i].duration) {
+
+        const segDuration = timelineData[i].duration;
+
+        if (elapsed < segDuration) {
             currentIndex = i;
+            segmentElapsed = elapsed;
             break;
         }
-        elapsed -= timelineData[i].duration;
+
+        elapsed -= segDuration;
     }
 
-    document.querySelectorAll(".timeline-segment").forEach((el, i) => {
-        el.classList.toggle("active", i === currentIndex);
+    const segments = document.querySelectorAll(".timeline-segment");
+
+    segments.forEach((el, i) => {
+
+        const fill = el.querySelector(".segment-fill");
+
+        if (!fill) return;
+
+        // ACTIVE segment
+        if (i === currentIndex) {
+
+            el.classList.add("active");
+
+            const segDuration = timelineData[i].duration;
+            const percent = Math.min((segmentElapsed / segDuration) * 100, 100);
+
+            fill.style.width = percent + "%";
+        }
+
+        // COMPLETED segments
+        else if (i < currentIndex) {
+            el.classList.remove("active");
+            fill.style.width = "100%";
+        }
+
+        // FUTURE segments
+        else {
+            el.classList.remove("active");
+            fill.style.width = "0%";
+        }
     });
 }
 
@@ -2010,12 +1930,7 @@ function syncTime() {
 
         updateClock();
 
-        // Always show full class block
-        totalSeconds = classBlockLength;
-        originalTotalSeconds = classBlockLength;
-
-        updateTotalDisplay();
-    }
+        }
 }
 
 /* ======================================================
