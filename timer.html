@@ -973,17 +973,7 @@ const rest = sheetRotateDuration ?? safeGet("restTime", 10);
     /* ---------- TOTAL WORKOUT BEFORE COOLDOWN ---------- */
     const workoutBlock = prepTotal + workoutTotal + breakTotal;
 
-    /* ---------- COOLDOWN CALCULATION ---------- */
-    cooldownDuration = Math.max(
-        classBlockLength - workoutBlock,
-        0
-    );
-
-    console.log("Cooldown calculated:", cooldownDuration);
-
-    /* ---------- FINAL TOTAL (ALWAYS CLASS LENGTH) ---------- */
-    return classBlockLength;
-}
+   
 
 function preciseTick() {
 
@@ -1700,6 +1690,21 @@ if (isEffectivelyBlankRow(r)) {
                 continue;
             }
 
+              if (firstCell === "cooldown_seconds") {
+    const v = parseSheetNumber(r[1]);
+
+    if (v !== null) {
+        cooldownDuration = v;
+
+        console.log(
+            "📥 Cooldown time:",
+            cooldownDuration
+        );
+    }
+
+    continue;
+}
+
               if (firstCell === "work_seconds" || firstCell === "work") {
     const v = parseSheetNumber(r[1]);
     if (v !== null) {
@@ -1967,63 +1972,100 @@ updateClockPulse();        // 👈 ADD
     }
 }
 
-      /* ===================== TIMELINE ===================== */
+/* ===================== TIMELINE ===================== */
 
 let timelineData = [];
 
 function buildSegmentTimeline() {
+
     if (!window.workoutData?.length) return;
 
     timelineData = [];
 
-    // DRESS
-    timelineData.push({ phase: "dress", duration: dressOutDuration });
+    /* ===================== DRESS ===================== */
 
-    // STRETCH
-    if (dynamicStretchDuration > 0) {
-        timelineData.push({ phase: "stretch", duration: dynamicStretchDuration });
-    }
-
-    // WORKOUT
-    window.workoutData.forEach((item, index) => {
-
-       if (item.type === "set") {
-
-    // WORK
     timelineData.push({
-        phase: "work",
-        duration:
-            item.workSec ||
-            sheetWorkDuration ||
-            safeGet("workTime", 30)
+        phase: "dress",
+        duration: dressOutDuration
     });
 
-    // LOOK AHEAD
-    const next = window.workoutData[index + 1];
+    /* ===================== STRETCH ===================== */
 
-    // ONLY add rotate between consecutive sets
-    if (next && next.type === "set") {
+    if (dynamicStretchDuration > 0) {
 
         timelineData.push({
-            phase: "rotate",
-            duration:
-                item.rotateSec ||
-                sheetRotateDuration ||
-                safeGet("restTime", 10)
+            phase: "stretch",
+            duration: dynamicStretchDuration
         });
     }
-} 
+
+    /* ===================== WORKOUT ===================== */
+
+    window.workoutData.forEach((item) => {
+
+        /* ---------- SETS ---------- */
+
+        if (item.type === "set") {
+
+            // ALL station rotations
+            for (let r = 0; r < maxRotations; r++) {
+
+                /* WORK */
+
+                timelineData.push({
+                    phase: "work",
+                    duration:
+                        item.workSec ||
+                        sheetWorkDuration ||
+                        safeGet("workTime", 30)
+                });
+
+                /* ROTATE */
+
+                if (r < maxRotations - 1) {
+
+                    timelineData.push({
+                        phase: "rotate",
+                        duration:
+                            item.rotateSec ||
+                            sheetRotateDuration ||
+                            safeGet("restTime", 10)
+                    });
+                }
+            }
+        }
+
+        /* ---------- BREAK ---------- */
 
         if (item.type === "break") {
+
             timelineData.push({
                 phase: "break",
-                duration: item.breakSec || breakDuration
+                duration:
+                    item.breakSec ||
+                    breakDuration
             });
         }
 
     });
 
-    renderTimeline(); // ✅ correct place
+    /* ===================== COOLDOWN ===================== */
+
+    if (cooldownDuration > 0) {
+
+        timelineData.push({
+            phase: "cooldown",
+            duration: cooldownDuration
+        });
+    }
+
+    /* ===================== DEBUG ===================== */
+
+    console.log("🧩 Timeline Data:", timelineData);
+
+    /* ===================== RENDER ===================== */
+
+    renderTimeline();
 }
 
 
