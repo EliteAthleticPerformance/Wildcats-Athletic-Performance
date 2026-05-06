@@ -1719,6 +1719,18 @@ function tick() {
 
     /* ===================== MASTER STATE ===================== */
     const state = computeWorkoutState(now);
+/* ===================== DEBUG STATE ===================== */
+
+console.log({
+    currentPhase,
+    statePhase: state.phase,
+    rotationCount,
+    stateRotation: state.rotation,
+    timeLeft: state.timeLeft,
+    setIndex: state.setIndex,
+    setNumber: state.setNumber
+});
+      
     if (!state) return;
 
     const prevPhase = currentPhase;
