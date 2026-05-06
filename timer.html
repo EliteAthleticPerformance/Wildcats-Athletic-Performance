@@ -41,19 +41,76 @@ try {
   sessionStorage.setItem("school", school);
 
   let logo = null;
+  let config = null;
 
-try {
-  const raw = sessionStorage.getItem("logo-" + school);
-  logo = raw ? JSON.parse(raw) : null;
-} catch (e) {
-  console.warn("Logo parse failed:", e);
-}
-  if (logo) {
-    document.addEventListener("DOMContentLoaded", () => {
-      const el = document.getElementById("schoolLogo");
-      if (el) el.src = logo;
-    });
+  try {
+    const rawLogo = sessionStorage.getItem("logo-" + school);
+    logo = rawLogo ? JSON.parse(rawLogo) : null;
+  } catch (e) {
+    console.warn("Logo parse failed:", e);
   }
+
+  try {
+    const rawTheme = sessionStorage.getItem("theme-" + school);
+    config = rawTheme ? JSON.parse(rawTheme) : null;
+  } catch (e) {
+    console.warn("School name parse failed:", e);
+  }
+
+      // 👇 ADD THIS LINE RIGHT HERE
+globalTheme = config;
+
+  document.addEventListener("DOMContentLoaded", () => {
+
+    // ✅ Set logo
+    const logoEl = document.getElementById("schoolLogo");
+    if (logoEl && logo) {
+      logoEl.src = logo;
+    }
+
+    // ✅ Set school name
+    const nameEl = document.getElementById("schoolName");
+    if (nameEl && config?.name) {
+      nameEl.innerText = config.name;
+    }
+
+    // 🔥 AUTO-FIT
+    function fitSchoolName() {
+      const el = document.getElementById("schoolName");
+      if (!el) return;
+
+      let size = 42;
+      el.style.fontSize = size + "px";
+
+      const maxWidth = window.innerWidth * 0.8;
+
+      while (el.scrollWidth > maxWidth && size > 14) {
+        size -= 1;
+        el.style.fontSize = size + "px";
+      }
+    }
+
+    // 🔥 DYNAMIC GLOW
+    function applySchoolGlow(theme) {
+      const el = document.getElementById("schoolName");
+      if (!el || !theme) return;
+
+      el.style.textShadow = `
+        0 0 6px ${theme.primary},
+        0 0 14px ${theme.primaryLight},
+        0 0 22px ${theme.primary}
+      `;
+    }
+
+    // ✅ RUN AFTER DOM READY
+    fitSchoolName();
+    applySchoolGlow(config);
+
+    // 🔁 resize support
+    window.addEventListener("resize", fitSchoolName);
+
+  });
+
 })();
 </script>
 
@@ -137,6 +194,33 @@ body {
         0 0 20px var(--primaryLight);
 }
 
+#headerCenter {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+
+     #schoolName {
+    font-weight:900;
+    letter-spacing:4px;
+    color:#fff;
+
+    /* 🔥 AUTO FIT BASE */
+    font-size:clamp(16px, 4vw, 42px);
+    max-width:90vw;
+    text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+
+    /* 🔥 DEFAULT GLOW (will be overridden dynamically) */
+    text-shadow:
+        0 0 6px var(--primary),
+        0 0 16px var(--primaryLight);
+
+    margin-bottom:6px;
+}
+      
 #headerMotto {
     text-align:center;
     font-size:clamp(32px, 5vh, 60px);
@@ -303,6 +387,15 @@ body {
 .seg-break    { background:red; }
 .seg-cooldown { background:#888; }
 
+      @keyframes workPulse {
+    0%   { text-shadow: 0 0 6px var(--primary); }
+    50%  { text-shadow: 0 0 24px var(--primaryLight); }
+    100% { text-shadow: 0 0 6px var(--primary); }
+}
+
+.work-glow {
+    animation: workPulse 1.2s infinite;
+}
 
       /* segment container */
 .timeline-segment {
@@ -353,7 +446,12 @@ body {
 
 <div id="schoolHeader">
     <span id="totalTime">00:00</span>
-    <span id="headerMotto">Elite Athletic Performance</span>
+
+    <div id="headerCenter">
+        <div id="schoolName"></div>
+        <div id="headerMotto">Elite Athletic Performance</div>
+    </div>
+
     <img id="schoolLogo">
 </div>
 
@@ -395,7 +493,7 @@ body {
   <input id="workTime" value="30">
   <input id="restTime" value="10">
   <button id="startBtn" onclick="startTimer()">START</button>
-  
+</div>div>
 
 <script>
 
@@ -418,6 +516,7 @@ let workoutData = [];
 window.workoutData = workoutData;
 window.classStartTime = null;
 let phaseStartTime = null;
+      let globalTheme = null;
       
 
 /* ===================== SETS ===================== */
@@ -625,7 +724,7 @@ originalTotalSeconds = finalTotal;
 
     nextTickTime = Date.now() + 1000;
     timer = setTimeout(preciseTick, 1000);
-animateTimeline(); // 👈 ADD THIS LINE RIGHT HERE
+
       if (!window.timelineAnimating) {
     window.timelineAnimating = true;
     animateTimeline();
@@ -1484,6 +1583,7 @@ function tick() {
     updateClock();
     updatePhaseDisplay();
     updateTotalDisplay();
+      updatePhaseGlow(globalTheme);
 
     /* ===================== END ===================== */
     if (totalSeconds <= 0) {
@@ -1595,6 +1695,57 @@ div.appendChild(label);
 
         container.appendChild(div);
     });
+}
+
+      function updatePhaseGlow(theme) {
+    const el = document.getElementById("schoolName");
+    if (!el || !theme) return;
+
+    switch (currentPhase) {
+
+        case "dress":
+            el.style.textShadow = `
+                0 0 4px #aaa,
+                0 0 8px #666
+            `;
+            break;
+
+        case "stretch":
+            el.style.textShadow = `
+                0 0 6px #4fc3f7,
+                0 0 14px #4fc3f7
+            `;
+            break;
+
+        case "work":
+            el.style.textShadow = `
+                0 0 8px ${theme.primary},
+                0 0 18px ${theme.primaryLight},
+                0 0 28px ${theme.primary}
+            `;
+            break;
+
+        case "rotate":
+            el.style.textShadow = `
+                0 0 6px orange,
+                0 0 14px gold
+            `;
+            break;
+
+        case "break":
+            el.style.textShadow = `
+                0 0 6px red,
+                0 0 16px crimson
+            `;
+            break;
+
+        case "cooldown":
+            el.style.textShadow = `
+                0 0 4px #888,
+                0 0 10px #555
+            `;
+            break;
+    }
 }
 
 function updateSegmentHighlight() {
