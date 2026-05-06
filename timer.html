@@ -344,6 +344,107 @@ body {
     opacity:0.8;
 }
 
+👉 That won’t animate.
+
+✅ ADD THIS CSS (below your center styles)
+#phaseContainer {
+    margin-top: 6px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#phase {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    opacity: 0.9;
+    transform: translateY(0);
+    transition: all 0.35s ease;
+}
+
+/* animation states */
+.phase-enter {
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+.phase-active {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* pulse during WORK */
+.phase-work {
+    animation: phasePulse 1.2s infinite;
+}
+
+@keyframes phasePulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+      /* ===================== CENTER PHASE COLORS ===================== */
+
+.phase-dress {
+    background: #111;
+    box-shadow: 0 0 10px #666;
+}
+
+.phase-stretch {
+    background: #0d2b3a;
+    box-shadow: 0 0 20px #4fc3f7;
+}
+
+.phase-work {
+    background: #000;
+    box-shadow:
+        0 0 20px var(--primary),
+        0 0 40px var(--primaryLight);
+}
+
+.phase-rotate {
+    background: #2a1a00;
+    box-shadow: 0 0 20px orange;
+}
+
+.phase-break {
+    background: #2a0000;
+    box-shadow: 0 0 20px red;
+}
+
+.phase-cooldown {
+    background: #222;
+    box-shadow: 0 0 10px #888;
+}
+
+      /* ===================== URGENCY FLASH ===================== */
+
+.urgent {
+    animation: urgentFlash 0.5s infinite;
+}
+
+@keyframes urgentFlash {
+    0%   { box-shadow: 0 0 10px red; }
+    50%  { box-shadow: 0 0 40px red; }
+    100% { box-shadow: 0 0 10px red; }
+}
+
+      /* ===================== CLOCK PULSE ===================== */
+
+.pulse {
+    animation: clockPulse 1s infinite;
+}
+
+@keyframes clockPulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
 
       /* ===================== TIMELINE ===================== */
 
@@ -488,10 +589,11 @@ body {
     </div>
 
     <div id="center">
-        <div id="clock">30</div>
+    <div id="clock">30</div>
+
+    <div id="phaseContainer">
         <div id="phase">WORK</div>
     </div>
-
 </div>
 
       <!-- SYSTEM INPUTS (hidden controls) -->
@@ -588,6 +690,73 @@ function updateClock() {
 
     el.textContent =
         minutes + ":" + String(seconds).padStart(2, "0");
+}
+
+      function updatePhaseDisplay() {
+    const el = document.getElementById("phase");
+    if (!el) return;
+
+    const newText = currentPhase.toUpperCase();
+
+    // prevent re-animation if same phase
+    if (el.textContent === newText) return;
+
+    el.classList.remove("phase-active", "phase-work");
+    el.classList.add("phase-enter");
+
+    setTimeout(() => {
+        el.textContent = newText;
+
+        el.classList.remove("phase-enter");
+        el.classList.add("phase-active");
+
+        if (currentPhase === "work") {
+            el.classList.add("phase-work");
+        }
+
+    }, 150);
+}
+
+      function updateCenterVisuals() {
+    const center = document.getElementById("center");
+    if (!center) return;
+
+    // reset classes
+    center.classList.remove(
+        "phase-dress",
+        "phase-stretch",
+        "phase-work",
+        "phase-rotate",
+        "phase-break",
+        "phase-cooldown"
+    );
+
+    // apply current phase
+    center.classList.add(`phase-${currentPhase}`);
+}
+
+      function updateUrgencyEffects() {
+    const center = document.getElementById("center");
+
+    if (!center) return;
+
+    // remove first
+    center.classList.remove("urgent");
+
+    if (timeLeft <= 5 && currentPhase === "work") {
+        center.classList.add("urgent");
+    }
+}
+
+      function updateClockPulse() {
+    const clock = document.getElementById("clock");
+    if (!clock) return;
+
+    clock.classList.remove("pulse");
+
+    if (timeLeft <= 5 && currentPhase === "work") {
+        clock.classList.add("pulse");
+    }
 }
       
 /* ---------- COUNT TOTAL SETS ---------- */
@@ -1599,9 +1768,13 @@ function tick() {
 
     /* ===================== UI ===================== */
     updateClock();
-    
+    updatePhaseDisplay();
     updateTotalDisplay();
       updatePhaseGlow(globalTheme);
+
+      updateCenterVisuals();     // 👈 ADD
+updateUrgencyEffects();    // 👈 ADD
+updateClockPulse();        // 👈 ADD
 
     /* ===================== END ===================== */
     if (totalSeconds <= 0) {
