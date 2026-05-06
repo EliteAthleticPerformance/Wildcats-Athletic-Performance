@@ -2378,6 +2378,35 @@ function loadSetData(setNumber) {
     }
 }
 
+      function workoutFinishScreen() {
+    isRunning = false;
+
+    // stop timer loop
+    if (timer) clearTimeout(timer);
+
+    // update center display
+    const clock = document.getElementById("clock");
+    const phase = document.getElementById("phase");
+
+    if (clock) clock.textContent = "0:00";
+    if (phase) phase.textContent = "COMPLETE";
+
+    // visual style
+    const center = document.getElementById("center");
+    if (center) {
+        center.classList.remove(
+            "phase-dress",
+            "phase-stretch",
+            "phase-work",
+            "phase-rotate",
+            "phase-break"
+        );
+        center.classList.add("phase-cooldown");
+    }
+
+    console.log("🏁 Workout finished");
+}
+
 /* ======================================================
    SPACEBAR CONTROL
 ====================================================== */
