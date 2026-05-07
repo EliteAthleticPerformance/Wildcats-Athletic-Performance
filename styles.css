@@ -97,20 +97,28 @@ text-align: center;
 
 /* Buttons */
 
+
+
 .logout-btn {
-  background: transparent;
-  border: 1px solid var(--primaryLight);
+  padding: 6px 14px;
+  border-radius: 8px;
+
+  background: rgba(20,20,20,0.9);
   color: white;
-  padding: 3px 8px;
-  border-radius: 4px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  border: 2px solid var(--secondary);   /* 🔥 MATCH COLOR */
+  box-shadow: 0 0 8px var(--secondary);
+
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-
-
 .logout-btn:hover {
-  background: #444;
+  box-shadow: 0 0 14px var(--secondary);
+  transform: scale(1.05);
 }
 
 /* Menu */
@@ -125,7 +133,8 @@ text-align: center;
   border-radius: 14px;
 
   background: rgba(20, 20, 20, 0.9);
-  border: 2px solid rgba(120, 255, 120, 0.4);
+  border: 2px solid var(--secondary);     /* 🔥 dynamic color */
+  box-shadow: 0 0 10px var(--secondary);
 
   color: white;
   font-size: 16px;
@@ -133,8 +142,7 @@ text-align: center;
 
   cursor: pointer;
 
-  box-shadow: 0 0 10px rgba(120, 255, 120, 0.2);
-  transition: all 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .menu-toggle:hover {
@@ -193,6 +201,13 @@ text-align: center;
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+}
+
+.nav-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 /* Animation */
