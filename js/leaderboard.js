@@ -43,6 +43,8 @@ renderLeaderboard(latest);
   }
 }
 
+
+
 /* ========================================
    🧠 GET LATEST TEST PER ATHLETE
 ======================================== */
@@ -56,6 +58,23 @@ function getLatestPerAthlete(data) {
     const existing = map[row.name];
 
     if (!existing || new Date(row.date) > new Date(existing.date)) {
+      map[row.name] = row;
+    }
+  });
+
+  return Object.values(map);
+}
+
+function getBestPerAthlete(data) {
+  const map = {};
+
+  data.forEach(row => {
+    if (!row.name) return;
+
+    const existing = map[row.name];
+
+    // 🔥 Compare by score (or total if you prefer)
+    if (!existing || row.score > existing.score) {
       map[row.name] = row;
     }
   });
@@ -246,7 +265,8 @@ function renderScoreTable(data) {
   const tbody = document.querySelector("#scoreTable tbody");
   if (!tbody) return;
 
-  const sorted = [...data].sort((a, b) => b.score - a.score);
+  const sorted = [...data]
+    .sort((a, b) => (b.score || 0) - (a.score || 0));
 
   tbody.innerHTML = sorted.map((a, i) => {
 
@@ -263,7 +283,7 @@ function renderScoreTable(data) {
         <td>${a.name}</td>
 
         <td>
-          ${a.score}
+          ${a.score || 0}
           <span class="tier ${tier}">
             ${getTierLabel(tier)}
           </span>
