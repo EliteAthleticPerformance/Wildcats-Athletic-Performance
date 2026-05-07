@@ -128,6 +128,36 @@ function buildAlphabetFilter(data) {
   bar.innerHTML = html;
 }
 
+let allAthletes = [];
+
+function filterByLetter(letter) {
+  if (letter === "ALL") {
+    renderLeaderboard(allAthletes);
+    return;
+  }
+
+  const filtered = allAthletes.filter(a =>
+    a.name.toUpperCase().startsWith(letter)
+  );
+
+  renderLeaderboard(filtered);
+}
+
+document.getElementById("searchInput").addEventListener("input", function(e) {
+  const value = e.target.value.toLowerCase();
+
+  const filtered = allAthletes.filter(a =>
+    a.name.toLowerCase().includes(value)
+  );
+
+  renderLeaderboard(filtered);
+});
+
+allAthletes = data;
+
+buildAlphabetFilter(data);
+renderLeaderboard(data);
+
 
 /* ========================================
    🏋️ LIFT TABLE
