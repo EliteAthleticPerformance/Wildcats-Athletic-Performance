@@ -38,10 +38,10 @@ document.addEventListener("headerLoaded", async () => {
 ======================================== */
 
 function getTag(score) {
-  if (score >= 850) return ["elite", "🔥 Collegiate Ready"];
-  if (score >= 750) return ["strong", "💪 Varsity Starter"];
-  if (score >= 650) return ["developing", "⚡ Varsity Level"];
-   if (score >= 550) return ["developing", "⚡ Sub-Varsity Level"];
+  if (score >= 900) return ["elite", "🔥 Collegiate Ready"];
+  if (score >= 800) return ["strong", "💪 Varsity Starter"];
+  if (score >= 700) return ["developing", "⚡ Varsity Level"];
+   if (score >= 500) return ["developing", "⚡ Sub-Varsity Level"];
   return ["needs", "📈 Needs Work"];
 }
 
