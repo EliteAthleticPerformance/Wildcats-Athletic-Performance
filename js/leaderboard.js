@@ -25,17 +25,14 @@ async function init() {
       return;
     }
 
-    const latest = getLatestPerAthlete(data);
+    const best = getBestPerAthlete(data);
 
-// 🔥 SET GLOBAL DATA
-allAthletes = latest;
+allAthletes = best;
 
-// 🔥 INIT FILTER UI
-buildAlphabetFilter(latest);
+buildAlphabetFilter(best);
 initSearch();
 
-// 🔥 INITIAL RENDER
-renderLeaderboard(latest);
+renderLeaderboard(best);
 
   } catch (err) {
     console.error("❌ Leaderboard init error:", err);
@@ -81,8 +78,10 @@ function getBestPerAthlete(data) {
 
     const existing = map[row.name];
 
-    // 🔥 Compare by score (or total if you prefer)
-    if (!existing || row.score > existing.score) {
+    const currentTotal = getTotal(row);
+    const existingTotal = existing ? getTotal(existing) : 0;
+
+    if (!existing || currentTotal > existingTotal) {
       map[row.name] = row;
     }
   });
@@ -192,6 +191,10 @@ function applyFilters() {
       a.name && a.name.toLowerCase().includes(searchValue)
     );
   }
+
+  if (searchValue) {
+  renderLeaderboard(fullDataset); // not best
+}
 
   renderLeaderboard(filtered);
 }
