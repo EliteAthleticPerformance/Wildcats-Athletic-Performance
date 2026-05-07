@@ -660,6 +660,10 @@ h1 {
   margin: 0 auto;
 }
 
+.alphabet-bar {
+  font-size: 0.9rem;   /* slightly smaller */
+}
+
 /* ========================================
    ATHLETE CARDS (FIXED)
 ======================================== */
