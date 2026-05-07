@@ -660,8 +660,30 @@ h1 {
   margin: 0 auto;
 }
 
+.filter-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+  text-align: center;
+}
+
+/* ALPHABET BAR */
 .alphabet-bar {
-  font-size: 0.9rem;   /* slightly smaller */
+  font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+  letter-spacing: 0.5px;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+/* SEARCH INPUT */
+.search-input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #111;
+  color: white;
+  font-size: 1rem;
 }
 
 /* ========================================
