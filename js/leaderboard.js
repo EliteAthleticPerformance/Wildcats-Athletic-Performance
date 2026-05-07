@@ -65,6 +65,14 @@ function getLatestPerAthlete(data) {
   return Object.values(map);
 }
 
+function getTotal(a) {
+  return (
+    a.projectedTotal ||
+    a["3 Lift Projected Max Total"] ||
+    ((a.bench || 0) + (a.squat || 0) + (a.clean || 0))
+  );
+}
+
 function getBestPerAthlete(data) {
   const map = {};
 
@@ -221,7 +229,7 @@ function renderLiftTable(data) {
   const sorted = [...data]
     .map(a => ({
       ...a,
-      total: (a.bench || 0) + (a.squat || 0) + (a.clean || 0)
+      total: getTotal(a)
     }))
     .sort((a, b) => b.total - a.total);
 
@@ -308,7 +316,7 @@ function renderMobile(data) {
   const liftSorted = [...data]
     .map(a => ({
       ...a,
-      total: (a.bench || 0) + (a.squat || 0) + (a.clean || 0)
+      total: getTotal(a)
     }))
     .sort((a, b) => b.total - a.total);
 
@@ -324,10 +332,7 @@ function renderMobile(data) {
 
   score.innerHTML = scoreSorted.map((a, i) => {
 
-    const total =
-      (a.bench || 0) +
-      (a.squat || 0) +
-      (a.clean || 0);
+    const total = getTotal(a);
 
     const tier = getPerformanceTier(a.score, total);
 
