@@ -25,7 +25,9 @@ async function init() {
       return;
     }
 
-    const best = getBestPerAthlete(data);
+   window.ALL_RAW_DATA = data; // 🔥 full dataset for search
+
+const best = getBestPerAthlete(data);
 
 allAthletes = best;
 
@@ -178,7 +180,14 @@ function buildAlphabetFilter(data) {
 // 🔎 APPLY FILTERS (COMBINED)
 // ===============================
 function applyFilters() {
-  let filtered = [...allAthletes];
+  let source = [...allAthletes];
+
+  // 🔥 IF SEARCHING → use FULL dataset (not just best)
+  if (searchValue) {
+    source = window.ALL_RAW_DATA || source;
+  }
+
+  let filtered = [...source];
 
   if (activeLetter !== "ALL") {
     filtered = filtered.filter(a =>
@@ -191,10 +200,6 @@ function applyFilters() {
       a.name && a.name.toLowerCase().includes(searchValue)
     );
   }
-
-  if (searchValue) {
-  renderLeaderboard(fullDataset); // not best
-}
 
   renderLeaderboard(filtered);
 }
