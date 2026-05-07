@@ -164,9 +164,10 @@ function setupMenu() {
   if (!toggle || !dropdown) return;
 
   toggle.onclick = (e) => {
-    e.stopPropagation();
-    dropdown.classList.toggle("show");
-  };
+  e.stopPropagation();
+  dropdown.classList.toggle("show");
+  toggle.classList.toggle("open"); // 👈 add this line
+};
 
   document.addEventListener("click", (e) => {
     if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
