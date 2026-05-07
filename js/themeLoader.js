@@ -37,6 +37,19 @@ const CONFIG_MAP = (() => {
         secondaryLight: "#93c5fd"
       }
     },
+
+      harrisonvillemiddle: {
+      key: "harrisonvillemiddle",
+      name: "Harrisonville Wildcats",
+      logo: base + "images/wildcats-logo.png",
+       theme: {
+        primary: "#1e3a8a",
+        primaryLight: "#3b82f6",
+        primaryDark: "#1e40af",
+        secondary: "#60a5fa",
+        secondaryLight: "#93c5fd"
+      }
+    },
      
      cassmidway: {
       key: "cassmidway",
