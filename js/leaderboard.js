@@ -1,3 +1,11 @@
+// ===============================
+// 🔤 FILTER STATE
+// ===============================
+let allAthletes = [];
+let activeLetter = "ALL";
+let searchValue = "";
+
+
 // ========================================
 // 🔥 ELITE LEADERBOARD (V2 - WITH TIERS)
 // ========================================
@@ -19,7 +27,15 @@ async function init() {
 
     const latest = getLatestPerAthlete(data);
 
-    renderLeaderboard(latest);
+// 🔥 SET GLOBAL DATA
+allAthletes = latest;
+
+// 🔥 INIT FILTER UI
+buildAlphabetFilter(latest);
+initSearch();
+
+// 🔥 INITIAL RENDER
+renderLeaderboard(latest);
 
   } catch (err) {
     console.error("❌ Leaderboard init error:", err);
@@ -104,6 +120,9 @@ function renderPodium(data) {
 }
 
 
+// ===============================
+// 🔤 BUILD ALPHABET BAR
+// ===============================
 function buildAlphabetFilter(data) {
   const bar = document.getElementById("alphabetBar");
   if (!bar) return;
@@ -111,6 +130,7 @@ function buildAlphabetFilter(data) {
   const counts = {};
 
   data.forEach(a => {
+    if (!a.name) return;
     const letter = a.name.charAt(0).toUpperCase();
     counts[letter] = (counts[letter] || 0) + 1;
   });
@@ -128,35 +148,47 @@ function buildAlphabetFilter(data) {
   bar.innerHTML = html;
 }
 
-let allAthletes = [];
+// ===============================
+// 🔎 APPLY FILTERS (COMBINED)
+// ===============================
+function applyFilters() {
+  let filtered = [...allAthletes];
 
-function filterByLetter(letter) {
-  if (letter === "ALL") {
-    renderLeaderboard(allAthletes);
-    return;
+  if (activeLetter !== "ALL") {
+    filtered = filtered.filter(a =>
+      a.name && a.name.toUpperCase().startsWith(activeLetter)
+    );
   }
 
-  const filtered = allAthletes.filter(a =>
-    a.name.toUpperCase().startsWith(letter)
-  );
+  if (searchValue) {
+    filtered = filtered.filter(a =>
+      a.name && a.name.toLowerCase().includes(searchValue)
+    );
+  }
 
   renderLeaderboard(filtered);
 }
 
-document.getElementById("searchInput").addEventListener("input", function(e) {
-  const value = e.target.value.toLowerCase();
+// ===============================
+// 🔤 LETTER CLICK
+// ===============================
+function filterByLetter(letter) {
+  activeLetter = letter;
+  applyFilters();
+}
 
-  const filtered = allAthletes.filter(a =>
-    a.name.toLowerCase().includes(value)
-  );
+// ===============================
+// 🔎 INIT SEARCH (SAFE)
+// ===============================
+function initSearch() {
+  const input = document.getElementById("searchInput");
+  if (!input) return;
 
-  renderLeaderboard(filtered);
-});
-
-allAthletes = data;
-
-buildAlphabetFilter(data);
-renderLeaderboard(data);
+  input.addEventListener("input", (e) => {
+    searchValue = e.target.value.toLowerCase();
+    applyFilters();
+  });
+}
 
 
 /* ========================================
