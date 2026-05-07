@@ -103,6 +103,32 @@ function renderPodium(data) {
   }).join("");
 }
 
+
+function buildAlphabetFilter(data) {
+  const bar = document.getElementById("alphabetBar");
+  if (!bar) return;
+
+  const counts = {};
+
+  data.forEach(a => {
+    const letter = a.name.charAt(0).toUpperCase();
+    counts[letter] = (counts[letter] || 0) + 1;
+  });
+
+  let html = `<span onclick="filterByLetter('ALL')">ALL (${data.length})</span> `;
+
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(letter => {
+    if (counts[letter]) {
+      html += `<span onclick="filterByLetter('${letter}')">${letter} (${counts[letter]})</span> `;
+    } else {
+      html += `<span class="disabled">${letter}</span> `;
+    }
+  });
+
+  bar.innerHTML = html;
+}
+
+
 /* ========================================
    🏋️ LIFT TABLE
 ======================================== */
