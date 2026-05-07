@@ -40,7 +40,7 @@ const CONFIG_MAP = (() => {
 
       harrisonvillemiddle: {
       key: "harrisonvillemiddle",
-      name: "Harrisonville Wildcats",
+      name: "Harrisonville Middle School Wildcats",
       logo: base + "images/wildcats-logo.png",
        theme: {
         primary: "#1e3a8a",
