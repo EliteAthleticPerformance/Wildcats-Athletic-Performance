@@ -653,6 +653,13 @@ h1 {
     font-weight: 900;
 }
 
+.athletes-subtitle {
+  font-size: 1.4rem;
+  line-height: 1.4;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 /* ========================================
    ATHLETE CARDS (FIXED)
 ======================================== */
